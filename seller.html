@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Icons & Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .seller-container { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
+        .seller-header { text-align: center; margin-bottom: 2rem; }
+        .seller-form { background: var(--white); padding: 2rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; background: var(--white); color: var(--text); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .full-width { grid-column: 1 / -1; }
+        .image-preview { width: 100%; height: 200px; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 0.5rem; overflow: hidden; background: var(--accent); position: relative; }
+        .image-preview img { width: 100%; height: 100%; object-fit: contain; }
+        .image-preview span { color: var(--light-text); pointer-events: none; }
+        
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <!-- Header (Simplified) -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
+                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Back to Shop</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container seller-container">
+            <div class="seller-header">
+                <h1>List Your Product</h1>
+                <p>Fill in the details below to add your item to the LuxeMart marketplace.</p>
+            </div>
+
+            <form class="seller-form" id="addProductForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="pName">Product Name *</label>
+                        <input type="text" id="pName" required placeholder="e.g. Vintage Leather Jacket">
+                    </div>
+                    <div class="form-group">
+                        <label for="pBrand">Brand *</label>
+                        <input type="text" id="pBrand" required placeholder="e.g. Generic or Brand Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="pCategory">Category *</label>
+                        <select id="pCategory" required>
+                            <option value="fashion">Fashion</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="home">Home & Living</option>
+                            <option value="beauty">Beauty</option>
+                            <option value="sports">Sports</option>
+                            <option value="kids">Kids</option>
+                            <option value="footwear">Footwear</option>
+                            <option value="watches">Watches</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pPrice">Price (KSh) *</label>
+                        <input type="number" id="pPrice" required min="1" placeholder="e.g. 1500">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="pDesc">Description *</label>
+                        <textarea id="pDesc" required placeholder="Describe your product..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Product Image *</label>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
+                            <input type="url" id="pImageUrl" placeholder="Paste Image URL..." style="flex: 1;">
+                            <span style="font-size: 0.9rem;">OR</span>
+                            <label for="pImageFile" class="btn-primary" style="cursor: pointer; padding: 0.75rem 1rem; border-radius: 8px; margin: 0;">Upload</label>
+                            <input type="file" id="pImageFile" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="image-preview" id="imagePreview">
+                            <span>No image selected</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem; text-align: right;">
+                    <button type="submit" class="btn-primary" style="padding: 1rem 3rem;">List Item</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/seller.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+/* css/chatbot.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.chatbot-container {
+    width: 400px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.chat-header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.chat-header img {
+    height: 30px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.chat-messages {
+    padding: 20px;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.bot-message {
+    background-color: #f0f0f0;
+    text-align: left;
+}
+
+.user-message {
+    background-color: #e2f3ff;
+    text-align: right;
+}
+
+.chat-input {
+    display: flex;
+    padding: 10px;
+    background-color: #f0f0f0;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+#sendButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+}
+
+/* Style adjustments for dark mode */
+body[data-theme='dark'] .chatbot-container {
+    background-color: #333;
+    color: #fff;
+}

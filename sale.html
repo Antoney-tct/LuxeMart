@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Sale - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
+                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
+                <a href="sale.html" style="color: var(--secondary);">Sale</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
+                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
+                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="cart-count" id="wishlistCount">0</span>
+                </a>
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="sale.html">Sale</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="promo-strip" style="background: var(--secondary); color: white;">
+        <i class="fas fa-fire"></i> Limited Time! These deals won't last long.
+    </div>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="section-header">
+                <h1 style="color: var(--secondary);">LuxeMart Flash Sale</h1>
+                <p>Don't miss out on these limited-time deals! Up to 50% off selected items.</p>
+            </div>
+
+            <div class="product-controls">
+                <div class="sort-options">
+                    <label for="sort">Sort By:</label>
+                    <select id="sort">
+                        <option value="default">Default</option>
+                        <option value="price-low-to-high">Price: Low to High</option>
+                        <option value="rating">Rating</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="products-grid" id="featuredProductsGrid">
+                <!-- Filtered sale products injected via main2.js -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <h2>Don't Miss Out</h2>
+            <p>Subscribe to be the first to know about our next big sale event!</p>
+            <form class="newsletter-form">
+                <label for="newsletter-email" class="visually-hidden">Email address for newsletter</label>
+                <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
+                <button type="submit" class="newsletter-btn">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar Reused -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart">×</button></div>
+        <div id="cartItems"></div>
+        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+        <div class="cart-actions"><a href="checkout.html" class="btn-primary">Checkout</a></div>
+    </div>
+    
+    <!-- Quick View Reused -->
+    <div class="modal-overlay quickview-modal" id="quickViewModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">Quick View</h3><button class="modal-close" id="closeQuickView">×</button></div><div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;"><img id="qvImg" src="" alt="" class="quickview-img"><div><h3 id="qvTitle"></h3><div class="quickview-price" id="qvPrice"></div><p id="qvDesc"></p><button class="btn-primary add-to-cart" id="qvAddToCart">Add to Cart</button></div></div></div></div>
+
+    <footer>
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div></div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main2.js"></script>
+</body>
+</html>

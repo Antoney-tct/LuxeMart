@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeMart - Premium Online Shopping</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <meta name="description" content="Discover premium products at LuxeMart. Shop fashion, electronics, home goods, and more with fast shipping and secure checkout.">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Icons & Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
+                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            </div>
+            
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
+                <a href="sale.html">Sale</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchBtn" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="cart-count" id="wishlistCount">0</span>
+                </a>
+                <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+<!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="#">Categories</a></li>
+            <li><a href="#">Sale</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="icon-btn">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <button class="icon-btn">
+                <i class="fas fa-user"></i> Account
+            </button>
+            <button class="icon-btn">
+                <i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)
+            </button>
+        </div>
+    </div>
+    <!-- Search Modal -->
+    <div class="modal-overlay" id="searchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Search Products</h3>
+                <button class="modal-close" id="closeSearch" aria-label="Close search modal">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" placeholder="Search for products, brands, categories..." id="searchInput">
+                <div id="searchSuggestions" class="search-suggestions"></div>
+                <button class="btn-primary">Search</button>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--light-text);">Try: "sneakers", "headphones", "watch"</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">My Account</h3>
+                <button class="modal-close" id="closeProfile" aria-label="Close account modal">×</button>
+            </div>
+            <div class="modal-body">
+                <button class="btn-primary" style="margin-bottom: 1rem;">Sign In</button>
+                <button class="btn-outline" style="width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text);">Create Account</button>
+                <div style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center;">
+                    <a href="#" style="color: var(--secondary);">Orders</a> • 
+                    <a href="wishlist.html" style="color: var(--secondary);">Wishlist</a> • 
+                    <a href="#" style="color: var(--secondary);">Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3 class="cart-title">Shopping Cart</h3>
+            <button class="modal-close" id="closeCart" aria-label="Close shopping cart">×</button>
+        </div>
+        <div id="cartItems">
+            <!-- Items injected via JS -->
+        </div>
+        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+        <div class="cart-actions">
+            <a href="#" class="btn-primary">View Cart</a>
+            <a href="#" class="btn-outline" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Checkout</a>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal-overlay quickview-modal" id="quickViewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Quick View</h3>
+                <button class="modal-close" id="closeQuickView" aria-label="Close quick view">×</button>
+            </div>
+            <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <img id="qvImg" src="" alt="" class="quickview-img">
+                <div>
+                    <h3 id="qvTitle"></h3>
+                    <div class="quickview-rating">
+                        <div class="stars" id="qvStars"></div>
+                        <span class="rating-count" id="qvRatingCount"></span>
+                    </div>
+                    <div class="quickview-price" id="qvPrice"></div>
+                    <p id="qvDesc" style="color: var(--light-text); margin: 1rem 0;"></p>
+                    <div class="quickview-actions">
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" data-action="decrease">-</button>
+                            <span class="qty-value" id="qvQty">1</span>
+                            <button class="qty-btn" data-action="increase">+</button>
+                        </div>
+                        <button class="btn-primary add-to-cart" id="qvAddToCart">Add to Cart</button>
+                        <button class="btn-outline" id="qvWishlist" style="flex-shrink: 0;"><i class="far fa-heart"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<main>
+    <!-- ==== SLIDING HERO BANNER ==== -->
+    <section class="hero-slider">
+        <div class="slider-wrapper">
+            <!-- Slide 1: Video Background -->
+            <div class="slide active">
+                <video class="slide-background" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1441986300917-64672611734d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80">
+                    <source src="videos/137246-766338223.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="animate-fade-in-down">Discover Premium Products</h1>
+                        <p class="animate-fade-in-up" style="animation-delay: 0.3s;">Shop the latest trends in fashion, electronics, and home essentials. Enjoy free shipping on orders over KSH5000.</p>
+                        <div class="animate-fade-in-up" style="animation-delay: 0.6s;">
+                            <a href="#featured-products-section" class="btn-primary">Shop Now <i class="fas fa-arrow-right"></i></a>
+                            <a href="shop.html" class="btn-outline">View Collection</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2: Image Background -->
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80" class="slide-background" alt="Promotional banner for a sale on electronics.">
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="animate-fade-in-left">Electronics Summer Sale</h1>
+                        <p class="animate-fade-in-right" style="animation-delay: 0.3s;">Get up to 40% off on the latest gadgets, headphones, and smart devices. Limited time offer!</p>
+                        <div class="animate-fade-in-up" style="animation-delay: 0.6s;">
+                            <a href="shop.html?category=electronics" class="btn-primary">Shop Electronics <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3: New Video Slide -->
+            <div class="slide">
+                <video class="slide-background" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80">
+                    <source src="videos/137246-766338223.mp4" type="video/mp4">
+                </video>
+                <div class="slide-overlay"></div>
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="animate-fade-in-up">Luxury For Every Moment</h1>
+                        <p class="animate-fade-in-up" style="animation-delay: 0.3s;">Explore our curated collection of watches, jewelry, and timeless accessories.</p>
+                        <div class="animate-fade-in-up" style="animation-delay: 0.6s;">
+                            <a href="shop.html?category=fashion" class="btn-primary">Shop Accessories <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-nav">
+            <button class="slider-btn prev-btn" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-btn next-btn" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="slider-dots">
+            <!-- Dots will be generated by JS -->
+        </div>
+    </section>
+
+<!-- ==== PARTNERS SECTION ==== -->
+    <section class="partners fade-in-section">
+        <div class="container">
+            <h2 class="section-header" style="text-align: center; margin-bottom: 2rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: var(--light-text);">Trusted By Industry Leaders</h2>
+            <div class="scrolling-wrapper">
+                <div class="scrolling-content">
+                    <!-- Logos Set 1 -->
+                    <img src="https://logodownload.org/wp-content/uploads/2014/04/nike-logo-4-1.png" alt="Nike Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2014/02/sony-logo.png" alt="Sony Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2013/12/apple-logo-4-1.png" alt="Apple Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2017/04/levis-logo.png" alt="Levi's Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2016/10/jbl-logo-5-1.png" alt="JBL Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2014/01/samsung-logo-1-1-1080x165.png" alt="Samsung Logo" class="partner-logo">
+                    <img src="https://i.pinimg.com/1200x/d2/72/83/d272838a2ebac5e3680cf11b85aa2d33.jpg" alt="Safaricom Logo" class="partner-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Mpesa Logo" class="partner-logo">
+                    <!-- Logos Set 2 (Here i can add as many brand logos as possible for seamless loop) -->
+                   <img src="https://logodownload.org/wp-content/uploads/2014/04/nike-logo-4-1.png" alt="Nike Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2014/02/sony-logo.png" alt="Sony Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2013/12/apple-logo-4-1.png" alt="Apple Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2017/04/levis-logo.png" alt="Levi's Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2016/10/jbl-logo-5-1.png" alt="JBL Logo" class="partner-logo">
+                    <img src="https://logodownload.org/wp-content/uploads/2014/01/samsung-logo-1-1-1080x165.png" alt="Samsung Logo" class="partner-logo">
+                    <img src="https://i.pinimg.com/1200x/d2/72/83/d272838a2ebac5e3680cf11b85aa2d33.jpg" alt="Safaricom Logo" class="partner-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Mpesa Logo" class="partner-logo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Categories / Collections -->
+    <section class="categories fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Grab our best collections from the market</h2>
+                <p>Explore our curated collections across all departments and product line</p>
+            </div>
+            <div class="categories-grid">
+                <a href="shop.html?category=fashion" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="A stylishly arranged collection of fashion apparel and accessories." class="category-img">
+                    <div class="category-overlay">
+                        <h3>Fashion</h3>
+                        <p>1,234 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=electronics" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="A collection of modern electronic gadgets including headphones and a camera." class="category-img">
+                    <div class="category-overlay">
+                        <h3>Electronics</h3>
+                        <p>856 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=home" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="A cozy living room scene with decorative pillows and a throw blanket." class="category-img">
+                    <div class="category-overlay">
+                        <h3>Home & Living</h3>
+                        <p>2,108 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=beauty" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="An assortment of beauty products and cosmetics on a clean background." class="category-img">
+                    <div class="category-overlay">
+                        <h3>Beauty</h3>
+                        <p>789 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=sports" class="category-card">
+                    <div class="category-badge">New</div>
+                    <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Sports equipment" class="category-img">
+                    <div class="category-overlay">
+                        <h3>Sports</h3>
+                        <p>450 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=kids" class="category-card">
+                    <div class="category-badge">New</div>
+                    <img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kids clothing" class="category-img">
+                    <div class="category-overlay">
+                        <h3>Kids</h3>
+                        <p>320 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=footwear" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Footwear" class="category-img">
+                    <div class="category-overlay">
+                        <h3>Footwear</h3>
+                        <p>650 items</p>
+                    </div>
+                </a>
+                <a href="shop.html?category=watches" class="category-card">
+                    <div class="category-badge">Hot</div>
+                    <img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Watches" class="category-img">
+                    <div class="category-overlay">
+                        <h3>Watches</h3>
+                        <p>120 items</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- === TRENDING SLIDER SECTION === -->
+    <section class="product-slider-section fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Trending Now</h2>
+                <p>Top rated picks for this week</p>
+            </div>
+            <div class="product-slider-wrapper">
+                <button class="slider-arrow prev-arrow" id="sliderPrev"><i class="fas fa-chevron-left"></i></button>
+                <div class="product-slider-track" id="productSliderTrack"></div>
+                <button class="slider-arrow next-arrow" id="sliderNext"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-products fade-in-section" id="featured-products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Products</h2>
+                <p>Hand-picked items our customers love</p>
+            </div>
+            <div class="product-controls">
+                <div class="top-controls">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="fashion">Fashion</button>
+                        <button class="filter-btn" data-filter="electronics">Electronics</button>
+                        <button class="filter-btn" data-filter="home">Home</button>
+                        <button class="filter-btn" data-filter="beauty">Beauty</button>
+                        <button class="filter-btn" data-filter="sports">Sports</button>
+                        <button class="filter-btn" data-filter="kids">Kids</button>
+                        <button class="filter-btn" data-filter="footwear">Footwear</button>
+                        <button class="filter-btn" data-filter="watches">Watches</button>
+                    </div>
+                    <div class="sort-options">
+                        <label for="sort">Sort By:</label>
+                        <select id="sort">
+                            <option value="popularity">Popular</option>
+                            <option value="newest">New Arrivals</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="rating">Rating</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="advanced-filters">
+                    <div class="filter-group">
+                        <label for="brandFilter">Brand</label>
+                        <select id="brandFilter"><option value="all">All Brands</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Price Range</label>
+                        <div class="price-inputs">
+                            <input type="number" id="minPrice" placeholder="Min KSh" min="0">
+                            <input type="number" id="maxPrice" placeholder="Max KSh" min="0">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label for="ratingFilter">Min Rating</label>
+                        <select id="ratingFilter"><option value="0">Any</option><option value="4">★★★★☆ & up</option><option value="3">★★★☆☆ & up</option><option value="2">★★☆☆☆ & up</option><option value="1">★☆☆☆☆ & up</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="colorFilter">Color</label>
+                        <div id="colorFilter" class="checkbox-group">
+                            <!-- Colors populated by JS -->
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label for="sizeFilter">Size</label>
+                        <div id="sizeFilter" class="checkbox-group">
+                            <!-- Sizes populated by JS -->
+                        </div>
+                    </div>
+                    <div class="filter-group"><label class="checkbox-label"><input type="checkbox" id="inStockFilter"> In Stock Only</label><label class="checkbox-label"><input type="checkbox" id="onSaleFilter"> On Sale</label></div>
+                </div>
+            </div>
+            <div class="products-grid" id="featuredProductsGrid">
+                <!-- All my Products will be loaded dynamically via JS -->
+            </div>
+            <div class="load-more-container">
+                <button class="btn" id="loadMoreBtn" style="display: none;">Load More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- === VIDEO ADVERTISEMENT SECTION === -->
+    <section class="video-promo-section fade-in-section">
+        <div class="container video-promo-grid">
+            <div class="video-promo-content">
+                <h2>Experience True Quality</h2>
+                <p>We travel the world to source the finest materials and partner with skilled artisans. Watch our story to see the passion that goes into every product we sell.</p>
+                <a href="#" class="btn-primary" style="background: white; color: var(--primary);">Learn About Us</a>
+            </div>
+            <div class="video-promo-player">
+                <video poster="images/shpas.jpg" id="promoVideo">
+                    <source src="videos/137246-766338223.mp4" type="video/mp4">
+                </video>
+                <button class="video-play-btn" aria-label="Play video">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- === PROMO BANNER WITH COUNTDOWN === -->
+    <section class="promo-banner fade-in-section">
+        <div class="container">
+            <h2>Flash Sale Ends Soon!</h2>
+            <p>Up to 50% off on selected items</p>
+            <div class="countdown">
+                <span id="days">00</span> :
+                <span id="hours">00</span> :
+                <span id="minutes">00</span> :
+                <span id="seconds">00</span>
+            </div>
+            <a href="shop.html" class="btn-primary" style="background: white; color: var(--primary);">Shop Sale Now</a>
+        </div>
+    </section>
+
+    <!-- === BLOG PREVIEW === -->
+    <section class="blog-preview fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>From Our Blog</h2>
+                <p>Style tips, trends, and more</p>
+            </div>
+            <div class="blog-grid">
+                <article class="blog-card">
+                    <img src="images/shoesneaker.jpg" alt="A pair of stylish white sneakers on a colorful background." class="blog-img">
+                    <div class="blog-info">
+                        <div class="blog-meta">Fashion • 3 min read</div>
+                        <h3 class="blog-title">Top 10 Sneakers for Spring 2025</h3>
+                        <p class="blog-excerpt">Discover the must-have kicks that combine comfort and style...</p>
+                        <a href="blog-post.html?id=1" class="read-more-btn" aria-label="Read more about Top 10 Sneakers for Spring 2025">Read More →</a>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="A pair of black over-ear headphones on a plain background." class="blog-img">
+                    <div class="blog-info">
+                        <div class="blog-meta">Tech • 5 min read</div>
+                        <h3 class="blog-title">Best Noise-Cancelling Headphones of 2025</h3>
+                        <p class="blog-excerpt">We tested 20+ models. Here are the top 5 that block out the world...</p>
+                        <a href="blog-post.html?id=2" class="read-more-btn" aria-label="Read more about Best Noise-Cancelling Headphones of 2025">Read More →</a>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <img src="images/shpas.jpg" alt="A bright, minimalist living room with a sofa and a houseplant." class="blog-img">
+                    <div class="blog-info">
+                        <div class="blog-meta">Home • 4 min read</div>
+                        <h3 class="blog-title">How to Style Minimalist Living Spaces</h3>
+                        <p class="blog-excerpt">Less is more. Learn how to create calm and elegance in your home...</p>
+                        <a href="blog-post.html?id=3" class="read-more-btn" aria-label="Read more about How to Style Minimalist Living Spaces">Read More →</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- === INSTAGRAM FEED === -->
+    <section class="instagram fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Follow Us @LuxeMart</h2>
+                <p>Tag us in your style</p>
+            </div>
+            <div class="insta-grid">
+                <a href="#" class="insta-item">
+                    <img src="images/sneakers.jpg" alt="Instagram photo of a person wearing stylish sneakers.">
+                    <div class="insta-overlay">
+                        <i class="fab fa-instagram"></i>
+                        <p>1.2k likes</p>
+                    </div>
+                </a>
+                <!-- I can add as many as possible -->
+                <a href="#" class="insta-item">
+                    <img src="images/ps.jpeg" alt="Instagram photo of a gaming console setup.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>980 likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/coats&boots.jpeg" alt="Instagram photo of a winter outfit with a coat and boots.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>2.1k likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/watch pack.jpeg" alt="Instagram photo of a collection of wristwatches.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>1.5k likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/i phone1.jpeg" alt="Instagram photo of a new smartphone.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>890 likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/coat1.jpeg" alt="Instagram photo of a person wearing a fashionable coat.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>1.8k likes</p></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- === CUSTOMER REVIEWS CAROUSEL === -->
+    <section class="reviews fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Our Customers Say</h2>
+                <p>Real reviews from real people</p>
+            </div>
+            <div class="scrolling-wrapper">
+                <div class="scrolling-content reviews-carousel" id="reviewsCarousel">
+                    <!-- Set 1 -->
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 5 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">"Best online shopping experience! Fast shipping and amazing quality."</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah">
+                            <div>
+                                <h4>Sarah M.</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 5 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">"The sneakers are even better in person. Will definitely order again!"</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Mike">
+                            <div>
+                                <h4>Mike Johnson</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 4 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        </div>
+                        <p class="review-text">"Great customer support. Helped me with sizing instantly."</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Lisa">
+                            <div>
+                                <h4>Lisa Chen</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Set 2 (Duplicate for seamless loop) -->
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 5 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">"Best online shopping experience! Fast shipping and amazing quality."</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah">
+                            <div>
+                                <h4>Sarah M.</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 5 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="review-text">"The sneakers are even better in person. Will definitely order again!"</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Mike">
+                            <div>
+                                <h4>Mike Johnson</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-stars" role="img" aria-label="Rating: 4 out of 5 stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        </div>
+                        <p class="review-text">"Great customer support. Helped me with sizing instantly."</p>
+                        <div class="review-author">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Lisa">
+                            <div>
+                                <h4>Lisa Chen</h4>
+                                <small>Verified Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="container">
+            <h2>Stay Updated</h2>
+            <p>Subscribe to our newsletter and get 10% off your first order. Plus, be the first to know about exclusive deals!</p>
+            <form class="newsletter-form">
+                <label for="newsletter-email" class="visually-hidden">Email address for newsletter</label>
+                <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
+                <button type="submit" class="newsletter-btn">Subscribe</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>LuxeMart</h3>
+                    <p>Your premium destination for fashion, electronics, home goods, and more. Shop with confidence.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="refer.html">Refer a Friend</a></li>
+                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li><a href="#">Fashion</a></li>
+                        <li><a href="#">Electronics</a></li>
+                        <li><a href="#">Home & Living</a></li>
+                        <li><a href="#">Beauty</a></li>
+                        <li><a href="#">Sports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Payment Methods</h3>
+                    <p>We accept all major payment methods</p>
+                    <div class="payment-methods">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="Visa">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888859.png" alt="Mastercard">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="PayPal">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Apple Pay">
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LuxeMart. All rights reserved.</p>
+                <p>
+                    <a href="#">Privacy Policy</a> • 
+                    <a href="#">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Exit-Intent Popup -->
+    <div class="modal-overlay" id="exitIntentModal">
+        <div class="modal exit-intent-modal">
+            <button class="modal-close" id="closeExitIntent">×</button>
+            <div class="modal-body" style="text-align: center;">
+                <i class="fas fa-gift" style="font-size: 3rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Wait! Don't Go!</h2>
+                <p style="color: var(--light-text); max-width: 300px; margin: 0 auto 1.5rem;">Get a special <strong>15% OFF</strong> coupon for your first order when you sign up for our newsletter.</p>
+                <form class="newsletter-form" style="flex-direction: column; box-shadow: none; gap: 0.75rem;">
+                    <input type="email" placeholder="Enter your email" required style="border-radius: 8px; text-align: center;">
+                    <button type="submit" class="btn-primary" style="border-radius: 8px; width: 100%; justify-content: center;">Claim My 15% Off</button>
+                </form>
+                <a href="#" id="continueShoppingExit" style="display: block; margin-top: 1rem; font-size: 0.9rem; color: var(--light-text); text-decoration: underline;">No thanks, I'll pay full price.</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main2.js"></script>
+</body>
+</html>
+
+  
+
+ 
+
+
+   
+
+    
+
+
+  

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop by Category - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
+                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html" style="color: var(--secondary);">Categories</a>
+                <a href="sale.html">Sale</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
+                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
+                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="cart-count" id="wishlistCount">0</span>
+                </a>
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="categories.html">Categories</a></li>
+            <li><a href="sale.html">Sale</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <div class="promo-strip">
+        <i class="fas fa-tags"></i> Explore our curated collections and find your perfect match.
+    </div>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="section-header">
+                <h1>Shop by Category</h1>
+                <p>Explore our wide range of premium collections</p>
+            </div>
+            <div class="categories-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+                <!-- Category cards reused from index.html -->
+                <a href="shop.html?category=fashion" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Fashion</h3><p>1,234 items</p></div>
+                </a>
+                <a href="shop.html?category=electronics" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Electronics</h3><p>856 items</p></div>
+                </a>
+                <a href="shop.html?category=home" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Home & Living</h3><p>2,108 items</p></div>
+                </a>
+                <a href="shop.html?category=beauty" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Beauty</h3><p>789 items</p></div>
+                </a>
+                <a href="shop.html?category=sports" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Sports</h3><p>450 items</p></div>
+                </a>
+                <a href="shop.html?category=watches" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80" class="category-img">
+                    <div class="category-overlay"><h3>Watches</h3><p>120 items</p></div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <h2>Stay Updated</h2>
+            <p>Subscribe to our newsletter and get 10% off your first order. Plus, be the first to know about exclusive deals!</p>
+            <form class="newsletter-form">
+                <label for="newsletter-email" class="visually-hidden">Email address for newsletter</label>
+                <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
+                <button type="submit" class="newsletter-btn">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart">×</button></div>
+        <div id="cartItems"></div>
+        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+        <div class="cart-actions"><a href="checkout.html" class="btn-primary">Checkout</a></div>
+    </div>
+
+    <footer>
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div></div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+</html>
