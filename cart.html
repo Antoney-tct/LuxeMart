@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Cart Page Specific Styles */
+        .cart-page-wrapper {
+            padding: 4rem 0;
+            min-height: 60vh;
+        }
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        .cart-table th {
+            background: #f8f9fa;
+            text-align: left;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .cart-table td {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .cart-product-col {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .cart-product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: max-content;
+        }
+        .qty-control button {
+            background: none;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .qty-control span {
+            padding: 0 0.5rem;
+            font-weight: 500;
+        }
+        .cart-summary-box {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            height: max-content;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: var(--light-text);
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+        @media (max-width: 768px) {
+            .cart-grid { grid-template-columns: 1fr; }
+            .cart-table thead { display: none; }
+            .cart-table tr { display: flex; flex-direction: column; padding: 1rem; border-bottom: 1px solid var(--border); }
+            .cart-table td { padding: 0.5rem 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (Same as index) -->
+    <header>
+        <div class="container header-inner">
+            <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
+                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            </a>
+            
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
+                <a href="sale.html">Sale</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <a href="wishlist.html" class="icon-btn" aria-label="My Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="cart-count" id="wishlistCount">0</span>
+                </a>
+                <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <button class="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Cart Content -->
+    <main class="container cart-page-wrapper">
+        <h1 style="font-family: 'Playfair Display', serif;">Your Shopping Cart</h1>
+        
+        <div class="cart-grid" id="cartPageContent">
+            <!-- Cart Items Table -->
+            <div class="cart-items-container">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartPageBody">
+                        <!-- Items injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="cart-summary-box">
+                <h3 style="margin-bottom: 1.5rem;">Order Summary</h3>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="cartPageSubtotal">KSh 0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping Estimate</span>
+                    <span>Calculated at checkout</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span id="cartPageTotal">KSh 0.00</span>
+                </div>
+                <a href="checkout.html" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1.5rem;">Proceed to Checkout</a>
+                <a href="shop.html" style="display: block; text-align: center; margin-top: 1rem; color: var(--light-text); font-size: 0.9rem;">or Continue Shopping</a>
+            </div>
+        </div>
+        
+        <!-- Empty Cart State (Hidden by default, shown via JS if needed) -->
+        <div id="emptyCartMessage" style="display: none; text-align: center; padding: 4rem;">
+            <i class="fas fa-shopping-basket" style="font-size: 4rem; color: #ddd; margin-bottom: 1rem;"></i>
+            <h2>Your cart is empty</h2>
+            <p>Looks like you haven't added anything yet.</p>
+            <a href="shop.html" class="btn-primary" style="margin-top: 1rem; display: inline-flex;">Start Shopping</a>
+        </div>
+    </main>
+
+    <!-- Footer (Simplified) -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 LuxeMart. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar (Hidden, but kept for logic consistency) -->
+    <div class="cart-sidebar" id="cartSidebar" style="display: none;"></div>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+</html>

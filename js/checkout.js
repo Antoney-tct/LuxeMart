@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const checkoutItemsEl = document.getElementById('checkoutItems');
     const checkoutTotalEl = document.getElementById('checkoutTotal');
     const checkoutForm = document.getElementById('checkoutForm');
@@ -12,34 +12,87 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardFields = document.getElementById('cardPaymentFields');
     const mpesaFields = document.getElementById('mpesaPaymentFields');
 
-    if (cart.length === 0) {
-        checkoutItemsEl.innerHTML = '<p>Your cart is empty.</p>';
-        if (clearCartBtn) clearCartBtn.style.display = 'none';
-        return;
-    }
-
     let total = 0;
 
-    // Render Cart Items
-    checkoutItemsEl.innerHTML = cart.map(item => {
-        const product = products.find(p => p.id === item.id);
-        if (!product) return '';
-        const itemTotal = product.price * item.qty;
-        total += itemTotal;
+    function renderCheckoutItems() {
+        // Filter only selected items
+        const checkoutCart = cart.filter(item => item.selected !== false);
 
-        return `
-            <div class="summary-item">
-                <img src="${product.img}" alt="${product.name}" class="summary-img">
-                <div class="summary-info">
-                    <div style="font-weight: 600; font-size: 0.9rem;">${product.name}</div>
-                    <div style="font-size: 0.85rem; color: #666;">Qty: ${item.qty}</div>
+        if (checkoutCart.length === 0) {
+            checkoutItemsEl.innerHTML = '<p>Your cart is empty or no items selected.</p>';
+            checkoutTotalEl.textContent = 'KSh 0.00';
+            if (clearCartBtn) clearCartBtn.style.display = 'none';
+            return;
+        }
+
+        total = 0;
+
+        checkoutItemsEl.innerHTML = checkoutCart.map(item => {
+            const product = products.find(p => p.id === item.id);
+            if (!product) return '';
+            const itemTotal = product.price * item.qty;
+            total += itemTotal;
+
+            return `
+                <div class="summary-item">
+                    <img src="${product.img}" alt="${product.name}" class="summary-img">
+                    <div class="summary-info">
+                        <div style="font-weight: 600; font-size: 0.9rem;">${product.name}</div>
+                        <div style="font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                            Qty: 
+                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="decrease" style="border:1px solid #ddd; background:#fff; border-radius:4px; padding:0 5px; cursor:pointer;">-</button>
+                            <span>${item.qty}</span>
+                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="increase" style="border:1px solid #ddd; background:#fff; border-radius:4px; padding:0 5px; cursor:pointer;">+</button>
+                        </div>
+                    </div>
+                    <div style="font-weight: 600;">KSh ${itemTotal.toFixed(2)}</div>
                 </div>
-                <div style="font-weight: 600;">KSh ${itemTotal.toFixed(2)}</div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
 
-    checkoutTotalEl.textContent = `KSh ${total.toFixed(2)}`;
+        checkoutTotalEl.textContent = `KSh ${total.toFixed(2)}`;
+        
+        // If discount was previously applied, re-apply visual indication (logic simplified here)
+        if (applyDiscountBtn.disabled) {
+            // For simplicity in this snippet, we revert discount state on qty change 
+            // or you could recalculate it. Let's reset discount to avoid calculation errors.
+            applyDiscountBtn.disabled = false;
+            discountInput.disabled = false;
+            applyDiscountBtn.textContent = 'Apply';
+            discountInput.value = '';
+        }
+    }
+
+    // Initial Render
+    renderCheckoutItems();
+
+    // Listen for Quantity Changes in Checkout
+    checkoutItemsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.checkout-qty-btn');
+        if (!btn) return;
+
+        const id = parseInt(btn.dataset.id, 10);
+        const action = btn.dataset.action;
+        const item = cart.find(i => i.id === id);
+
+        if (item) {
+            if (action === 'increase') {
+                item.qty++;
+            } else if (action === 'decrease') {
+                if (item.qty > 1) {
+                    item.qty--;
+                } else {
+                    // Option: Remove item if qty becomes 0?
+                    // For now, let's keep min 1 or verify user wants to remove.
+                    if(confirm("Remove this item from checkout?")) {
+                        cart = cart.filter(i => i.id !== id);
+                    }
+                }
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCheckoutItems();
+        }
+    });
 
     // Clear Cart Logic
     if (clearCartBtn) {

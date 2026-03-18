@@ -126,6 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', () => mobileMenu.classList.remove('open'));
     });
 
+    // Mobile Menu Search & Account Hooks
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+    const mobileAccountBtn = document.getElementById('mobileAccountBtn');
+    if (mobileSearchBtn && searchModal) mobileSearchBtn.addEventListener('click', () => { mobileMenu.classList.remove('open'); searchModal.classList.add('show'); });
+    if (mobileAccountBtn && profileModal) mobileAccountBtn.addEventListener('click', () => { mobileMenu.classList.remove('open'); profileModal.classList.add('show'); });
+
     // === EXIT-INTENT POPUP LOGIC ===
     const exitIntentModal = document.getElementById('exitIntentModal');
     if (exitIntentModal) {
