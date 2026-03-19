@@ -39,10 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="summary-info">
                         <div style="font-weight: 600; font-size: 0.9rem;">${product.name}</div>
                         <div style="font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
-                            Qty: 
-                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="decrease" style="border:1px solid #ddd; background:#fff; border-radius:4px; padding:0 5px; cursor:pointer;">-</button>
+                            Qty:
+                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="decrease">-</button>
                             <span>${item.qty}</span>
-                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="increase" style="border:1px solid #ddd; background:#fff; border-radius:4px; padding:0 5px; cursor:pointer;">+</button>
+                            <button class="checkout-qty-btn" data-id="${item.id}" data-action="increase">+</button>
                         </div>
                     </div>
                     <div style="font-weight: 600;">KSh ${itemTotal.toFixed(2)}</div>

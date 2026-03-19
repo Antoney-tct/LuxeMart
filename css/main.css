@@ -450,6 +450,19 @@ header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(255,255
     background: #000000;
 }
 
+.checkout-qty-btn {
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    padding: 0 5px;
+    cursor: pointer;
+    color: #333;
+    line-height: 1.4; /* Adjust for alignment */
+}
+.checkout-qty-btn:hover {
+    background: #f0f0f0;
+}
+
 /* Newsletter */
 .newsletter {
     padding: 5rem 0;
@@ -1817,6 +1830,37 @@ body[data-theme="dark"] .partner-logo {
 
 body[data-theme="dark"] .payment-option input[type="radio"]:checked + .payment-option-label {
     background-color: var(--accent);
+}
+
+/* Fix button visibility in dark mode */
+body[data-theme="dark"] .add-to-cart,
+body[data-theme="dark"] .btn-buy-now {
+    color: var(--white); /* Use dark text on light background */
+}
+
+body[data-theme="dark"] .add-to-cart:hover {
+    color: white; /* On hover, background becomes black, so text must be white */
+}
+
+body[data-theme="dark"] .btn-outline:hover {
+    color: var(--white); /* Use dark text on white hover background */
+}
+
+body[data-theme="dark"] .filter-btn,
+body[data-theme="dark"] .product-action-btn,
+body[data-theme="dark"] .checkout-qty-btn,
+body[data-theme="dark"] .slider-arrow {
+    background: var(--accent);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body[data-theme="dark"] .slider-arrow {
+    color: var(--primary); /* Keep icon color light */
+}
+
+body[data-theme="dark"] .checkout-qty-btn:hover {
+    background: var(--border);
 }
 
 /* Search Suggestions */
