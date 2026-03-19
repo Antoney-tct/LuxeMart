@@ -16,9 +16,9 @@
     <!-- Header -->
     <header>
         <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+                <span>LuxeMart</span>
             </div>
             
             <nav class="nav-desktop">
@@ -218,7 +218,7 @@
         </div>
     </section>
 
-<!-- ==== PARTNERS SECTION ==== -->
+<!-- ====MY INDUSTRY PARTNERS LOGOS SECTION ==== -->
     <section class="partners fade-in-section">
         <div class="container">
             <h2 class="section-header" style="text-align: center; margin-bottom: 2rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: var(--light-text);">Trusted By Industry Leaders</h2>
@@ -247,7 +247,7 @@
         </div>
     </section>
 
-<!-- Categories / Collections -->
+<!-- My Categories / Collections -->
     <section class="categories fade-in-section">
         <div class="container">
             <div class="section-header">
@@ -332,13 +332,14 @@
             </div>
         </div>
     </section>
-
+<!--=== My Filtering /sorting section === -->
     <section class="featured-products fade-in-section" id="featured-products-section">
         <div class="container">
             <div class="section-header">
                 <h2>Featured Products</h2>
                 <p>Hand-picked items our customers love</p>
             </div>
+            <!-- == My general categories == -->
             <div class="product-controls">
                 <div class="top-controls">
                     <div class="filter-buttons">
@@ -352,6 +353,7 @@
                         <button class="filter-btn" data-filter="footwear">Footwear</button>
                         <button class="filter-btn" data-filter="watches">Watches</button>
                     </div>
+                    <!--Sorting part-->
                     <div class="sort-options">
                         <label for="sort">Sort By:</label>
                         <select id="sort">
@@ -363,6 +365,7 @@
                         </select>
                     </div>
                 </div>
+                <!--My further advanced filters -->
                 <div class="advanced-filters">
                     <div class="filter-group">
                         <label for="brandFilter">Brand</label>
@@ -381,13 +384,13 @@
                     </div>
                     <div class="filter-group">
                         <label for="colorFilter">Color</label>
-                        <div id="colorFilter" class="checkbox-group">
+                        <div id="colorFilter" class="filter-options">
                             <!-- Colors populated by JS -->
                         </div>
                     </div>
                     <div class="filter-group">
                         <label for="sizeFilter">Size</label>
-                        <div id="sizeFilter" class="checkbox-group">
+                        <div id="sizeFilter" class="filter-options">
                             <!-- Sizes populated by JS -->
                         </div>
                     </div>
@@ -409,7 +412,7 @@
             <div class="video-promo-content">
                 <h2>Experience True Quality</h2>
                 <p>We travel the world to source the finest materials and partner with skilled artisans. Watch our story to see the passion that goes into every product we sell.</p>
-                <a href="#" class="btn-primary" style="background: white; color: var(--primary);">Learn About Us</a>
+                <a href="#" class="btn-primary video-cta-btn">Learn About Us</a>
             </div>
             <div class="video-promo-player">
                 <video poster="images/shpas.jpg" id="promoVideo">
@@ -433,7 +436,7 @@
                 <span id="minutes">00</span> :
                 <span id="seconds">00</span>
             </div>
-            <a href="shop.html" class="btn-primary" style="background: white; color: var(--primary);">Shop Sale Now</a>
+            <a href="shop.html" class="btn-primary promo-cta-btn">Shop Sale Now</a>
         </div>
     </section>
 
@@ -483,7 +486,8 @@
                 <h2>Follow Us @LuxeMart</h2>
                 <p>Tag us in your style</p>
             </div>
-            <div class="insta-grid">
+            <div class="insta-scroll-wrapper">
+                <!-- Original Set -->
                 <a href="#" class="insta-item">
                     <img src="images/sneakers.jpg" alt="Instagram photo of a person wearing stylish sneakers.">
                     <div class="insta-overlay">
@@ -491,7 +495,31 @@
                         <p>1.2k likes</p>
                     </div>
                 </a>
-                <!-- I can add as many as possible -->
+                <a href="#" class="insta-item">
+                    <img src="images/ps.jpeg" alt="Instagram photo of a gaming console setup.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>980 likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/coats&boots.jpeg" alt="Instagram photo of a winter outfit with a coat and boots.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>2.1k likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/watch pack.jpeg" alt="Instagram photo of a collection of wristwatches.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>1.5k likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/i phone1.jpeg" alt="Instagram photo of a new smartphone.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>890 likes</p></div>
+                </a>
+                <a href="#" class="insta-item">
+                    <img src="images/coat1.jpeg" alt="Instagram photo of a person wearing a fashionable coat.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>1.8k likes</p></div>
+                </a>
+                <!-- Duplicated Set for Smooth Loop -->
+                <a href="#" class="insta-item">
+                    <img src="images/sneakers.jpg" alt="Instagram photo of a person wearing stylish sneakers.">
+                    <div class="insta-overlay"><i class="fab fa-instagram"></i><p>1.2k likes</p></div>
+                </a>
                 <a href="#" class="insta-item">
                     <img src="images/ps.jpeg" alt="Instagram photo of a gaming console setup.">
                     <div class="insta-overlay"><i class="fab fa-instagram"></i><p>980 likes</p></div>
@@ -671,7 +699,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 LuxeMart. All rights reserved.</p>
+                <p>&copy; 2026 LuxeMart. All rights reserved.</p>
                 <p>
                     <a href="#">Privacy Policy</a> • 
                     <a href="#">Terms of Service</a>
@@ -700,7 +728,7 @@
     <script src="js/products.js"></script>
     <script src="js/common.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/main2.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
 

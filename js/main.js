@@ -66,8 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const onSaleFilter = document.getElementById('onSaleFilter');
     const colorFilterContainer = document.getElementById('colorFilter');
     const sizeFilterContainer = document.getElementById('sizeFilter');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
 
     let currentCategory = 'all';
+    let productsPerPage = 12; // Number of products to show per "page"
+    let currentPage = 1;
+    let currentFilteredProducts = []; // Stores the complete list of currently filtered products
 
     // Debounce function to prevent excessive re-renders on input fields
     const debounce = (func, delay) => {
@@ -96,29 +100,29 @@ document.addEventListener('DOMContentLoaded', () => {
         brandFilter.innerHTML += brands.map(brand => `<option value="${brand}">${brand}</option>`).join('');
     };
 
-    const populateCheckboxFilter = (container, attribute) => {
+    const populateOptionFilter = (container, attribute) => {
         if (!container) return;
-        // Use flatMap to handle arrays of attributes (like colors or sizes) and filter out undefined/null values
         const allValues = [...new Set(products.flatMap(p => p[attribute] || []))].sort();
         
-        container.innerHTML = allValues.map(value => `
-            <label class="checkbox-label">
-                <input type="checkbox" value="${value}">
-                ${attribute === 'color' 
-                    ? `<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${value.toLowerCase()}; border: 1px solid #ccc; margin-right: 5px;"></span>` 
-                    : ''
-                }
-                ${value}
-            </label>`).join('');
+        container.innerHTML = allValues.map(value => {
+            const colorSwatch = attribute === 'color' 
+                ? `<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${value.toLowerCase()}; border: 1px solid #ccc;"></span>` 
+                : '';
+            return `<button class="filter-option" data-value="${value}">${colorSwatch} ${value}</button>`;
+        }).join('');
     };
 
-    const renderProducts = (productsToRender) => {
-        if (productsToRender.length === 0) {
+    const renderProducts = () => {
+        const productsToDisplay = currentFilteredProducts.slice(0, currentPage * productsPerPage);
+
+        if (productsToDisplay.length === 0) {
             productGrid.innerHTML = `<p class="no-products-msg" style="grid-column: 1 / -1; text-align: center; padding: 3rem 0; color: var(--light-text);">No products match your criteria.</p>`;
+            loadMoreBtn.style.display = 'none';
             return;
         }
+
         const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-        productGrid.innerHTML = productsToRender.map(p => {
+        productGrid.innerHTML = productsToDisplay.map(p => {
             const isWishlisted = wishlist.includes(p.id.toString());
             return `
             <div class="product-card">
@@ -147,6 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         }).join('');
+
+        // Handle "Load More" button visibility
+        if (productsToDisplay.length < currentFilteredProducts.length) {
+            loadMoreBtn.style.display = 'block';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
     };
 
     const applyFiltersAndSort = () => {
@@ -162,17 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const minRating = parseFloat(ratingFilter.value);
         const inStock = inStockFilter.checked;
         const onSale = onSaleFilter.checked;
-        const selectedColors = [...colorFilterContainer.querySelectorAll('input:checked')].map(el => el.value);
-        const selectedSizes = [...sizeFilterContainer.querySelectorAll('input:checked')].map(el => el.value);
+        const selectedColors = [...colorFilterContainer.querySelectorAll('.filter-option.active')].map(el => el.dataset.value);
+        const selectedSizes = [...sizeFilterContainer.querySelectorAll('.filter-option.active')].map(el => el.dataset.value);
 
         processedProducts = processedProducts.filter(p => {
             if (brand !== 'all' && p.brand !== brand) return false;
             if (!isNaN(minPrice) && p.price < minPrice) return false;
             if (!isNaN(maxPrice) && p.price > maxPrice) return false;
             if (p.rating < minRating) return false;
-            // For multi-select, if filters are selected, product must have at least one of the selected values.
             if (selectedColors.length > 0 && (!p.color || !p.color.some(c => selectedColors.includes(c)))) return false;
-            // Convert product sizes to string for comparison, as checkbox values are strings.
             if (selectedSizes.length > 0 && (!p.size || !p.size.map(String).some(s => selectedSizes.includes(s)))) return false;
             if (inStock && (!p.stock || p.stock === 0)) return false;
             if (onSale && !p.oldPrice) return false;
@@ -198,7 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
 
-        renderProducts(processedProducts);
+        currentFilteredProducts = processedProducts;
+        currentPage = 1; // Reset to first page on any filter change
+        renderProducts();
     };
 
     filterButtons.forEach(btn => {
@@ -218,15 +229,30 @@ document.addEventListener('DOMContentLoaded', () => {
     ratingFilter.addEventListener('change', applyFiltersAndSort);
     inStockFilter.addEventListener('change', applyFiltersAndSort);
     onSaleFilter.addEventListener('change', applyFiltersAndSort);
-    // Use event delegation for dynamically added checkboxes
-    colorFilterContainer.addEventListener('change', applyFiltersAndSort);
-    sizeFilterContainer.addEventListener('change', applyFiltersAndSort);
     minPriceInput.addEventListener('input', debouncedPriceFilter);
     maxPriceInput.addEventListener('input', debouncedPriceFilter);
 
+    // Event delegation for new filter options
+    [colorFilterContainer, sizeFilterContainer].forEach(container => {
+        if (container) {
+            container.addEventListener('click', (e) => {
+                const filterOption = e.target.closest('.filter-option');
+                if (filterOption) {
+                    filterOption.classList.toggle('active');
+                    applyFiltersAndSort();
+                }
+            });
+        }
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+        currentPage++;
+        renderProducts();
+    });
+
     // Populate all filters on initial load
     populateBrandFilter();
-    populateCheckboxFilter(colorFilterContainer, 'color');
-    populateCheckboxFilter(sizeFilterContainer, 'size');
+    populateOptionFilter(colorFilterContainer, 'color');
+    populateOptionFilter(sizeFilterContainer, 'size');
     applyFiltersAndSort();
 });

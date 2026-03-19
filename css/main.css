@@ -19,6 +19,7 @@ h1 { font-size: 3rem; } h2 { font-size: 2.25rem; } h3 { font-size: 1.75rem; } h4
 header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 .header-inner { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
 .logo { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+.logo img { height: 40px; width: auto; }
 .logo i { color: var(--secondary); font-size: 1.5rem; }
 .nav-desktop { display: flex; gap: 2rem; align-items: center; }
 .nav-desktop a { font-weight: 500; color: var(--text); position: relative; padding: 0.5rem 0; }
@@ -743,6 +744,16 @@ footer {
 .countdown { display: flex; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; font-size: 1.5rem; font-weight: 700; }
 .countdown span { background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 8px; min-width: 60px; }
 
+/* Promo CTA Buttons (Light style for colored backgrounds) */
+.promo-cta-btn, .video-cta-btn {
+    background: white;
+    color: var(--primary);
+}
+.promo-cta-btn:hover, .video-cta-btn:hover {
+    background: #f0f0f0;
+    color: var(--secondary);
+}
+
 /* Blog Preview */
 .blog-preview { padding: 5rem 0; }
 .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
@@ -997,7 +1008,7 @@ body[data-theme="dark"] .advanced-filters {
     cursor: pointer;
 }
 
-.checkbox-group {
+.filter-options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -1010,25 +1021,31 @@ body[data-theme="dark"] .advanced-filters {
     min-width: 150px;
 }
 
-.checkbox-group::-webkit-scrollbar {
+.filter-options::-webkit-scrollbar {
     width: 5px;
 }
-.checkbox-group::-webkit-scrollbar-track {
+.filter-options::-webkit-scrollbar-track {
     background: var(--accent);
 }
-.checkbox-group::-webkit-scrollbar-thumb {
+.filter-options::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 5px;
 }
 
-.checkbox-group .checkbox-label {
+.filter-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     border: 1px solid var(--border);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.85rem;
     transition: var(--transition);
+    cursor: pointer;
+    background: none;
+    color: var(--text);
 }
-.checkbox-group .checkbox-label:has(input:checked) {
+.filter-option.active, .filter-option:hover {
     background-color: var(--secondary);
     color: white;
     border-color: var(--secondary);
@@ -1832,6 +1849,18 @@ body[data-theme="dark"] .payment-option input[type="radio"]:checked + .payment-o
     background-color: var(--accent);
 }
 
+body[data-theme="dark"] .advanced-filters {
+    background: #2d3748; /* Lighter than background for visibility */
+    border: 1px solid #4b5563;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+body[data-theme="dark"] .filter-group select,
+body[data-theme="dark"] .filter-group input,
+body[data-theme="dark"] .filter-options {
+    background-color: var(--accent); /* Make inputs/groups stand out */
+}
+
 /* Fix button visibility in dark mode */
 body[data-theme="dark"] .add-to-cart,
 body[data-theme="dark"] .btn-buy-now {
@@ -1861,6 +1890,56 @@ body[data-theme="dark"] .slider-arrow {
 
 body[data-theme="dark"] .checkout-qty-btn:hover {
     background: var(--border);
+}
+
+/* === DARK MODE SPECIFIC FIXES === */
+
+/* Fix Video Promo Section: Ensure dark background and visible text */
+body[data-theme="dark"] .video-promo-section {
+    background: var(--accent);
+    color: var(--primary);
+}
+
+/* Fix Buttons in Promo & Video Sections: Light background, Dark text */
+body[data-theme="dark"] .promo-cta-btn, 
+body[data-theme="dark"] .video-cta-btn {
+    background: var(--primary); /* Dark button on dark bg? No, make it contrast */
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* Fix Read More Button Visibility */
+body[data-theme="dark"] .read-more-btn {
+    color: var(--secondary);
+    font-weight: 700;
+}
+
+/* === INSTAGRAM SCROLLING ANIMATION === */
+.instagram .container {
+    overflow: hidden; /* Hide overflow for the scrolling effect */
+}
+
+.insta-scroll-wrapper {
+    display: flex;
+    width: max-content;
+    animation: scroll-right 40s linear infinite; /* Left to Right animation */
+}
+
+.insta-scroll-wrapper:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll-right {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+}
+
+/* Update insta-item to work in flex row */
+.insta-item {
+    flex: 0 0 220px;
+    width: 220px;
+    height: 220px;
+    margin-right: 1.5rem;
 }
 
 /* Search Suggestions */
