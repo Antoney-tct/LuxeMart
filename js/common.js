@@ -61,6 +61,63 @@ document.addEventListener('DOMContentLoaded', () => {
         closeProfile.addEventListener('click', () => profileModal.classList.remove('show'));
     }
 
+    // === SEARCH LOGIC ===
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const searchSubmitBtn = document.querySelector('#searchModal .btn-primary');
+
+    if (searchInput) {
+        const performSearch = () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                // Redirect to shop page with search query
+                window.location.href = `shop.html?search=${encodeURIComponent(query)}`;
+            }
+        };
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        // Search on Button Click
+        if (searchSubmitBtn) {
+            searchSubmitBtn.addEventListener('click', performSearch);
+        }
+
+        // Live Suggestions
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            if (!searchSuggestions) return;
+            
+            searchSuggestions.innerHTML = '';
+            searchSuggestions.classList.remove('active');
+
+            if (query.length < 2) return;
+
+            if (typeof products !== 'undefined') {
+                const matches = products.filter(p => 
+                    p.name.toLowerCase().includes(query) || 
+                    p.brand.toLowerCase().includes(query) ||
+                    p.category.toLowerCase().includes(query)
+                ).slice(0, 5);
+
+                if (matches.length > 0) {
+                    searchSuggestions.innerHTML = matches.map(p => `
+                        <div class="suggestion-item" onclick="window.location.href='product.html?id=${p.id}'">
+                            <img src="${p.img}" class="suggestion-img" alt="${p.name}">
+                            <div class="suggestion-info">
+                                <span class="suggestion-name">${p.name}</span>
+                                <span class="suggestion-price">KSh ${p.price.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    searchSuggestions.classList.add('active');
+                }
+            }
+        });
+    }
+
     // === TOAST NOTIFICATION ===
     window.showToast = (message, type = 'info') => {
         let container = document.getElementById('toastContainer');

@@ -1892,6 +1892,16 @@ body[data-theme="dark"] .checkout-qty-btn:hover {
     background: var(--border);
 }
 
+/* Fix Load More Button Visibility in Dark Mode */
+body[data-theme="dark"] #loadMoreBtn {
+    background: var(--primary); /* Light background */
+    color: var(--accent);       /* Dark text for contrast */
+}
+body[data-theme="dark"] #loadMoreBtn:hover {
+    background: #e5e7eb;
+    color: black;
+}
+
 /* === DARK MODE SPECIFIC FIXES === */
 
 /* Fix Video Promo Section: Ensure dark background and visible text */
