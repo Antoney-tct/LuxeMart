@@ -31,7 +31,9 @@
                     <i class="fas fa-heart"></i>
                     <span class="cart-count" id="wishlistCount">0</span>
                 </a>
-                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="icon-btn" id="profileBtn" aria-label="My Account">
+                    <i class="fas fa-user"></i>
+                </button>
                 <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -49,6 +51,12 @@
             <li><a href="about.html">About</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
+        <div class="nav-actions">
+             <button class="icon-btn" id="mobileCartBtn"><i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)</button>
+             <button class="icon-btn" id="themeToggle">
+                <i class="fas fa-moon"></i> Theme
+            </button>
+        </div>
     </div>
 
     <div class="promo-strip" style="background: var(--secondary); color: white;">

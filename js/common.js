@@ -6,11 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const applyTheme = (theme) => {
         if (theme === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
-            if (themeToggle) themeToggle.innerHTML = sunIcon;
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    themeToggle.innerHTML = sunIcon;
+                }
+            }
             localStorage.setItem('theme', 'dark');
         } else {
             document.body.setAttribute('data-theme', 'light');
-            if (themeToggle) themeToggle.innerHTML = moonIcon;
+            if (themeToggle) {
+                const icon = themeToggle.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-moon';
+                } else {
+                    themeToggle.innerHTML = moonIcon;
+                }
+            }
             localStorage.setItem('theme', 'light');
         }
     };

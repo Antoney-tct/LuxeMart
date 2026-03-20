@@ -40,8 +40,8 @@
                     <i class="fas fa-shopping-bag"></i>
                     <span class="cart-count" id="cartCount">0</span>
                 </button>
-                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
+                <button class="icon-btn" id="profileBtn" aria-label="My Account">
+                    <i class="fas fa-user"></i>
                 </button>
                 <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
             </div>
@@ -49,7 +49,7 @@
     </header>
 
     <!-- Mobile Menu, Modals, and Cart Sidebar (reused from other pages) -->
-    <div class="mobile-menu" id="mobileMenu"><button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button><ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="#">Categories</a></li><li><a href="#">Sale</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul><div class="nav-actions"><button class="icon-btn"><i class="fas fa-search"></i> Search</button><button class="icon-btn"><i class="fas fa-user"></i> Account</button><button class="icon-btn"><i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)</button></div></div>
+    <div class="mobile-menu" id="mobileMenu"><button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button><ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="#">Categories</a></li><li><a href="#">Sale</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul><div class="nav-actions"><button class="icon-btn" id="mobileSearchBtn"><i class="fas fa-search"></i> Search</button><button class="icon-btn" id="mobileCartBtn"><i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)</button><button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i> Theme</button></div></div>
     <div class="modal-overlay" id="searchModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">Search Products</h3><button class="modal-close" id="closeSearch" aria-label="Close search modal">×</button></div><div class="modal-body"><input type="text" placeholder="Search for products, brands, categories..." id="searchInput"><div id="searchSuggestions" class="search-suggestions"></div><button class="btn-primary">Search</button></div></div></div>
     <div class="modal-overlay" id="profileModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">My Account</h3><button class="modal-close" id="closeProfile" aria-label="Close account modal">×</button></div><div class="modal-body"><button class="btn-primary" style="margin-bottom: 1rem;">Sign In</button><button class="btn-outline" style="width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text);">Create Account</button><div style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center;"><a href="#" style="color: var(--secondary);">Orders</a> • <a href="wishlist.html" style="color: var(--secondary);">Wishlist</a> • <a href="#" style="color: var(--secondary);">Settings</a></div></div></div></div>
     <div class="cart-sidebar" id="cartSidebar"><div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart" aria-label="Close shopping cart">×</button></div><div id="cartItems"></div><div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div><div class="cart-actions"><a href="#" class="btn-primary">View Cart</a><a href="#" class="btn-outline" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Checkout</a></div></div>
@@ -152,7 +152,7 @@
     <script src="js/products.js"></script>
     <script src="js/common.js"></script>
     <script src="js/cart.js"></script>
-    <script src="js/main2.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/product-page.js"></script>
 </body>
 </html>
