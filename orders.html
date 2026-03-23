@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+                <span>LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
+                <div class="account-dropdown">
+                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+                    <div class="account-dropdown-menu">
+                        <a href="#" id="accountLink">My Account</a>
+                        <a href="seller.html">My Shop</a>
+                        <a href="orders.html">My Orders</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
+                <button class="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="closeMenu"><i class="fas fa-times"></i></button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="orders.html">My Orders</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+
+    <main class="page-content">
+        <div class="container orders-container">
+            <div class="section-header" style="text-align: left; margin-bottom: 2rem;">
+                <h1>My Orders</h1>
+                <p>Track your delivery status and view purchase history.</p>
+            </div>
+            
+            <div class="order-search-container" style="margin-bottom: 1.5rem;">
+                <div class="search-input-wrapper" style="position: relative; max-width: 400px;">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--light-text);"></i>
+                    <input type="text" id="orderSearchInput" placeholder="Search by Order ID or Product Name..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1px solid var(--border); border-radius: 50px; outline: none;">
+                </div>
+            </div>
+
+            <div class="date-filters">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="startDate" style="font-size: 0.9rem; color: var(--light-text);">From:</label>
+                    <input type="date" id="startDate" class="date-input">
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="endDate" style="font-size: 0.9rem; color: var(--light-text);">To:</label>
+                    <input type="date" id="endDate" class="date-input">
+                </div>
+                <button id="clearDatesBtn" class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--text); border-color: var(--border);">Clear Dates</button>
+            </div>
+
+            <div class="filter-buttons" style="margin-bottom: 2rem; justify-content: flex-start;">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="processing">Processing</button>
+                <button class="filter-btn" data-filter="shipped">Shipped</button>
+                <button class="filter-btn" data-filter="delivered">Delivered</button>
+                <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+            </div>
+
+            <div id="ordersList">
+                <!-- Orders injected by JS -->
+                <div class="skeleton" style="height: 150px; border-radius: 12px; margin-bottom: 1rem;"></div>
+                <div class="skeleton" style="height: 150px; border-radius: 12px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart">×</button></div>
+        <div id="cartItems"></div>
+        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+        <div class="cart-actions"><a href="checkout.html" class="btn-primary">Checkout</a></div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/orders.js"></script>
+</body>
+</html>

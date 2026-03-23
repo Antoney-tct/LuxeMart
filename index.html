@@ -42,9 +42,14 @@
                     <i class="fas fa-shopping-bag"></i>
                     <span class="cart-count" id="cartCount">0</span>
                 </button>
-                <button class="icon-btn" id="profileBtn" aria-label="My Account">
-                    <i class="fas fa-user"></i>
-                </button>
+                <div class="account-dropdown">
+                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+                    <div class="account-dropdown-menu">
+                        <a href="#" id="accountLink">My Account</a>
+                        <a href="seller.html">My Shop</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
                 <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -88,25 +93,6 @@
                 <div id="searchSuggestions" class="search-suggestions"></div>
                 <button class="btn-primary">Search</button>
                 <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--light-text);">Try: "sneakers", "headphones", "watch"</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile Modal -->
-    <div class="modal-overlay" id="profileModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">My Account</h3>
-                <button class="modal-close" id="closeProfile" aria-label="Close account modal">×</button>
-            </div>
-            <div class="modal-body">
-                <button class="btn-primary" style="margin-bottom: 1rem;">Sign In</button>
-                <button class="btn-outline" style="width: 100%; background: transparent; border: 1px solid var(--border); color: var(--text);">Create Account</button>
-                <div style="margin-top: 1.5rem; font-size: 0.9rem; text-align: center;">
-                    <a href="#" style="color: var(--secondary);">Orders</a> • 
-                    <a href="wishlist.html" style="color: var(--secondary);">Wishlist</a> • 
-                    <a href="#" style="color: var(--secondary);">Settings</a>
-                </div>
             </div>
         </div>
     </div>

@@ -1902,6 +1902,131 @@ body[data-theme="dark"] #loadMoreBtn:hover {
     color: black;
 }
 
+/* === ACCOUNT DROPDOWN === */
+.account-dropdown { position: relative; display: inline-flex; align-items: center; }
+.account-dropdown-menu {
+    position: absolute; top: 100%; right: 0; width: 180px;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: var(--shadow);
+    opacity: 0; visibility: hidden; transform: translateY(10px);
+    transition: var(--transition); z-index: 1100;
+    overflow: hidden; padding: 0.5rem 0;
+}
+.account-dropdown:hover .account-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.account-dropdown-menu a {
+    display: block; padding: 0.75rem 1.25rem; color: var(--text);
+    font-size: 0.9rem; font-weight: 500; transition: var(--transition);
+}
+.account-dropdown-menu a:hover { background: var(--accent); color: var(--secondary); }
+/* Dark Mode for Dropdown */
+body[data-theme="dark"] .account-dropdown-menu { background: var(--accent); border-color: var(--border); }
+body[data-theme="dark"] .account-dropdown-menu a:hover { background: var(--border); }
+
+/* === ORDERS PAGE === */
+.orders-container { max-width: 900px; margin: 0 auto; padding: 2rem 0; }
+.order-card { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 2rem; overflow: hidden; background: var(--white); box-shadow: var(--shadow); }
+.order-header { background: var(--accent); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+.order-id { font-weight: 600; color: var(--primary); }
+.order-date { color: var(--light-text); font-size: 0.9rem; }
+.order-status { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+
+.status-processing { background: #dbeafe; color: #1e40af; }
+.status-delivered { background: #d1fae5; color: #065f46; }
+.status-shipped { background: #ffedd5; color: #9a3412; }
+.status-cancelled { background: #fee2e2; color: #991b1b; }
+
+.order-body { padding: 1.5rem; }
+.order-item { display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); align-items: center; }
+.order-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.order-item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+.order-item-info h4 { font-size: 1rem; margin-bottom: 0.25rem; color: var(--text); }
+.order-footer { padding: 1rem 1.5rem; background: var(--accent); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; gap: 1rem; font-weight: 500; }
+.order-total { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+
+body[data-theme="dark"] .status-processing { background: rgba(30, 64, 175, 0.2); color: #93c5fd; }
+body[data-theme="dark"] .status-cancelled { background: rgba(153, 27, 27, 0.2); color: #fca5a5; }
+
+/* === ORDER DATE FILTERS === */
+.date-filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.date-input {
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+}
+.date-input:focus { border-color: var(--secondary); }
+body[data-theme="dark"] .date-input { background: var(--accent); }
+
+/* === ORDER TRACKING BAR === */
+.track-order {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: 1.5rem 1.5rem 0.5rem;
+    padding-bottom: 1rem;
+}
+.track-line-bg {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    z-index: 0;
+}
+.track-line-active {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    height: 4px;
+    background: var(--success);
+    z-index: 0;
+    transition: width 0.5s ease;
+}
+.track-step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    width: 80px;
+}
+.track-icon {
+    width: 34px;
+    height: 34px;
+    background: var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--light-text);
+    margin: 0 auto 0.5rem;
+    border: 4px solid var(--white); /* Gap from line */
+    transition: var(--transition);
+}
+.track-step.active .track-icon {
+    background: var(--success);
+    color: white;
+}
+.track-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--light-text);
+}
+.track-step.active .track-label {
+    color: var(--text);
+    font-weight: 600;
+}
+/* Dark mode adjustments for tracking bar */
+body[data-theme="dark"] .track-icon { border-color: var(--white); }
+
 /* === DARK MODE SPECIFIC FIXES === */
 
 /* Fix Video Promo Section: Ensure dark background and visible text */

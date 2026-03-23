@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // === AUTH & ROLE CHECK ===
+    const user = JSON.parse(localStorage.getItem('luxeUser'));
+    if (!user || user.role !== 'seller') {
+        alert('Access Denied. You must be logged in as a Seller to access this dashboard.');
+        window.location.href = 'index.html';
+        return;
+    }
+
     const form = document.getElementById('addProductForm');
     const imageInput = document.getElementById('pImageFile');
     const imageUrlInput = document.getElementById('pImageUrl');
@@ -53,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     reviews: 0,
                     stock: 10, // Default starting stock
                     dateAdded: new Date().toISOString(), // For "Newest" sorting
-                    badge: "NEW"
+                    badge: "NEW",
+                    sellerEmail: user.email // Associate product with current seller
                 };
 
                 saveToLocalStorage(newProduct);

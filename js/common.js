@@ -66,15 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSearch.addEventListener('click', () => searchModal.classList.remove('show'));
     }
 
-    const profileBtn = document.getElementById('profileBtn');
-    const profileModal = document.getElementById('profileModal');
-    const closeProfile = document.getElementById('closeProfile');
-
-    if (profileBtn && profileModal && closeProfile) {
-        profileBtn.addEventListener('click', () => profileModal.classList.add('show'));
-        closeProfile.addEventListener('click', () => profileModal.classList.remove('show'));
-    }
-
     // === SEARCH LOGIC ===
     const searchInput = document.getElementById('searchInput');
     const searchSuggestions = document.getElementById('searchSuggestions');
@@ -199,9 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mobile Menu Search & Account Hooks
     const mobileSearchBtn = document.getElementById('mobileSearchBtn');
-    const mobileAccountBtn = document.getElementById('mobileAccountBtn');
     if (mobileSearchBtn && searchModal) mobileSearchBtn.addEventListener('click', () => { mobileMenu.classList.remove('open'); searchModal.classList.add('show'); });
-    if (mobileAccountBtn && profileModal) mobileAccountBtn.addEventListener('click', () => { mobileMenu.classList.remove('open'); profileModal.classList.add('show'); });
 
     // === EXIT-INTENT POPUP LOGIC ===
     const exitIntentModal = document.getElementById('exitIntentModal');
@@ -231,6 +220,156 @@ document.addEventListener('DOMContentLoaded', () => {
 
         closeBtn.addEventListener('click', closeExitIntentPopup);
         continueLink.addEventListener('click', closeExitIntentPopup);
+    }
+
+    // === GOOGLE LOGIN INTEGRATION ===
+    const accountLink = document.getElementById('accountLink');
+    const logoutLink = document.getElementById('logoutLink');
+
+    // 1. Inject Login Modal HTML
+    const loginModalHTML = `
+        <div class="modal-overlay" id="loginModal">
+            <div class="modal" style="max-width: 400px; text-align: center;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Welcome Back</h3>
+                    <button class="modal-close" id="closeLoginModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 1.5rem; color: var(--light-text);">Sign in to access your account, wishlist, and orders.</p>
+                    
+                    <!-- Role Selection -->
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 2rem; background: var(--accent); padding: 1rem; border-radius: 8px;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                            <input type="radio" name="accountRole" value="buyer" checked style="width: auto; margin: 0; accent-color: var(--secondary);"> I'm a Buyer
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                            <input type="radio" name="accountRole" value="seller" style="width: auto; margin: 0; accent-color: var(--secondary);"> I'm a Seller
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                            <input type="radio" name="accountRole" value="admin" style="width: auto; margin: 0; accent-color: var(--secondary);"> Admin
+                        </label>
+                    </div>
+
+                    <div id="googleBtnContainer" style="display: flex; justify-content: center;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loginModalHTML);
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginModalBtn = document.getElementById('closeLoginModal');
+
+    if (closeLoginModalBtn) {
+        closeLoginModalBtn.addEventListener('click', () => loginModal.classList.remove('show'));
+    }
+
+    // 2. Load Google Script & Initialize
+    const script = document.createElement('script');
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    window.handleCredentialResponse = (response) => {
+        // Decode JWT (Client-side implementation)
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        const payload = JSON.parse(jsonPayload);
+        
+        // Get Selected Role
+        const roleInputs = document.querySelectorAll('input[name="accountRole"]');
+        let role = 'buyer';
+        roleInputs.forEach(r => { if(r.checked) role = r.value; });
+
+        // Store User
+        const user = { name: payload.name, email: payload.email, picture: payload.picture, role: role };
+        localStorage.setItem('luxeUser', JSON.stringify(user));
+        
+        updateAccountUI();
+        loginModal.classList.remove('show');
+        window.showToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
+    };
+
+    script.onload = () => {
+        // NOTE: Replace 'YOUR_CLIENT_ID' with your actual Google Client ID from Cloud Console
+        google.accounts.id.initialize({
+            client_id: "YOUR_CLIENT_ID.apps.googleusercontent.com", 
+            callback: handleCredentialResponse
+        });
+        google.accounts.id.renderButton(
+            document.getElementById("googleBtnContainer"),
+            { theme: "outline", size: "large", width: 250 } 
+        );
+    };
+
+    // 3. UI Logic
+    function updateAccountUI() {
+        const user = JSON.parse(localStorage.getItem('luxeUser'));
+        const sellerLink = document.querySelector('.account-dropdown-menu a[href="seller.html"]');
+        let ordersLink = document.querySelector('.account-dropdown-menu a[href="orders.html"]');
+        let adminLink = document.querySelector('.account-dropdown-menu a[href="admin.html"]');
+
+        // Inject Orders link if missing (for pages that don't have it hardcoded yet)
+        const dropdownMenu = document.querySelector('.account-dropdown-menu');
+        if (dropdownMenu && .insertBefore(ordersLink, logoutLink);
+            }
+            if (!adminLink) {
+                adminLink = document.createElement('a');
+                adminLink.href = 'admin.html';
+                adminLink.textContent = 'Admin Dashboard';
+                dropdownMenu.insertBefore(adminLink, logoutLink);
+            }
+        }
+
+        if (user && accountLink) {
+            accountLink.innerHTML = `<i class="fas fa-user-circle"></i> ${user.name}`;
+            if (logoutLink) logoutLink.style.display = 'block';
+            if (ordersLink) ordersLink.style.display = 'block';
+            
+            // Role-based Menu Logic
+            if (sellerLink) {
+                if (user.role === 'seller') {
+                    sellerLink.style.display = 'block';
+                    sellerLink.innerHTML = 'My Shop Dashboard';
+                } else {
+                    sellerLink.style.display = 'none';
+                }
+            }
+            
+            if (adminLink) {
+                if (user.role === 'admin') {
+                    adminLink.style.display = 'block';
+                } else {
+                    adminLink.style.display = 'none';
+                }
+            }
+        } else if (accountLink) {
+            accountLink.innerHTML = 'Login / Register';
+            if (logoutLink) logoutLink.style.display = 'none';
+            if (sellerLink) sellerLink.style.display = 'none';
+            if (ordersLink) ordersLink.style.display = 'none';
+            if (adminLink) adminLink.style.display = 'none';
+        }
+    }
+    updateAccountUI();
+
+    if (accountLink) {
+        accountLink.addEventListener('click', (e) => {
+            if (!localStorage.getItem('luxeUser')) {
+                e.preventDefault();
+                loginModal.classList.add('show');
+            }
+        });
+    }
+
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('luxeUser');
+            updateAccountUI();
+            window.showToast('Logged out successfully', 'info');
+        });
     }
 });
 
