@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Icons & Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Admin-specific styles */
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .admin-header { text-align: left; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); border-left: 5px solid var(--secondary); }
+        .stat-card h3 { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .stat-card p { color: var(--light-text); font-weight: 500; }
+
+        /* Tables */
+        .admin-section { margin-bottom: 3rem; }
+        .admin-section h2 { margin-bottom: 1.5rem; }
+        .table-wrapper { overflow-x: auto; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--accent); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { font-size: 0.95rem; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: var(--accent); }
+
+        /* Status Dropdown */
+        .status-select { padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-weight: 500; cursor: pointer; }
+        .status-select.processing { background: #dbeafe; color: #1e40af; }
+        .status-select.shipped { background: #ffedd5; color: #9a3412; }
+        .status-select.delivered { background: #d1fae5; color: #065f46; }
+        .status-select.cancelled { background: #fee2e2; color: #991b1b; }
+
+        /* Buttons */
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px; background: var(--primary); color: white; border: none; }
+        .btn-sm.btn-danger { background: #dc2626; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+                <span>LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Back to Shop</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <div class="account-dropdown">
+                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+                    <div class="account-dropdown-menu">
+                        <a href="#" id="accountLink">My Account</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container admin-container">
+            <div class="admin-header">
+                <h1>Admin Dashboard</h1>
+                <p>Manage orders, products, and view site statistics.</p>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-grid" id="adminStats">
+                <!-- Stat cards will be injected by admin.js -->
+                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
+                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
+                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
+                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
+            </div>
+
+            <!-- Sales Chart Section -->
+            <section class="admin-section">
+                <h2>Sales Over Time</h2>
+                <div class="chart-container" style="position: relative; height:40vh; width:100%; background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow);">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Orders Management Section -->
+            <section class="admin-section">
+                <h2>Recent Orders</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminOrdersTableBody">
+                            <!-- Order rows will be injected by admin.js -->
+                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading orders...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Product Management Section -->
+            <section class="admin-section">
+                <h2>Product Management (Latest 20)</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductsTableBody">
+                            <!-- Product rows will be injected by admin.js -->
+                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/products.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/common.js"></script>
+</body>
+</html>

@@ -3,8 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('luxeUser'));
     if (!user || user.role !== 'seller') {
         alert('Access Denied. You must be logged in as a Seller to access this dashboard.');
-        window.location.href = 'index.html';
-        return;
+        window.location.href = 'index.html'; 
     }
 
     const form = document.getElementById('addProductForm');
@@ -51,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const processProductSave = (finalImage) => {
                 const newProduct = {
                     id: Date.now(), // Generate a unique ID based on timestamp
-                    name: name,
                     brand: brand,
                     category: category,
                     price: price,

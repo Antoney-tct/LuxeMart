@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // === MERGE VENDOR PRODUCTS INTO GLOBAL STATE ===
+    // This ensures products added by sellers appear in the shop
+    const mergeProducts = () => {
+        if (typeof products !== 'undefined') {
+            const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
+            const existingIds = new Set(products.map(p => p.id));
+            vendorProducts.forEach(vp => {
+                if (!existingIds.has(vp.id)) {
+                    products.unshift(vp); // Add new products to the top
+                }
+            });
+        }
+    };
+    mergeProducts();
+
     const themeToggle = document.getElementById('themeToggle');
     const moonIcon = '<i class="fas fa-moon"></i>';
     const sunIcon = '<i class="fas fa-sun"></i>';
@@ -235,10 +250,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="modal-close" id="closeLoginModal">×</button>
                 </div>
                 <div class="modal-body">
-                    <p style="margin-bottom: 1.5rem; color: var(--light-text);">Sign in to access your account, wishlist, and orders.</p>
+                    <p style="margin-bottom: 1rem; color: var(--light-text);">Sign in to access your dashboard.</p>
                     
+                    <form id="manualLoginForm" style="margin-bottom: 1.5rem; text-align: left;">
+                        <input type="email" id="loginEmail" placeholder="Email Address" required style="width: 100%; margin-bottom: 10px;">
+                        <input type="password" id="loginPassword" placeholder="Password" required style="width: 100%; margin-bottom: 15px;">
+                        <button type="submit" class="btn-primary" style="width: 100%;">Log In</button>
+                    </form>
+
+                    <div class="divider" style="margin: 1rem 0; font-size: 0.9rem; color: #888;">OR CONTINUE WITH</div>
+
                     <!-- Role Selection -->
-                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 2rem; background: var(--accent); padding: 1rem; border-radius: 8px;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 1rem; background: var(--accent); padding: 1rem; border-radius: 8px;">
                         <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
                             <input type="radio" name="accountRole" value="buyer" checked style="width: auto; margin: 0; accent-color: var(--secondary);"> I'm a Buyer
                         </label>
@@ -276,34 +299,78 @@ document.addEventListener('DOMContentLoaded', () => {
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
         const payload = JSON.parse(jsonPayload);
-        
+        completeLogin({ name: payload.name, email: payload.email, picture: payload.picture });
+    };
+
+    // 3. Manual Login Handler
+    const manualLoginForm = document.getElementById('manualLoginForm');
+    if (manualLoginForm) {
+        manualLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            // For demo purposes, we accept any password
+            const name = email.split('@')[0];
+            const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+            
+            completeLogin({ 
+                name: capitalizedName, 
+                email: email, 
+                picture: 'https://ui-avatars.com/api/?name=' + name + '&background=ff6b35&color=fff' 
+            });
+        });
+    }
+
+    function completeLogin(userData) {
         // Get Selected Role
         const roleInputs = document.querySelectorAll('input[name="accountRole"]');
         let role = 'buyer';
         roleInputs.forEach(r => { if(r.checked) role = r.value; });
 
-        // Store User
-        const user = { name: payload.name, email: payload.email, picture: payload.picture, role: role };
+        // Special check for hardcoded admin demo
+        if (userData.email.toLowerCase().includes('admin')) {
+            role = 'admin';
+        }
+
+        const user = { ...userData, role: role };
         localStorage.setItem('luxeUser', JSON.stringify(user));
         
         updateAccountUI();
         loginModal.classList.remove('show');
-        window.showToast(`Welcome back, ${user.name.split(' ')[0]}!`, 'success');
-    };
+        window.showToast(`Welcome back, ${user.name}! Signed in as ${role.toUpperCase()}.`, 'success');
+
+        // Redirect Logic based on Role
+        setTimeout(() => {
+            if (role === 'admin') {
+                if (!window.location.href.includes('admin.html')) window.location.href = 'admin.html';
+            } else if (role === 'seller') {
+                if (!window.location.href.includes('seller.html')) window.location.href = 'seller.html';
+            } else {
+                // If buyer, stay here or go to shop if on login page
+                if (window.location.href.includes('login.html')) window.location.href = 'index.html';
+            }
+        }, 1000);
+    }
 
     script.onload = () => {
-        // NOTE: Replace 'YOUR_CLIENT_ID' with your actual Google Client ID from Cloud Console
-        google.accounts.id.initialize({
-            client_id: "YOUR_CLIENT_ID.apps.googleusercontent.com", 
-            callback: handleCredentialResponse
-        });
-        google.accounts.id.renderButton(
-            document.getElementById("googleBtnContainer"),
-            { theme: "outline", size: "large", width: 250 } 
-        );
+        try {
+            // My google client id for log in with google
+            google.accounts.id.initialize({
+                client_id: "459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com", 
+                callback: handleCredentialResponse
+            });
+            const btnContainer = document.getElementById("googleBtnContainer");
+            if (btnContainer) {
+                google.accounts.id.renderButton(
+                    btnContainer,
+                    { theme: "outline", size: "large", width: 250 } 
+                );
+            }
+        } catch (e) {
+            console.warn("Google Sign-In script failed to load or initialize.", e);
+        }
     };
 
-    // 3. UI Logic
+    // 4. UI Logic
     function updateAccountUI() {
         const user = JSON.parse(localStorage.getItem('luxeUser'));
         const sellerLink = document.querySelector('.account-dropdown-menu a[href="seller.html"]');
@@ -312,13 +379,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Inject Orders link if missing (for pages that don't have it hardcoded yet)
         const dropdownMenu = document.querySelector('.account-dropdown-menu');
-        if (dropdownMenu && .insertBefore(ordersLink, logoutLink);
+        if (dropdownMenu) {
+            if (!ordersLink) {
+                ordersLink = document.createElement('a');
+                ordersLink.href = 'orders.html';
+                ordersLink.textContent = 'My Orders';
+                // Insert before logout
+                const logoutBtn = dropdownMenu.querySelector('#logoutLink');
+                if (logoutBtn) dropdownMenu.insertBefore(ordersLink, logoutBtn);
             }
+            
             if (!adminLink) {
                 adminLink = document.createElement('a');
                 adminLink.href = 'admin.html';
                 adminLink.textContent = 'Admin Dashboard';
-                dropdownMenu.insertBefore(adminLink, logoutLink);
+                const logoutBtn = dropdownMenu.querySelector('#logoutLink');
+                if (logoutBtn) dropdownMenu.insertBefore(adminLink, logoutBtn);
             }
         }
 
@@ -356,9 +432,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (accountLink) {
         accountLink.addEventListener('click', (e) => {
-            if (!localStorage.getItem('luxeUser')) {
-                e.preventDefault();
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('luxeUser'));
+            
+            if (!user) {
                 loginModal.classList.add('show');
+            } else {
+                // Redirect based on role
+                if (user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else if (user.role === 'seller') {
+                    window.location.href = 'seller.html';
+                } else {
+                    window.location.href = 'orders.html';
+                }
             }
         });
     }
