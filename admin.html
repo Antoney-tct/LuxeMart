@@ -85,6 +85,34 @@
                 <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
             </div>
 
+            <!-- Edit Product Modal -->
+            <div class="modal-overlay" id="editProductModal">
+                <div class="modal" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Edit Product</h3>
+                        <button class="modal-close" id="closeEditModal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editProductForm">
+                            <input type="hidden" id="editProductId">
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label for="editProductName" style="display: block; margin-bottom: 0.5rem;">Product Name</label>
+                                <input type="text" id="editProductName" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label for="editProductPrice" style="display: block; margin-bottom: 0.5rem;">Price (KSh)</label>
+                                <input type="number" id="editProductPrice" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editProductStock" style="display: block; margin-bottom: 0.5rem;">Stock</label>
+                                <input type="number" id="editProductStock" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem; border-radius: 8px;">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sales Chart Section -->
             <section class="admin-section">
                 <h2>Sales Over Time</h2>
@@ -126,8 +154,9 @@
                                 <th>Product</th>
                                 <th>Name</th>
                                 <th>Category</th>
+                                <th>Seller</th>
                                 <th>Price</th>
-                                <th>Stock</th>
+                                <th>Stock</th> 
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -146,6 +175,7 @@
 
     <!-- Scripts -->
     <script src="js/products.js"></script>
+    <script src="js/users.js"></script> <!-- Add users data -->
     <script src="js/admin.js"></script>
     <script src="js/common.js"></script>
 </body>

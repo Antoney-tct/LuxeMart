@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const processProductSave = (finalImage) => {
                 const newProduct = {
                     id: Date.now(), // Generate a unique ID based on timestamp
+                    name: name,
                     brand: brand,
                     category: category,
                     price: price,

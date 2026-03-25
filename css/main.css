@@ -653,7 +653,9 @@ footer {
         margin-bottom: 2rem;
     }
     
-    .newsletter-form {3}
+    .newsletter-form {
+        flex-direction: column;
+    }
     
     .newsletter-btn {
         border-radius: 0 0 12px 12px;

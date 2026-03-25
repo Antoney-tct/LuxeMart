@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Load users data if available
+    const allUsersData = typeof allUsers !== 'undefined' ? allUsers : [];
+
     // === RENDER STATS ===
     const renderStats = () => {
         const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
@@ -147,21 +150,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById('adminProductsTableBody');
         if (!tbody) return;
 
-        // Show latest 20 products
-        const displayProducts = allProducts.slice(0, 20);
+        // Show all products
+        const displayProducts = allProducts;
 
         tbody.innerHTML = displayProducts.map(p => `
             <tr>
                 <td><img src="${p.img}" alt="${p.name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
                 <td>${p.name}</td>
                 <td>${p.category}</td>
+                <td>${getSellerInfo(p.sellerEmail)}</td>
                 <td>KSh ${p.price}</td>
                 <td>${p.stock || 'N/A'}</td>
                 <td>
-                    <button class="btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+                    <button class="btn-sm" onclick="openEditModal(${p.id})">Edit</button>
+                    <button class="btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button> 
                 </td>
             </tr>
         `).join('');
+    };
+
+    const getSellerInfo = (email) => {
+        if (!email) return '<span style="color: var(--light-text);">LuxeMart</span>';
+        const seller = allUsersData.find(u => u.email === email);
+        if (!seller) return email;
+
+        return `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="${seller.picture}" style="width: 30px; height: 30px; border-radius: 50%;">
+                <div>
+                    <div>${seller.name}</div>
+                    <a href="tel:${seller.phone}" style="font-size: 0.8rem; color: var(--secondary);"><i class="fas fa-phone"></i> Call</a>
+                </div>
+            </div>
+        `;
     };
 
     // === GLOBAL FUNCTIONS FOR ONCLICK ===
@@ -184,11 +205,56 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (vProducts.length < initialLength) {
                 localStorage.setItem('vendorProducts', JSON.stringify(vProducts));
-                alert('Product deleted successfully.');
+                window.showToast('Seller product deleted successfully.', 'success');
                 location.reload(); // Reload to refresh lists
             } else {
-                alert('Cannot delete built-in products in this demo mode. Only Seller added products can be deleted.');
+                // For demo, we can "delete" a built-in product from the view
+                const initialAllLength = allProducts.length;
+                allProducts = allProducts.filter(p => p.id !== productId);
+                if (allProducts.length < initialAllLength) {
+                    renderProductsTable(); // Re-render the table without the deleted item
+                    window.showToast('Built-in product removed from view (demo).', 'info');
+                } else {
+                    alert('Could not find product to delete.');
+                }
             }
+        }
+    };
+
+    window.openEditModal = (productId) => {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product) return;
+
+        document.getElementById('editProductId').value = product.id;
+        document.getElementById('editProductName').value = product.name;
+        document.getElementById('editProductPrice').value = product.price;
+        document.getElementById('editProductStock').value = product.stock || 0;
+
+        document.getElementById('editProductModal').classList.add('show');
+    };
+
+    // Handle Modal Close and Form Submit
+    document.getElementById('closeEditModal').addEventListener('click', () => {
+        document.getElementById('editProductModal').classList.remove('show');
+    });
+
+    document.getElementById('editProductForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('editProductId').value);
+        const name = document.getElementById('editProductName').value;
+        const price = parseFloat(document.getElementById('editProductPrice').value);
+        const stock = parseInt(document.getElementById('editProductStock').value);
+
+        let vProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
+        const productIndex = vProducts.findIndex(p => p.id === id);
+        if (productIndex > -1) {
+            vProducts[productIndex] = { ...vProducts[productIndex], name, price, stock };
+            localStorage.setItem('vendorProducts', JSON.stringify(vProducts));
+            window.showToast('Product updated successfully!', 'success');
+            location.reload();
+        } else {
+            alert('Editing built-in products is not supported in this demo. Only seller-added products can be persistently edited.');
+            document.getElementById('editProductModal').classList.remove('show');
         }
     };
 

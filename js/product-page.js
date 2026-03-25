@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const relatedContainer = document.getElementById('related-products-section');
     if (!detailContainer) return;
 
+    // Load users data if available
+    const allUsersData = typeof allUsers !== 'undefined' ? allUsers : [];
+
     // === HELPER FUNCTIONS ===
     const getStarRating = (rating) => {
         let html = '';
@@ -56,6 +59,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderProductInfo = (product, wishlist) => {
         let stockInfoHtml = '';
+
+        // Find seller details
+        const seller = product.sellerEmail ? allUsersData.find(u => u.email === product.sellerEmail) : null;
+        
+        let sellerInfoHtml = '';
+        if (seller) {
+            const whatsappMessage = encodeURIComponent(`Hi ${seller.name}, I'm interested in your product on LuxeMart: ${product.name}. Is it still available?`);
+            sellerInfoHtml = `
+                <div class="seller-info-box" style="margin: 1.5rem 0; padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: var(--accent);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <img src="${seller.picture}" alt="${seller.name}" style="width: 50px; height: 50px; border-radius: 50%;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--light-text);">Sold by</div>
+                            <div style="font-weight: 600;">${seller.name}</div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <a href="https://wa.me/${seller.phone}?text=${whatsappMessage}" target="_blank" class="btn-outline" style="text-align: center; padding: 0.6rem; border-radius: 8px; background: #25D366; color: white; border-color: #25D366;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="tel:${seller.phone}" class="btn-outline" style="text-align: center; padding: 0.6rem; border-radius: 8px; color: var(--text); border-color: var(--border);">
+                            <i class="fas fa-phone"></i> Call Seller
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
         if (product.stock > 0 && product.stock <= 10) {
             stockInfoHtml = `<div class="stock-info low-stock">Only ${product.stock} left in stock!</div>`;
         } else if (product.stock > 10) {
@@ -105,6 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <p class="product-description">${product.desc}</p>
                 
+                ${sellerInfoHtml}
+
                 <div class="product-variants">
                     ${colorOptions}
                     ${sizeOptions}
