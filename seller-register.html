@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become a Seller - LuxeMart</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .register-container { max-width: 450px; margin: 0 auto; padding: 2rem 1rem; }
+        .register-box { background: var(--white); padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center; }
+        .register-box h1 { font-size: 2rem; }
+        .register-box p { color: var(--light-text); margin-bottom: 2rem; }
+        .register-box form { text-align: left; }
+        .register-box input { width: 100%; padding: 0.875rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; }
+        .register-box .btn-primary { width: 100%; justify-content: center; }
+        .divider { margin: 1.5rem 0; font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+                <span>LuxeMart</span>
+            </div>
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container register-container">
+            <div class="register-box">
+                <h1>Become a Seller</h1>
+                <p>Join our marketplace and start selling your products to thousands of customers.</p>
+                <p>Sign in with Google to create your seller account and get started.</p>
+                <div id="sellerGoogleBtnContainer" style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/products.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/seller-register.js"></script>
+</body>
+</html>
+
+```
+
+### 2. Create `js/seller-register.js` (New File)
+
+Next, create a corresponding JavaScript file to handle the logic for the new page. This script will initialize Google Sign-In and ensure anyone signing up here is assigned the 'seller' role.
+
+```diff
+--- /dev/null
++++ b/c:/file xampp/htdocs/LuxeMart/js/seller-register.js
+@@ -0,0 +1,55 @@
++document.addEventListener('DOMContentLoaded', () => {
++    // This script handles the dedicated seller registration page.
++
++    // 1. Load Google Script for this page specifically
++    const script = document.createElement('script');
++    script.src = "https://accounts.google.com/gsi/client";
++    script.async = true;
++    script.defer = true;
++    document.body.appendChild(script);
++
++    // 2. Define a specific callback for seller registration
++    window.handleSellerRegisterResponse = (response) => {
++        // Decode JWT
++        const base64Url = response.credential.split('.')[1];
++        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
++        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
++        const payload = JSON.parse(jsonPayload);
++        
++        // Call the global completeLogin function but force the role to 'seller'
++        if (window.completeLogin) {
++            window.completeLogin({ name: payload.name, email: payload.email, picture: payload.picture }, 'seller');
++        }
++    };
++
++    // 3. Initialize Google Sign-In when the script loads
++    script.onload = () => {
++        try {
++            google.accounts.id.initialize({
++                client_id: "459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com", 
++                callback: window.handleSellerRegisterResponse // Use our specific callback
++            });
++            const btnContainer = document.getElementById("sellerGoogleBtnContainer");
++            if (btnContainer) {
++                google.accounts.id.renderButton(
++                    btnContainer,
++                    { theme: "outline", size: "large", width: "300" } 
++                );
++            }
++        } catch (e) {
++            console.warn("Google Sign-In for seller page failed to load.", e);
++        }
++    };
++
++    // 4. Manual Seller Registration Handler
++    const manualRegisterForm = document.getElementById('sellerManualRegisterForm');
++    if (manualRegisterForm) {
++        manualRegisterForm.addEventListener('submit', (e) => {
++            e.preventDefault();
++            const email = document.getElementById('sellerRegisterEmail').value;
++            const name = email.split('@')[0];
++            const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
++            
++            // Call the global completeLogin function, forcing the role to 'seller'
++            if (window.completeLogin) {
++                window.completeLogin({ 
++                    name: capitalizedName, 
++                    email: email, 
++                    picture: 'https://ui-avatars.com/api/?name=' + name + '&background=ff6b35&color=fff' 
++                }, 'seller');
++            }
++        });
++    }
++});
+```
+
+### 3. Update `js/common.js`
+
+To allow the new `seller-register.js` script to work, we need to make a small modification to `common.js`. We'll expose the `completeLogin` function globally and allow it to accept a `forcedRole` parameter.
+
+```diff
+--- a/c:/file xampp/htdocs/LuxeMart/js/common.js
++++ b/c:/file xampp/htdocs/LuxeMart/js/common.js
+@@ -415,22 +415,29 @@
+         localStorage.setItem('usersDB', JSON.stringify(usersDB));
+     };
+ 
+-    function completeLogin(userData) {
+-        // Get Selected Role
+-        const roleInputs = document.querySelectorAll('input[name="accountRole"]');
+-        let role = 'buyer';
+-        roleInputs.forEach(r => { if(r.checked) role = r.value; });
+-
+-        // === INTELLIGENT ROLE DETECTION ===
+-        const loginModal = document.getElementById('loginModal');
+-        const isModalOpen = loginModal && loginModal.classList.contains('show');
+-
+-        // 1. If One Tap (Modal closed), try to find existing role from "Database"
+-        if (!isModalOpen) {
+-            const knownRole = getKnownRole(userData.email);
+-            if (knownRole) role = knownRole;
++    // Make completeLogin globally accessible for other scripts like seller-register.js
++    window.completeLogin = function(userData, forcedRole = null) {
++        let role;
++
++        if (forcedRole) {
++            role = forcedRole;
++        } else {
++            // Get Selected Role from modal if it's open
++            const roleInputs = document.querySelectorAll('input[name="accountRole"]');
++            role = 'buyer'; // Default
++            roleInputs.forEach(r => { if(r.checked) role = r.value; });
++
++            // === INTELLIGENT ROLE DETECTION for One Tap ===
++            const loginModal = document.getElementById('loginModal');
++            const isModalOpen = loginModal && loginModal.classList.contains('show');
++
++            // If One Tap (Modal closed), try to find existing role from "Database"
++            if (!isModalOpen) {
++                const knownRole = getKnownRole(userData.email);
++                if (knownRole) role = knownRole;
++            }
+         }
+-
++        
+         // Special check for hardcoded admin demo
+         if (userData.email.toLowerCase().includes('admin')) {
+             role = 'admin';
+@@ -442,7 +449,8 @@
+         saveKnownUser(user);
+         
+         updateAccountUI();
+-        loginModal.classList.remove('show');
++        const loginModal = document.getElementById('loginModal');
++        if (loginModal) loginModal.classList.remove('show');
+         window.showToast(`Welcome back, ${user.name}! Signed in as ${role.toUpperCase()}.`, 'success');
+ 
+         // Redirect Logic based on Role
+@@ -456,7 +464,7 @@
+                 if (window.location.href.includes('login.html')) window.location.href = 'index.html';
+             }
+         }, 1000);
+-    }
++    };
+ 
+     script.onload = () => {
+         try {
+
+```
+
+### 4. Update Links in Footer
+
+Finally, let's update the "Sell on LuxeMart" links in your `index.html` and `product.html` footers to point to this new, user-friendly registration page.
+
+#### `index.html`
+```diff
+--- a/c:/file xampp/htdocs/LuxeMart/index.html
++++ b/c:/file xampp/htdocs/LuxeMart/index.html
+@@ -583,6 +583,7 @@
+                     <h3>Quick Links</h3>
+                     <ul>
+                         <li><a href="#">About Us</a></li>
++                        <li><a href="seller-register.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
+                         <li><a href="#">Contact</a></li>
+                         <li><a href="refer.html">Refer a Friend</a></li>
+                         <li><a href="faq.html">FAQs</a></li>
+
+```
+
+#### `product.html`
+```diff
+--- a/c:/file xampp/htdocs/LuxeMart/product.html
++++ b/c:/file xampp/htdocs/LuxeMart/product.html
+@@ -139,7 +139,7 @@
+                         <li><a href="#">About Us</a></li>
+                         <li><a href="refer.html">Refer a Friend</a></li>
+                         <li><a href="#">Contact</a></li>
+-                        <li><a href="seller.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
++                        <li><a href="seller-register.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
+                         <li><a href="faq.html">FAQs</a></li>
+                         <li><a href="#">Shipping Info</a></li>
+                         <li><a href="#">Returns</a></li>
+
+```
+
+With these changes, you now have a dedicated page for seller registration that simplifies the process and automatically assigns the correct role, improving the overall user experience.
+
+<!--
+[PROMPT_SUGGESTION]How can I add a "My Products" view to the seller dashboard so they can see and edit their own listings?[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]Can you add a feature for buyers to leave reviews on products they have purchased?[/PROMPT_SUGGESTION]
+-->

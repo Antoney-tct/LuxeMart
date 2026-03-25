@@ -51,6 +51,37 @@
                 <p>Welcome back! Fill in the details below to add your item to the LuxeMart marketplace.</p>
             </div>
 
+            <!-- My Products Section -->
+            <section class="admin-section" style="margin-bottom: 3rem;">
+                <h2>My Products</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sellerProductsTableBody">
+                            <!-- Product rows will be injected by seller.js -->
+                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Add Product Form -->
+            <section>
+                <h2>Add New Product</h2>
+                <p>Fill in the details below to add your item to the LuxeMart marketplace.</p>
+            </section>
+
+            <!-- Add Product Form (same as before) -->
+
             <form class="seller-form" id="addProductForm">
                 <div class="form-grid">
                     <div class="form-group">
@@ -106,6 +137,28 @@
 
     <script src="js/products.js"></script>
     <script src="js/common.js"></script>
+    <script>
+     document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    const moonIcon = '<i class="fas fa-moon"></i>';
+    const sunIcon = '<i class="fas fa-sun"></i>';
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            if (themeToggle) {
+                themeToggle.innerHTML = sunIcon;
+            }
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.setAttribute('data-theme', 'light');
+            if (themeToggle) {
+                themeToggle.innerHTML = moonIcon;
+            }
+            localStorage.setItem('theme', 'light');
+        }
+    };
+});
     <script src="js/cart.js"></script>
     <script src="js/seller.js"></script>
 </body>

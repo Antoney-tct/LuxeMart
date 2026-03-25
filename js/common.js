@@ -244,34 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Inject Login Modal HTML
     const loginModalHTML = `
         <div class="modal-overlay" id="loginModal">
-            <div class="modal" style="max-width: 400px; text-align: center;">
+            <div class="modal" style="max-width: 380px; text-align: center;">
                 <div class="modal-header">
-                    <h3 class="modal-title">Welcome Back</h3>
+                    <h3 class="modal-title">Sign In</h3>
                     <button class="modal-close" id="closeLoginModal">×</button>
                 </div>
                 <div class="modal-body">
-                    <p style="margin-bottom: 1rem; color: var(--light-text);">Sign in to access your dashboard.</p>
-                    
-                    <form id="manualLoginForm" style="margin-bottom: 1.5rem; text-align: left;">
-                        <input type="email" id="loginEmail" placeholder="Email Address" required style="width: 100%; margin-bottom: 10px;">
-                        <input type="password" id="loginPassword" placeholder="Password" required style="width: 100%; margin-bottom: 15px;">
-                        <button type="submit" class="btn-primary" style="width: 100%;">Log In</button>
-                    </form>
-
-                    <div class="divider" style="margin: 1rem 0; font-size: 0.9rem; color: #888;">OR CONTINUE WITH</div>
-
-                    <!-- Role Selection -->
-                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 1rem; background: var(--accent); padding: 1rem; border-radius: 8px;">
-                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
-                            <input type="radio" name="accountRole" value="buyer" checked style="width: auto; margin: 0; accent-color: var(--secondary);"> I'm a Buyer
-                        </label>
-                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
-                            <input type="radio" name="accountRole" value="seller" style="width: auto; margin: 0; accent-color: var(--secondary);"> I'm a Seller
-                        </label>
-                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
-                            <input type="radio" name="accountRole" value="admin" style="width: auto; margin: 0; accent-color: var(--secondary);"> Admin
-                        </label>
-                    </div>
+                    <p style="margin-bottom: 2rem; color: var(--light-text);">
+                        Please sign in with your Google account to continue.
+                    </p>
 
                     <div id="googleBtnContainer" style="display: flex; justify-content: center;"></div>
                 </div>
@@ -302,40 +283,46 @@ document.addEventListener('DOMContentLoaded', () => {
         completeLogin({ name: payload.name, email: payload.email, picture: payload.picture });
     };
 
-    // 3. Manual Login Handler
-    const manualLoginForm = document.getElementById('manualLoginForm');
-    if (manualLoginForm) {
-        manualLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            // For demo purposes, we accept any password
-            const name = email.split('@')[0];
-            const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-            
-            completeLogin({ 
-                name: capitalizedName, 
-                email: email, 
-                picture: 'https://ui-avatars.com/api/?name=' + name + '&background=ff6b35&color=fff' 
-            });
-        });
-    }
+    // === USER ROLE DATABASE (Simulates Backend) ===
+    // This allows One Tap to know if a user is a Seller or Admin based on previous logins
+    const getKnownRole = (email) => {
+        const usersDB = JSON.parse(localStorage.getItem('usersDB')) || {};
+        return usersDB[email] ? usersDB[email].role : null;
+    };
 
-    function completeLogin(userData) {
-        // Get Selected Role
-        const roleInputs = document.querySelectorAll('input[name="accountRole"]');
-        let role = 'buyer';
-        roleInputs.forEach(r => { if(r.checked) role = r.value; });
+    const saveKnownUser = (user) => {
+        const usersDB = JSON.parse(localStorage.getItem('usersDB')) || {};
+        usersDB[user.email] = { role: user.role, name: user.name };
+        localStorage.setItem('usersDB', JSON.stringify(usersDB));
+    };
 
+    // Make completeLogin globally accessible for other scripts like seller-register.js
+    window.completeLogin = function(userData, forcedRole = null) {
+        let role;
+
+        if (forcedRole) {
+            role = forcedRole;
+        } else {
+            // With One-Tap only, we always check the known role database.
+            // If not found, they default to 'buyer'.
+            const knownRole = getKnownRole(userData.email);
+            role = knownRole || 'buyer';
+        }
+        
         // Special check for hardcoded admin demo
-        if (userData.email.toLowerCase().includes('admin')) {
+        if (userData.email.toLowerCase() === 'aouko178@gmail.com') {
             role = 'admin';
         }
-
+        
         const user = { ...userData, role: role };
         localStorage.setItem('luxeUser', JSON.stringify(user));
         
+        // Save to our local "Database" so One Tap remembers them next time
+        saveKnownUser(user);
+        
         updateAccountUI();
-        loginModal.classList.remove('show');
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) loginModal.classList.remove('show');
         window.showToast(`Welcome back, ${user.name}! Signed in as ${role.toUpperCase()}.`, 'success');
 
         // Redirect Logic based on Role
@@ -349,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.location.href.includes('login.html')) window.location.href = 'index.html';
             }
         }, 1000);
-    }
+    };
 
     script.onload = () => {
         try {
@@ -365,6 +352,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     { theme: "outline", size: "large", width: 250 } 
                 );
             }
+
+            // === ENABLE GOOGLE ONE TAP (The Pop-up) ===
+            // Only show if user is NOT already logged in
+            if (!localStorage.getItem('luxeUser')) {
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        // console.log("One Tap skipped");
+                    }
+                });
+            }
+
         } catch (e) {
             console.warn("Google Sign-In script failed to load or initialize.", e);
         }
@@ -375,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('luxeUser'));
         const sellerLink = document.querySelector('.account-dropdown-menu a[href="seller.html"]');
         let ordersLink = document.querySelector('.account-dropdown-menu a[href="orders.html"]');
+        let sellWithUsLink = document.querySelector('.account-dropdown-menu a[href="seller-register.html"]');
         let adminLink = document.querySelector('.account-dropdown-menu a[href="admin.html"]');
 
         // Inject Orders link if missing (for pages that don't have it hardcoded yet)
@@ -389,6 +388,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (logoutBtn) dropdownMenu.insertBefore(ordersLink, logoutBtn);
             }
             
+            if (!sellWithUsLink) {
+                sellWithUsLink = document.createElement('a');
+                sellWithUsLink.href = 'seller-register.html';
+                sellWithUsLink.innerHTML = '<i class="fas fa-store"></i> Sell with Us';
+                const logoutBtn = dropdownMenu.querySelector('#logoutLink');
+                if (logoutBtn) dropdownMenu.insertBefore(sellWithUsLink, logoutBtn);
+            }
+
             if (!adminLink) {
                 adminLink = document.createElement('a');
                 adminLink.href = 'admin.html';
@@ -402,14 +409,17 @@ document.addEventListener('DOMContentLoaded', () => {
             accountLink.innerHTML = `<i class="fas fa-user-circle"></i> ${user.name}`;
             if (logoutLink) logoutLink.style.display = 'block';
             if (ordersLink) ordersLink.style.display = 'block';
+            if (sellWithUsLink) sellWithUsLink.style.display = 'block';
             
             // Role-based Menu Logic
             if (sellerLink) {
                 if (user.role === 'seller') {
                     sellerLink.style.display = 'block';
                     sellerLink.innerHTML = 'My Shop Dashboard';
+                    if (sellWithUsLink) sellWithUsLink.style.display = 'none'; // Hide "Sell with us" if already a seller
                 } else {
                     sellerLink.style.display = 'none';
+                    if (sellWithUsLink) sellWithUsLink.style.display = 'block';
                 }
             }
             
@@ -425,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (logoutLink) logoutLink.style.display = 'none';
             if (sellerLink) sellerLink.style.display = 'none';
             if (ordersLink) ordersLink.style.display = 'none';
+            if (sellWithUsLink) sellWithUsLink.style.display = 'none'; // Hide if not logged in
             if (adminLink) adminLink.style.display = 'none';
         }
     }

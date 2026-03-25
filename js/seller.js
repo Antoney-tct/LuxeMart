@@ -3,8 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('luxeUser'));
     if (!user || user.role !== 'seller') {
         alert('Access Denied. You must be logged in as a Seller to access this dashboard.');
-        window.location.href = 'index.html'; 
+        window.location.href = 'index.html';
+        return;
     }
+
+    // === DATA LOADING ===
+    const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
+    const sellerProducts = vendorProducts.filter(p => p.sellerEmail === user.email);
 
     const form = document.getElementById('addProductForm');
     const imageInput = document.getElementById('pImageFile');
@@ -19,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle URL input changes
     imageUrlInput.addEventListener('input', (e) => {
         if (e.target.value.match(/\.(jpeg|jpg|gif|png|webp)$/) != null) {
-            updatePreview(e.target.value);
+            updatePreview(e.target.value); 
         }
     });
 
@@ -32,6 +37,37 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         }
     });
+    // === RENDER PRODUCTS TABLE ===
+    const renderProductsTable = () => {
+        const tbody = document.getElementById('sellerProductsTableBody');
+        if (!tbody) return;
+
+        // Show all products
+        const displayProducts = sellerProducts;
+
+        tbody.innerHTML = displayProducts.map(p => `
+            <tr>
+                <td><img src="${p.img}" alt="${p.name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
+                <td>${p.name}</td>
+                <td>${p.category}</td>
+                <td>KSh ${p.price}</td>
+                <td>${p.stock || 'N/A'}</td>
+                <td>
+                
+                </td>
+            </tr>
+        `).join('');
+    };
+
+     // Function to apply theme
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+        } else {
+        }
+    };
+
+    renderProductsTable();
+    applyTheme();
 
     // === FORM SUBMISSION ===
     if (form) {
@@ -47,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let img = imageUrlInput.value;
 
             // 2. Handle Image Source (File takes precedence over URL)
+
             const processProductSave = (finalImage) => {
                 const newProduct = {
                     id: Date.now(), // Generate a unique ID based on timestamp
@@ -69,16 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (imageInput.files[0]) {
                 const reader = new FileReader();
-                reader.onload = (event) => processProductSave(event.target.result);
+                 reader.onload = (event) => processProductSave(event.target.result);
                 reader.readAsDataURL(imageInput.files[0]);
             } else if (img) {
                 processProductSave(img);
             } else {
                 alert('Please upload an image or provide a valid image URL.');
             }
+
         });
     }
-
     function saveToLocalStorage(product) {
         // Get existing vendor products or initialize empty array
         const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
@@ -97,4 +134,5 @@ document.addEventListener('DOMContentLoaded', () => {
         // Optional: Redirect to shop to see the new item
         // setTimeout(() => window.location.href = 'shop.html', 1500);
     }
+
 });
