@@ -172,43 +172,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 paymentMethod: selectedPaymentMethod
             };
 
-            const saveOrderAndRedirect = () => {
-                // Save to LocalStorage
-                const orders = JSON.parse(localStorage.getItem('orders')) || [];
-                orders.unshift(order);
-                localStorage.setItem('orders', JSON.stringify(orders));
-
-                // Clear Cart
-                localStorage.removeItem('cart');
-                
-                // Redirect
-                window.location.href = 'orders.html?new=true';
-            };
-
-            if (selectedPaymentMethod === 'mpesa') {
-                // Simulate M-Pesa STK Push
-                const phone = document.getElementById('mpesaPhone').value;
-                alert(`Simulating STK Push...\n\nA payment prompt for KSh ${total.toFixed(2)} has been sent to ${phone}. Please enter your M-Pesa PIN to complete the transaction.`);
-                
-                setTimeout(() => {
-                    alert('Payment received! Your order has been placed.');
-                    saveOrderAndRedirect();
-                }, 8000); // 8-second delay to simulate user entering PIN
-
-            } else if (selectedPaymentMethod === 'paypal') {
-                // Simulate PayPal redirect
-                alert('You will now be redirected to PayPal to complete your payment.');
-                setTimeout(() => {
-                    alert('Payment with PayPal successful! Your order has been placed.'); // Simulating return from PayPal
-                    saveOrderAndRedirect();
-                }, 4000);
-
-            } else { // Card payment
-                alert('Order placed successfully! Thank you for shopping with LuxeMart.');
-                saveOrderAndRedirect();
-            }
+            finalizeOrder(order);
         }
     });
+
+    const finalizeOrder = async (order) => {
+        try {
+            // Save to Database via API
+            const response = await fetch('api/orders/create.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(order)
+            });
+            const result = await response.json();
+
+            if (!result.success) throw new Error(result.message);
+
+            if (order.paymentMethod === 'mpesa') {
+                const phone = document.getElementById('mpesaPhone').value;
+                handleMpesaFlow(phone, order.total, result.order_db_id);
+            } else {
+                // Clear Cart and Redirect
+                localStorage.removeItem('cart');
+                window.location.href = 'orders.html?new=true';
+            }
+        } catch (error) {
+            if (window.showToast) window.showToast('Error saving order: ' + error.message, 'error');
+        }
+    };
+
+    const handleMpesaFlow = async (phone, amount, orderDbId) => {
+        const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+
+        try {
+            // 1. Set Loading State
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Awaiting PIN Entry...';
+            
+            if (window.showToast) {
+                window.showToast(`Requesting STK Push for ${phone}...`, 'info');
+            }
+
+            // 2. Call the PHP Backend
+            const response = await fetch('api/mpesa/stk_push.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, amount, order_id: orderDbId })
+            });
+            const data = await response.json();
+
+            if (data.ResponseCode !== "0") throw new Error(data.CustomerMessage || 'STK Push failed');
+
+            if (window.showToast) window.showToast('STK Push sent! Please enter your PIN on your phone.', 'success');
+            
+            localStorage.removeItem('cart');
+            setTimeout(() => { window.location.href = 'orders.html?new=true'; }, 3000);
+
+        } catch (error) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            if (window.showToast) window.showToast('Payment failed or timed out. Please try again.', 'error');
+        }
+    };
+
+    const handlePaypalFlow = (order) => {
+        if (window.showToast) window.showToast('Redirecting to PayPal...', 'info');
+
+        setTimeout(() => {
+            if (window.showToast) window.showToast('PayPal payment authorized!', 'success');
+            finalizeOrder(order);
+        }, 3000);
+    };
 
     const validateForm = () => {
         let isValid = true;
@@ -257,8 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const isValidMpesaPhone = (phone) => {
-        // Validates formats like 2547... or 07...
-        return /^(2547\d{8}|07\d{8})$/.test(phone.trim());
+        // Validates formats like 2547... or 07... or 2541... or 01...
+        return /^(254[71]\d{8}|0[71]\d{8})$/.test(phone.trim());
     };
 
     const isValidEmail = (email) => {

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeMart - Track Your Order</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .track-order-container {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        .track-order-container h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        .track-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .track-form input[type="text"] {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+        .track-form button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .track-form button:hover {
+            background: var(--primary-hover);
+        }
+        #orderResults {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+        }
+        .order-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        .order-detail-item:last-child {
+            border-bottom: none;
+        }
+        .order-detail-item strong {
+            color: var(--text);
+        }
+        .order-detail-item span {
+            color: var(--light-text);
+        }
+        .order-items-list {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+        .order-items-list h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dotted var(--border);
+            font-size: 0.9rem;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item-name {
+            flex-grow: 1;
+            color: var(--text);
+        }
+        .order-item-qty-price {
+            color: var(--light-text);
+            white-space: nowrap;
+        }
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        /* Example status styling - ensure these match your database status values */
+        .status-Processing { background: #fffbe6; color: #a16207; } /* Amber */
+        .status-Paid { background: #dcfce7; color: #166534; } /* Green */
+        .status-Failed { background: #fee2e2; color: #991b1b; } /* Red */
+        .status-Shipped { background: #e0f2fe; color: #0369a1; } /* Blue */
+        .status-Delivered { background: #dcfce7; color: #166534; } /* Green */
+        .status-Cancelled { background: #fee2e2; color: #991b1b; } /* Red */
+        .error-message {
+            color: #ef4444;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (copied from index.html for consistency) -->
+    <header>
+        <div class="container header-inner">
+            <div class="logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+                <span>LuxeMart</span>
+            </div>
+            
+            <nav class="nav-desktop">
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
+                <a href="sale.html">Sale</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchBtn" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="cart-count" id="wishlistCount">0</span>
+                </a>
+                <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+                <div class="account-dropdown">
+                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+                    <div class="account-dropdown-menu">
+                        <a href="#" id="accountLink">My Account</a>
+                        <a href="seller.html">My Shop</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
+                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="track-order-container">
+            <h1>Track Your Order</h1>
+            <form id="trackOrderForm" class="track-form">
+                <input type="text" id="orderNumberInput" placeholder="Enter your Order Number (e.g., ORD-123456)" required>
+                <button type="submit" id="trackOrderBtn">Track Order</button>
+            </form>
+            <div id="orderResults">
+                <p style="text-align: center; color: var(--light-text);">Enter an order number above to see its status.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer (copied from index.html for consistency) -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>LuxeMart</h3>
+                    <p>Your premium destination for fashion, electronics, home goods, and more. Shop with confidence.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="seller-register.html">Sell on LuxeMart</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="refer.html">Refer a Friend</a></li>
+                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li><a href="#">Fashion</a></li>
+                        <li><a href="#">Electronics</a></li>
+                        <li><a href="#">Home & Living</a></li>
+                        <li><a href="#">Beauty</a></li>
+                        <li><a href="#">Sports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Payment Methods</h3>
+                    <p>We accept all major payment methods</p>
+                    <div class="payment-methods">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="Visa">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888859.png" alt="Mastercard">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="PayPal">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Apple Pay">
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 LuxeMart. All rights reserved.</p>
+                <p>
+                    <a href="#">Privacy Policy</a> • 
+                    <a href="#">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/common.js"></script> <!-- Assuming common.js has showToast -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const trackOrderForm = document.getElementById('trackOrderForm');
+            const orderNumberInput = document.getElementById('orderNumberInput');
+            const orderResultsDiv = document.getElementById('orderResults');
+            const trackOrderBtn = document.getElementById('trackOrderBtn');
+
+            trackOrderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orderNumber = orderNumberInput.value.trim();
+
+                if (!orderNumber) {
+                    orderResultsDiv.innerHTML = '<p class="error-message">Please enter an order number.</p>';
+                    return;
+                }
+
+                trackOrderBtn.disabled = true;
+                trackOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tracking...';
+                orderResultsDiv.innerHTML = '<p style="text-align: center; color: var(--light-text);">Searching for order...</p>';
+
+                try {
+                    const response = await fetch(`api/track_order.php?order_number=${encodeURIComponent(orderNumber)}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        renderOrderDetails(result.order);
+                        if (window.showToast) window.showToast('Order found!', 'success');
+                    } else {
+                        orderResultsDiv.innerHTML = `<p class="error-message">${result.message || 'Order not found.'}</p>`;
+                        if (window.showToast) window.showToast(result.message || 'Order not found.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error tracking order:', error);
+                    orderResultsDiv.innerHTML = '<p class="error-message">An error occurred while tracking your order. Please try again.</p>';
+                    if (window.showToast) window.showToast('An error occurred. Please try again.', 'error');
+                } finally {
+                    trackOrderBtn.disabled = false;
+                    trackOrderBtn.innerHTML = 'Track Order';
+                }
+            });
+
+            function renderOrderDetails(order) {
+                let itemsHtml = '';
+                if (order.items && order.items.length > 0) {
+                    itemsHtml = `
+                        <div class="order-items-list">
+                            <h3>Order Items:</h3>
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span class="order-item-name">${item.product_name}</span>
+                                    <span class="order-item-qty-price">${item.quantity} x KSh ${parseFloat(item.price).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    itemsHtml = '<p style="font-size: 0.9rem; color: var(--light-text);">No items found for this order.</p>';
+                }
+
+                // Replace spaces in status for CSS class compatibility
+                const statusClass = `status-${order.status.replace(/\s/g, '')}`; 
+                
+                orderResultsDiv.innerHTML = `
+                    <h2>Order Details for <span style="color: var(--primary);">${order.order_number}</span></h2>
+                    <div class="order-detail-item">
+                        <strong>Status:</strong>
+                        <span><span class="status-pill ${statusClass}">${order.status}</span></span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Order Date:</strong>
+                        <span>${new Date(order.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Customer Name:</strong>
+                        <span>${order.customer_name}</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Customer Email:</strong>
+                        <span>${order.customer_email}</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Shipping Address:</strong>
+                        <span>${order.address}, ${order.city}, ${order.zip}</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Payment Method:</strong>
+                        <span>${order.payment_method}</span>
+                    </div>
+                    <div class="order-detail-item">
+                        <strong>Total Amount:</strong>
+                        <span>KSh ${parseFloat(order.total).toFixed(2)}</span>
+                    </div>
+                    ${itemsHtml}
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
