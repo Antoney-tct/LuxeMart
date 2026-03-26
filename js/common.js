@@ -317,6 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = { ...userData, role: role };
         localStorage.setItem('luxeUser', JSON.stringify(user));
         
+        // Sync with PHP Session for secure API access
+        fetch('api/auth/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+        });
+
         // Save to our local "Database" so One Tap remembers them next time
         saveKnownUser(user);
         
@@ -465,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('luxeUser');
+            fetch('api/auth/logout.php'); // Clear PHP session
             updateAccountUI();
             window.showToast('Logged out successfully', 'info');
         });

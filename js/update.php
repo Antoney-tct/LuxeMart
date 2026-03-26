@@ -1,11 +1,18 @@
 <?php
+session_start();
 header("Content-Type: application/json");
 require_once '../../db.php';
 
-$productId = $_POST['id'] ?? null;
-$sellerEmail = $_POST['sellerEmail'] ?? null;
+// Session Check
+if (!isset($_SESSION['user_email']) || $_SESSION['role'] !== 'seller') {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
+    exit;
+}
 
-if (!$productId || !$sellerEmail) {
+$productId = $_POST['id'] ?? null;
+$sellerEmail = $_SESSION['user_email']; // Use secure session email
+
+if (!$productId) {
     echo json_encode(['success' => false, 'message' => 'Missing required data']);
     exit;
 }
@@ -14,6 +21,15 @@ $imageUrl = $_POST['image_url'] ?? '';
 
 // Handle New File Upload if present
 if (isset($_FILES['pImageFile']) && $_FILES['pImageFile']['error'] === UPLOAD_ERR_OK) {
+    // 1. Get old image path to delete it
+    $stmtOld = $pdo->prepare("SELECT image_url FROM products WHERE id = ? AND seller_email = ?");
+    $stmtOld->execute([$productId, $sellerEmail]);
+    $oldProduct = $stmtOld->fetch();
+    if ($oldProduct && !empty($oldProduct['image_url'])) {
+        $oldFilePath = '../../' . $oldProduct['image_url'];
+        if (file_exists($oldFilePath)) unlink($oldFilePath);
+    }
+
     $uploadDir = '../../uploads/';
     $fileTmpPath = $_FILES['pImageFile']['tmp_name'];
     $newFileName = uniqid('prod_', true) . '.' . pathinfo($_FILES['pImageFile']['name'], PATHINFO_EXTENSION);

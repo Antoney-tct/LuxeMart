@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('api/products/delete.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, sellerEmail: user.email })
+                body: JSON.stringify({ id })
             });
             const result = await response.json();
             if (result.success) {
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === API CALL TO FETCH PRODUCTS ===
     const fetchSellerProducts = async () => {
         try {
-            const response = await fetch(`api/products/list_seller_products.php?email=${encodeURIComponent(user.email)}`);
+            const response = await fetch(`api/products/list_seller_products.php`);
             const result = await response.json();
             if (result.success) {
                 sellerProducts = result.products;
@@ -187,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('price', document.getElementById('pPrice').value);
             formData.append('description', document.getElementById('pDesc').value);
             formData.append('image_url', imageUrlInput.value); // Fallback URL
-            formData.append('sellerEmail', user.email);
             formData.append('stock', 10);
 
             if (editingProductId) {

@@ -32,7 +32,7 @@ try {
         $stmtProductName = $pdo->prepare("SELECT name FROM products WHERE id = ?");
         $stmtProductName->execute([$item['product_id']]);
         $product = $stmtProductName->fetch(PDO::FETCH_ASSOC);
-        $item['product_name'] = $product['name'] ?? 'Unknown Product'; // Fallback if product name not found
+        $item['product_name'] = htmlspecialchars($product['name'] ?? 'Unknown Product', ENT_QUOTES, 'UTF-8');
     }
     unset($item); // Break the reference with the last element to prevent unexpected behavior
 
