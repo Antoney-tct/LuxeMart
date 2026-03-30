@@ -1,19 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // === MERGE VENDOR PRODUCTS INTO GLOBAL STATE ===
-    // This ensures products added by sellers appear in the shop
-    const mergeProducts = () => {
-        if (typeof products !== 'undefined') {
-            const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
-            const existingIds = new Set(products.map(p => p.id));
-            vendorProducts.forEach(vp => {
-                if (!existingIds.has(vp.id)) {
-                    products.unshift(vp); // Add new products to the top
-                }
-            });
-        }
-    };
-    mergeProducts();
-
+    
     const themeToggle = document.getElementById('themeToggle');
     const moonIcon = '<i class="fas fa-moon"></i>';
     const sunIcon = '<i class="fas fa-sun"></i>';
@@ -112,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             searchSuggestions.innerHTML = '';
             searchSuggestions.classList.remove('active');
-
+            // Ensure window.products is populated before attempting to search
             if (query.length < 2) return;
 
             if (typeof products !== 'undefined') {

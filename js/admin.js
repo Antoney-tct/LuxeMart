@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === DATA LOADING ===
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    // Merge static products with vendor products for display
-    let allProducts = typeof products !== 'undefined' ? [...products] : [];
+    // Use window.products which will be populated by main.js (or similar)
+    let allProducts = typeof window.products !== 'undefined' ? [...window.products] : [];
     const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
     // Merge ensuring no duplicates based on ID
     const productIds = new Set(allProducts.map(p => p.id));
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const itemsHtml = order.items.map(i => {
             // Try to find product details
-            const p = allProducts.find(prod => prod.id === i.id) || { name: 'Item ' + i.id, price: 0 };
+            const p = window.products.find(prod => prod.id === i.id) || { name: 'Item ' + i.id, price: 0 };
             return `<div>${p.name} x ${i.qty} - KSh ${(p.price * i.qty).toFixed(2)}</div>`;
         }).join('');
 

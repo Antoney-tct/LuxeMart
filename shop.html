@@ -195,7 +195,28 @@
     </div>
 </footer>
 
-<script src="js/products.js"></script>
+<script>
+    // Define a global products array and fetch data from SQL
+    window.products = [];
+    
+    async function initShopData() {
+        try {
+            const response = await fetch('api/products/get_products.php');
+            const result = await response.json();
+            if (result.success) {
+                window.products = result.products;
+                // Dispatch a custom event so main.js knows data is ready
+                document.dispatchEvent(new CustomEvent('productsLoaded'));
+            }
+        } catch (error) {
+            console.error('Failed to load products from database:', error);
+        }
+    }
+
+    // Start fetching immediately
+    initShopData();
+</script>
+
 <script src="js/common.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>

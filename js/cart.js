@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Default selected to true if undefined
             if (item.selected === undefined) item.selected = true;
             
-            const product = (typeof products !== 'undefined') ? products.find(p => p.id == item.id) : null;
+            const product = (typeof window.products !== 'undefined') ? window.products.find(p => p.id == item.id) : null;
             if (product && item.selected) {
                 total += product.price * item.qty;
             }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Update Sidebar (Only if elements exist)
         if (cartItemsEl) {
             cartItemsEl.innerHTML = cart.map(item => {
-                const product = (typeof products !== 'undefined') ? products.find(p => p.id == item.id) : null;
+                const product = (typeof window.products !== 'undefined') ? window.products.find(p => p.id == item.id) : null;
                 const name = product ? product.name : `Item ${item.id}`;
                 const img = product ? product.img : '';
                 const price = product ? product.price : 0;
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (emptyCartMessage) emptyCartMessage.style.display = 'none';
 
                 cartPageBody.innerHTML = cart.map(item => {
-                    const product = (typeof products !== 'undefined') ? products.find(p => p.id == item.id) : null;
+                    const product = (typeof window.products !== 'undefined') ? window.products.find(p => p.id == item.id) : null;
                     const name = product ? product.name : `Item ${item.id}`;
                     const img = product ? product.img : '';
                     const price = product ? product.price : 0;

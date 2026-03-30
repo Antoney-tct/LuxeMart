@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render wishlist items
     const renderWishlist = () => {
-        if (typeof products === 'undefined') return;
+        if (typeof window.products === 'undefined' || window.products.length === 0) return; // Ensure products are loaded
         const wishlistProducts = products.filter(product => wishlist.includes(product.id.toString()));
 
         if (wishlistProducts.length === 0) {

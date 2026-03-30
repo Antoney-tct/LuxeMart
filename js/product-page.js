@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = parseInt(urlParams.get('id'), 10);
         const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
         
-        if (typeof products === 'undefined') return;
+        if (typeof window.products === 'undefined' || window.products.length === 0) return; // Ensure products are loaded
         const product = products.find(p => p.id === productId);
 
         if (!product) {
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === IMAGE ZOOM LOGIC ===
-    const initImageZoom = () => {
+    const initImageZoom = () => { // Moved outside renderProduct for clarity
         const container = document.getElementById('mainImageContainer');
         const img = document.getElementById('mainProductImage');
         
@@ -542,4 +542,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === INITIAL CALL ===
     renderProduct();
+
+    // If products are not yet loaded (e.g., if this script runs before main.js's fetch completes),
+    // we might need to wait. For now, assuming products are available or will be soon.
+    // A more robust solution would be to listen for a 'productsLoaded' event or ensure
+    // product-page.js runs after main.js has fetched initial products.
+    // For now, the `typeof window.products === 'undefined' || window.products.length === 0` check
+    // in `renderProduct` will handle the initial state.
 });
