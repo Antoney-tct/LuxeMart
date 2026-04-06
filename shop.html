@@ -1,224 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop All Products - LuxeMart</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
-    <meta name="description" content="Explore all products at LuxeMart. Shop our full collection of fashion, electronics, home goods, and more.">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Icons & Stylesheet -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop All Products - LuxeMart</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+  <meta name="description" content="Explore all products at LuxeMart. Shop our full collection of fashion, electronics, home goods, and more.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/products-extra.css">
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-inner">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-                <span>LuxeMart</span>
-            </div>
-            
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-            </nav>
-            
-            <div class="nav-actions">
-                <button class="icon-btn" id="searchBtn" aria-label="Search">
-                    <i class="fas fa-search"></i>
-                </button>
-                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
-                    <i class="fas fa-heart"></i>
-                    <span class="cart-count" id="wishlistCount">0</span>
-                </a>
-                <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </button>
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
-                </div>
-                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
-        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu">
-            <i class="fas fa-times"></i>
-        </button>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="#">Categories</a></li>
-            <li><a href="#">Sale</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
-        <div class="nav-actions">
-            <button class="icon-btn" id="mobileSearchBtn">
-                <i class="fas fa-search"></i> Search
-            </button>
-            <button class="icon-btn" id="mobileCartBtn">
-                <i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)
-            </button>
-            <button class="icon-btn" id="themeToggle">
-                <i class="fas fa-moon"></i> Theme
-            </button>
-        </div>
+<!-- Header -->
+<header>
+  <div class="container header-inner">
+    <div class="logo">
+      <a href="index.html" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;color:inherit;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+        <span>LuxeMart</span>
+      </a>
     </div>
-
-    <!-- All Modals and Sidebars (reused from index.html) -->
-    <div class="modal-overlay" id="searchModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">Search Products</h3><span class="modal-close" id="closeSearch">×</span></div><div class="modal-body"><input type="text" placeholder="Search for products, brands, categories..." id="searchInput"><div id="searchSuggestions" class="search-suggestions"></div><button class="btn-primary">Search</button><p style="margin-top: 1rem; font-size: 0.9rem; color: var(--light-text);">Try: "sneakers", "headphones", "watch"</p></div></div></div>
-    <div class="cart-sidebar" id="cartSidebar"><div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><span class="modal-close" id="closeCart">×</span></div><div id="cartItems"></div><div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div><div class="cart-actions"><a href="#" class="btn-primary">View Cart</a><a href="#" class="btn-outline" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Checkout</a></div></div>
-    <div class="modal-overlay quickview-modal" id="quickViewModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">Quick View</h3><span class="modal-close" id="closeQuickView">×</span></div><div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;"><img id="qvImg" src="" alt="" class="quickview-img"><div><h3 id="qvTitle"></h3><div class="quickview-rating"><div class="stars" id="qvStars"></div><span class="rating-count" id="qvRatingCount"></span></div><div class="quickview-price" id="qvPrice"></div><p id="qvDesc" style="color: var(--light-text); margin: 1rem 0;"></p><div class="quickview-actions"><div class="cart-item-qty"><button class="qty-btn" data-action="decrease">-</button><span class="qty-value" id="qvQty">1</span><button class="qty-btn" data-action="increase">+</button></div><button class="btn-primary add-to-cart" id="qvAddToCart">Add to Cart</button><button class="btn-outline" id="qvWishlist" style="flex-shrink: 0;"><i class="far fa-heart"></i></button></div></div></div></div></div>
-
-<main>
-    <section class="featured-products page-content" id="featured-products-section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Shop All Products</h2>
-                <p>Find exactly what you're looking for</p>
-            </div>
-            <div class="product-controls">
-                <div class="sort-options">
-                    <label for="sort">Sort By:</label>
-                    <select id="sort">
-                        <option value="default">Default</option>
-                        <option value="price-low-to-high">Price: Low to High</option>
-                        <option value="price-high-to-low">Price: High to Low</option>
-                        <option value="rating">Rating</option>
-                    </select>
-                </div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="fashion">Fashion</button>
-                    <button class="filter-btn" data-filter="electronics">Electronics</button>
-                    <button class="filter-btn" data-filter="home">Home</button>
-                    <button class="filter-btn" data-filter="beauty">Beauty</button>
-                    <button class="filter-btn" data-filter="sports">Sports</button>
-                    <button class="filter-btn" data-filter="kids">Kids</button>
-                    <button class="filter-btn" data-filter="footwear">Footwear</button>
-                    <button class="filter-btn" data-filter="watches">Watches</button>
-                </div>
-            </div>
-            <div class="products-grid" id="featuredProductsGrid">
-                <!-- Products will be loaded dynamically via JS -->
-            </div>
-            <div class="load-more-container">
-                <button class="btn" id="loadMoreBtn" style="display: none;">Load More</button>
-            </div>
+    <nav class="nav-desktop">
+      <a href="index.html">Home</a>
+      <a href="shop.html" class="active">Shop</a>
+      <a href="categories.html">Categories</a>
+      <a href="sale.html">Sale</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search"><i class="fas fa-search"></i></button>
+      <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
+        <i class="fas fa-heart"></i>
+        <span class="cart-count" id="wishlistCount">0</span>
+      </a>
+      <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <div class="account-dropdown">
+        <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+        <div class="account-dropdown-menu">
+          <a href="login.html" id="accountLink">My Account</a>
+          <a href="seller.html">My Shop</a>
+          <a href="#" id="logoutLink">Logout</a>
         </div>
-    </section>
+      </div>
+      <button class="mobile-menu-toggle" aria-label="Open Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" id="closeMenu"><i class="fas fa-times"></i></button>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="categories.html">Categories</a></li>
+    <li><a href="sale.html">Sale</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions" style="padding:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+    <button class="icon-btn" id="mobileSearchBtn"><i class="fas fa-search"></i> Search</button>
+    <button class="icon-btn" id="mobileCartBtn"><i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)</button>
+    <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i> Theme</button>
+  </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Search Products</h3>
+      <button class="modal-close" id="closeSearch">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" placeholder="Search for products, brands, categories..." id="searchInput">
+      <div id="searchSuggestions" class="search-suggestions"></div>
+      <p style="margin-top:1rem;font-size:0.9rem;color:var(--light-text);">Try: "sneakers", "headphones", "watch"</p>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3 class="cart-title">Shopping Cart</h3>
+    <button class="modal-close" id="closeCart">×</button>
+  </div>
+  <div id="cartItems"></div>
+  <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+  <div class="cart-actions">
+    <a href="cart.html" class="btn-primary">View Cart</a>
+    <a href="checkout.html" class="btn-outline" style="background:transparent;border:1px solid var(--border);color:var(--text);">Checkout</a>
+  </div>
+</div>
+
+<!-- Quick View Modal -->
+<div class="modal-overlay quickview-modal" id="quickViewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Quick View</h3>
+      <button class="modal-close" id="closeQuickView">×</button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+      <img id="qvImg" src="" alt="" class="quickview-img">
+      <div>
+        <h3 id="qvTitle"></h3>
+        <div class="quickview-rating">
+          <div class="stars" id="qvStars"></div>
+          <span class="rating-count" id="qvRatingCount"></span>
+        </div>
+        <div class="quickview-price" id="qvPrice"></div>
+        <p id="qvDesc" style="color:var(--light-text);margin:1rem 0;"></p>
+        <div class="quickview-actions">
+          <div class="cart-item-qty">
+            <button class="qty-btn" data-action="decrease">-</button>
+            <span class="qty-value" id="qvQty">1</span>
+            <button class="qty-btn" data-action="increase">+</button>
+          </div>
+          <button class="btn-primary add-to-cart" id="qvAddToCart">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Shop Main -->
+<main>
+  <section class="featured-products page-content" id="featured-products-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Shop All Products</h2>
+        <p>Find exactly what you're looking for</p>
+      </div>
+
+      <div class="product-controls">
+        <div class="top-controls" style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;">
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="fashion">Fashion</button>
+            <button class="filter-btn" data-filter="electronics">Electronics</button>
+            <button class="filter-btn" data-filter="home">Home</button>
+            <button class="filter-btn" data-filter="beauty">Beauty</button>
+            <button class="filter-btn" data-filter="sports">Sports</button>
+            <button class="filter-btn" data-filter="kids">Kids</button>
+            <button class="filter-btn" data-filter="footwear">Footwear</button>
+            <button class="filter-btn" data-filter="watches">Watches</button>
+          </div>
+          <div class="sort-options">
+            <label for="sort">Sort By:</label>
+            <select id="sort">
+              <option value="popularity">Popular</option>
+              <option value="newest">New Arrivals</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Rating</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="advanced-filters" style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;">
+          <div class="filter-group">
+            <label for="brandFilter">Brand</label>
+            <select id="brandFilter"><option value="all">All Brands</option></select>
+          </div>
+          <div class="filter-group">
+            <label>Price Range (KSh)</label>
+            <div class="price-inputs" style="display:flex;gap:0.5rem;">
+              <input type="number" id="minPrice" placeholder="Min" min="0" style="width:90px;">
+              <input type="number" id="maxPrice" placeholder="Max" min="0" style="width:90px;">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label for="ratingFilter">Min Rating</label>
+            <select id="ratingFilter">
+              <option value="0">Any</option>
+              <option value="4">★★★★☆ & up</option>
+              <option value="3">★★★☆☆ & up</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Color</label>
+            <div id="colorFilter" class="filter-options"></div>
+          </div>
+          <div class="filter-group">
+            <label>Size</label>
+            <div id="sizeFilter" class="filter-options"></div>
+          </div>
+          <div class="filter-group" style="display:flex;gap:1rem;align-items:center;margin-top:1.2rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="checkbox" id="inStockFilter"> In Stock Only
+            </label>
+            <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <input type="checkbox" id="onSaleFilter"> On Sale
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="products-grid" id="featuredProductsGrid">
+        <!-- Products rendered by JS -->
+      </div>
+
+      <div class="load-more-container">
+        <button class="btn" id="loadMoreBtn" style="display:none;">Load More</button>
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- Newsletter Section -->
+<!-- Newsletter -->
 <section class="newsletter">
-    <div class="container">
-        <h2>Stay Updated</h2>
-        <p>Subscribe to our newsletter and get 10% off your first order. Plus, be the first to know about exclusive deals!</p>
-        <form class="newsletter-form">
-            <label for="newsletter-email" class="visually-hidden">Email address for newsletter</label>
-            <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
-            <button type="submit" class="newsletter-btn">Subscribe</button>
-        </form>
-    </div>
+  <div class="container">
+    <h2>Stay Updated</h2>
+    <p>Subscribe to our newsletter and get 10% off your first order.</p>
+    <form class="newsletter-form">
+      <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
+      <button type="submit" class="newsletter-btn">Subscribe</button>
+    </form>
+  </div>
 </section>
 
 <!-- Footer -->
 <footer>
-    <div class="container">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h3>LuxeMart</h3>
-                <p>Your premium destination for fashion, electronics, home goods, and more. Shop with confidence.</p>
-                <div class="social-links">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="faq.html">FAQs</a></li>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h3>Categories</h3>
-                <ul>
-                    <li><a href="#">Fashion</a></li>
-                    <li><a href="#">Electronics</a></li>
-                    <li><a href="#">Home & Living</a></li>
-                    <li><a href="#">Beauty</a></li>
-                    <li><a href="#">Sports</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h3>Payment Methods</h3>
-                <p>We accept all major payment methods</p>
-                <div class="payment-methods">
-                    <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="Visa">
-                    <img src="https://cdn-icons-png.flaticon.com/512/888/888859.png" alt="Mastercard">
-                    <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="PayPal">
-                    <img src="https://cdn-icons-png.flaticon.com/512/888/888844.png" alt="Apple Pay">
-                </div>
-            </div>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3>LuxeMart</h3>
+        <p>Your premium destination for fashion, electronics, home goods, and more.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 LuxeMart. All rights reserved.</p>
-            <p>
-                <a href="#">Privacy Policy</a> • 
-                <a href="#">Terms of Service</a>
-            </p>
+      </div>
+      <div class="footer-col">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="faq.html">FAQs</a></li>
+          <li><a href="seller-register.html">Sell on LuxeMart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Categories</h3>
+        <ul>
+          <li><a href="shop.html?category=fashion">Fashion</a></li>
+          <li><a href="shop.html?category=electronics">Electronics</a></li>
+          <li><a href="shop.html?category=home">Home & Living</a></li>
+          <li><a href="shop.html?category=beauty">Beauty</a></li>
+          <li><a href="shop.html?category=sports">Sports</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Payment Methods</h3>
+        <div class="payment-methods">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="Visa">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888859.png" alt="Mastercard">
+          <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="PayPal">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="M-Pesa">
         </div>
+      </div>
     </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 LuxeMart. All rights reserved.</p>
+      <p><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></p>
+    </div>
+  </div>
 </footer>
 
-<script>
-    // Define a global products array and fetch data from SQL
-    window.products = [];
-    
-    async function initShopData() {
-        try {
-            const response = await fetch('api/products/get_products.php');
-            const result = await response.json();
-            if (result.success) {
-                window.products = result.products;
-                // Dispatch a custom event so main.js knows data is ready
-                document.dispatchEvent(new CustomEvent('productsLoaded'));
-            }
-        } catch (error) {
-            console.error('Failed to load products from database:', error);
-        }
-    }
-
-    // Start fetching immediately
-    initShopData();
-</script>
-
-<script src="js/common.js"></script>
+<!-- Scripts — ORDER MATTERS -->
+<script src="js/products.js"></script>
 <script src="js/cart.js"></script>
-<script src="js/main.js"></script>
+<script src="js/main2.js"></script>
+
 </body>
 </html>
