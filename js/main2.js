@@ -409,10 +409,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── 13. SCROLL ANIMATIONS ─────────────────────────────────
   function initScrollAnimations() {
+    const sections = document.querySelectorAll('.fade-in-section');
+    sections.forEach(el => el.classList.add('animate-ready'));
     const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
+    sections.forEach(el => observer.observe(el));
   }
 
   // ── 14. THEME TOGGLE ─────────────────────────────────────

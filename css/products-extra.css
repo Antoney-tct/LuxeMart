@@ -476,8 +476,10 @@
 }
 
 /* ── SCROLL ANIMATION ────────────────────────────────────── */
-.fade-in-section { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.fade-in-section.visible { opacity: 1; transform: translateY(0); }
+/* Sections are visible by default — JS adds animation progressively */
+.fade-in-section { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease, transform 0.6s ease; }
+.fade-in-section.animate-ready { opacity: 0; transform: translateY(30px); }
+.fade-in-section.animate-ready.visible { opacity: 1; transform: translateY(0); }
 
 /* ═══════════════════════════════════════════════════════════
    FULL MOBILE RESPONSIVENESS

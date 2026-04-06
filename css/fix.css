@@ -1,0 +1,42 @@
+/* ============================================================
+   LuxeMart — fix.css
+   EMERGENCY FIX: Forces all hidden sections to be visible.
+   Add this as the LAST CSS link in every HTML page's <head>.
+   ============================================================ */
+
+/* Force all sections visible regardless of JS state */
+.fade-in-section,
+.fade-in-section.animate-ready {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+/* Re-enable smooth animation only when JS marks it visible */
+.fade-in-section.animate-ready {
+  opacity: 0 !important;
+  transform: translateY(20px) !important;
+  transition: opacity 0.5s ease, transform 0.5s ease !important;
+}
+
+.fade-in-section.animate-ready.visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Partners, categories, trending, featured, blog, reviews 
+   — force visible as fallback */
+.partners,
+.categories,
+.product-slider-section,
+.featured-products,
+.video-promo-section,
+.promo-banner,
+.blog-preview,
+.instagram,
+.reviews {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+  display: block !important;
+}
