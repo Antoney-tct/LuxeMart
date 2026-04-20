@@ -17,8 +17,10 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     rating DECIMAL(2,1) DEFAULT 0.0,
     reviews INT DEFAULT 0,
-    oldPrice DECIMAL(10, 2) NULL,
-    badge VARCHAR(50) NULL
+    originalPrice DECIMAL(10, 2) NULL, -- Renamed to match products.js
+    badge VARCHAR(50) NULL,
+    colors TEXT NULL, -- Added to store JSON array
+    sizes TEXT NULL   -- Added to store JSON array
 );
 
 -- 2. Orders Table
@@ -52,11 +54,11 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 -- Sample Data for Testing Name Lookup
-INSERT INTO products (name, brand, price, category, stock, rating, reviews, oldPrice, badge) 
+INSERT INTO products (name, brand, price, category, stock, rating, reviews, originalPrice, badge) 
 VALUES 
-('Wireless Headphones', 'LuxeAudio', 5500.00, 'electronics', 50, 4.5, 120, 6000.00, 'NEW'),
+('Wireless Headphones', 'LuxeAudio', 5500.00, 'electronics', 50, 4.5, 120, 6000.00, 'New'),
 ('Smartwatch X', 'TechWear', 3200.00, 'electronics', 30, 4.2, 80, NULL, NULL),
-('Designer Handbag', 'ChicBags', 12000.00, 'fashion', 15, 4.8, 50, 15000.00, 'SALE'),
+('Designer Handbag', 'ChicBags', 12000.00, 'fashion', 15, 4.8, 50, 15000.00, 'Sale'),
 ('Running Shoes', 'StrideFit', 4500.00, 'footwear', 100, 4.0, 200, NULL, NULL),
 ('Coffee Maker', 'HomeBrew', 2800.00, 'home', 40, 4.6, 90, NULL, NULL),
-('Yoga Mat Pro', 'ZenLife', 1500.00, 'sports', 70, 4.9, 150, NULL, 'BESTSELLER');
+('Yoga Mat Pro', 'ZenLife', 1500.00, 'sports', 70, 4.9, 150, NULL, 'Hot');

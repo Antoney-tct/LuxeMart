@@ -279,6 +279,21 @@
 
 <!-- Scripts — ORDER MATTERS -->
 <script src="js/products.js"></script>
+<script>
+  // Fetch live products from the database
+  fetch('get_products.php')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Overwrite the static window.products with database data
+        window.products = data.products;
+        console.log("Database products loaded:", window.products);
+        // Re-run rendering if your main script has a render function
+        if (typeof renderProducts === 'function') renderProducts();
+      }
+    })
+    .catch(err => console.error("Database fetch failed:", err));
+</script>
 <script src="js/cart.js"></script>
 <script src="js/main2.js"></script>
 

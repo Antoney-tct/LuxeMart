@@ -87,15 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        if (product.stock > 0 && product.stock <= 10) {
+        if (product.stock && product.stock > 0 && product.stock <= 10) {
             stockInfoHtml = `<div class="stock-info low-stock">Only ${product.stock} left in stock!</div>`;
-        } else if (product.stock > 10) {
+        } else if (product.inStock || (product.stock && product.stock > 10)) {
             stockInfoHtml = `<div class="stock-info in-stock">In Stock</div>`;
         } else {
             stockInfoHtml = `<div class="stock-info out-of-stock">Out of Stock</div>`;
         }
 
-        const isWishlisted = wishlist.includes(product.id.toString());
+        const isWishlisted = wishlist && wishlist.includes(product.id.toString());
 
         const shareURL = encodeURIComponent(window.location.href);
         const shareText = encodeURIComponent(`Check out this product: ${product.name}`);
@@ -103,21 +103,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const facebookShare = `https://www.facebook.com/sharer/sharer.php?u=${shareURL}`;
         const pinterestShare = `https://pinterest.com/pin/create/button/?url=${shareURL}&media=${encodeURIComponent(product.img)}&description=${shareText}`;
 
-        // NEW: Variant selectors
-        const colorOptions = (product.color && product.color.length > 0) ? `
+        // Using 'colors' and 'sizes' to match js/products.js
+        const colorOptions = (product.colors && product.colors.length > 0) ? `
             <div class="variant-group">
-                <div class="variant-label">Color: <span id="selectedColor" class="selected-value">${product.color[0]}</span></div>
+                <div class="variant-label">Color: <span id="selectedColor" class="selected-value">${product.colors[0]}</span></div>
                 <div class="color-swatches">
-                    ${product.color.map((c, index) => `<div class="color-swatch ${index === 0 ? 'active' : ''}" style="background-color: ${c.toLowerCase()};" data-value="${c}" title="${c}"></div>`).join('')}
+                    ${product.colors.map((c, index) => `<div class="color-swatch ${index === 0 ? 'active' : ''}" style="background-color: ${c.toLowerCase()};" data-value="${c}" title="${c}"></div>`).join('')}
                 </div>
             </div>
         ` : '';
 
-        const sizeOptions = (product.size && product.size.length > 0 && product.size[0] !== "One Size") ? `
+        const sizeOptions = (product.sizes && product.sizes.length > 0 && product.sizes[0] !== "One Size") ? `
             <div class="variant-group">
-                <div class="variant-label">Size: <span id="selectedSize" class="selected-value">${product.size[0]}</span></div>
+                <div class="variant-label">Size: <span id="selectedSize" class="selected-value">${product.sizes[0]}</span></div>
                 <div class="size-selector">
-                    ${product.size.map((s, index) => `<div class="size-option ${index === 0 ? 'active' : ''}" data-value="${s}">${s}</div>`).join('')}
+                    ${product.sizes.map((s, index) => `<div class="size-option ${index === 0 ? 'active' : ''}" data-value="${s}">${s}</div>`).join('')}
                 </div>
             </div>
         ` : '';
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="product-price">
                     <span class="price-current">KSh ${product.price.toFixed(2)}</span>
-                    ${product.oldPrice ? `<span class="price-old">KSh ${product.oldPrice.toFixed(2)}</span>` : ''}
+                    ${product.originalPrice ? `<span class="price-old">KSh ${product.originalPrice.toFixed(2)}</span>` : ''}
                 </div>
                 <p class="product-description">${product.desc}</p>
                 
@@ -152,10 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="qty-btn" data-action="increase" aria-label="Increase quantity">+</button>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-primary add-to-cart" data-id="${product.id}" ${product.stock === 0 ? 'disabled' : ''}>
-                            <i class="fas fa-shopping-bag"></i> ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        <button class="btn-primary add-to-cart" data-id="${product.id}" ${product.inStock === false ? 'disabled' : ''}>
+                            <i class="fas fa-shopping-bag"></i> ${product.inStock === false ? 'Out of Stock' : 'Add to Cart'}
                         </button>
-                        <button class="btn-primary btn-buy-now" data-id="${product.id}" ${product.stock === 0 ? 'disabled' : ''}>Buy Now</button>
+                        <button class="btn-primary btn-buy-now" data-id="${product.id}" ${product.inStock === false ? 'disabled' : ''}>Buy Now</button>
                     </div>
                 </div>
 
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderShopTheLook = (currentProduct) => {
         if (!shopTheLookContainer || !currentProduct.shopTheLook || currentProduct.shopTheLook.length === 0) return;
 
-        const lookProducts = products.filter(p => currentProduct.shopTheLook.includes(p.id));
+        const lookProducts = (window.products || []).filter(p => currentProduct.shopTheLook.includes(p.id));
         if (lookProducts.length > 0) {
             shopTheLookContainer.style.display = 'block';
             const grid = document.getElementById('shopTheLookGrid');
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderRelatedProducts = (currentProduct) => {
-        const related = products.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).slice(0, 4);
+        const related = (window.products || []).filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).slice(0, 4);
         if (related.length > 0) {
             relatedContainer.style.display = 'block';
             const grid = document.getElementById('relatedProductsGrid');
@@ -313,8 +313,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = parseInt(urlParams.get('id'), 10);
         const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
         
-        if (typeof window.products === 'undefined' || window.products.length === 0) return; // Ensure products are loaded
-        const product = products.find(p => p.id === productId);
+        // Fix: Added retry logic in case window.products is still loading
+        const productList = window.products || [];
+        if (productList.length === 0) {
+            console.log("Waiting for products to load...");
+            setTimeout(renderProduct, 100);
+            return;
+        }
+
+        const product = productList.find(p => p.id === productId);
 
         if (!product) {
             detailContainer.innerHTML = '<h2>Product not found</h2><p>Sorry, we couldn\'t find the product you were looking for. <a href="shop.html">Return to shop</a>.</p>';

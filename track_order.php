@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-require_once '../../db.php'; // Adjust path as necessary, assuming this file is in /api/
+require_once 'db.php'; // Corrected path assuming track_order.php and db.php are in the same folder
 
 $orderNumber = $_GET['order_number'] ?? '';
 

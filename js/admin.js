@@ -8,18 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === DATA LOADING ===
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    // Use window.products which will be populated by main.js (or similar)
+    let orders = [];
     let allProducts = typeof window.products !== 'undefined' ? [...window.products] : [];
-    const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
-    // Merge ensuring no duplicates based on ID
-    const productIds = new Set(allProducts.map(p => p.id));
-    vendorProducts.forEach(p => {
-        if (!productIds.has(p.id)) {
-            allProducts.unshift(p);
-        }
-    });
-
+    
     // Load users data if available
     const allUsersData = typeof allUsers !== 'undefined' ? allUsers : [];
 
@@ -196,28 +187,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.deleteProduct = (productId) => {
+    window.deleteProduct = async (productId) => {
         if (confirm('Are you sure you want to delete this product?')) {
-            // 1. Remove from vendorProducts if it exists there
-            let vProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
-            const initialLength = vProducts.length;
-            vProducts = vProducts.filter(p => p.id !== productId);
-            
-            if (vProducts.length < initialLength) {
-                localStorage.setItem('vendorProducts', JSON.stringify(vProducts));
-                window.showToast('Seller product deleted successfully.', 'success');
-                location.reload(); // Reload to refresh lists
-            } else {
-                // For demo, we can "delete" a built-in product from the view
-                const initialAllLength = allProducts.length;
-                allProducts = allProducts.filter(p => p.id !== productId);
-                if (allProducts.length < initialAllLength) {
-                    renderProductsTable(); // Re-render the table without the deleted item
-                    window.showToast('Built-in product removed from view (demo).', 'info');
-                } else {
-                    alert('Could not find product to delete.');
+            try {
+                const response = await fetch('api/products/delete.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: productId })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.showToast('Product deleted from database.', 'success');
+                    fetchData(); // Refresh list
                 }
-            }
+            } catch (e) { console.error(e); }
         }
     };
 
@@ -277,8 +260,27 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
     };
 
-    renderStats();
-    renderSalesChart();
-    renderOrdersTable();
-    renderProductsTable();
+    // New Unified Fetch Logic
+    const fetchData = async () => {
+        try {
+            // Fetch Products
+            const pRes = await fetch('get_products.php');
+            const pData = await pRes.json();
+            if (pData.success) allProducts = pData.products;
+
+            // Fetch Orders (Ensure this PHP file exists)
+            const oRes = await fetch('api/orders/list_all.php');
+            const oData = await oRes.json();
+            if (oData.success) orders = oData.orders;
+
+            renderStats();
+            renderSalesChart();
+            renderOrdersTable();
+            renderProductsTable();
+        } catch (e) {
+            console.warn("Database fetch failed, some stats might be empty.", e);
+        }
+    };
+
+    fetchData();
 });

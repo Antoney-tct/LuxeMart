@@ -1,12 +1,22 @@
 <?php
-$host = 'localhost';
-$dbname = 'luxemart_db';
-$username = 'root'; // Default XAMPP username
-$password = '';     // Default XAMPP password
+// htdocs/LuxeMart/db.php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'luxemart_db');
+define('DB_USER', 'root');
+define('DB_PASS', '');  // XAMPP default — change on live server
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]
+    );
 } catch (PDOException $e) {
-    die(json_encode(['error' => 'Connection failed: ' . $e->getMessage()]));
+    http_response_code(500);
+    die(json_encode(['success' => false, 'message' => 'Database connection failed.']));
 }

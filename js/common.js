@@ -99,10 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
             searchSuggestions.innerHTML = '';
             searchSuggestions.classList.remove('active');
             // Ensure window.products is populated before attempting to search
-            if (query.length < 2) return;
+            if (query.length < 2 || !window.products) return;
 
-            if (typeof products !== 'undefined') {
-                const matches = products.filter(p => 
+            if (typeof window.products !== 'undefined') {
+                const matches = window.products.filter(p => 
                     p.name.toLowerCase().includes(query) || 
                     p.brand.toLowerCase().includes(query) ||
                     p.category.toLowerCase().includes(query)
@@ -269,19 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
         completeLogin({ name: payload.name, email: payload.email, picture: payload.picture });
     };
 
-    // === USER ROLE DATABASE (Simulates Backend) ===
-    // This allows One Tap to know if a user is a Seller or Admin based on previous logins
-    const getKnownRole = (email) => {
-        const usersDB = JSON.parse(localStorage.getItem('usersDB')) || {};
-        return usersDB[email] ? usersDB[email].role : null;
-    };
-
-    const saveKnownUser = (user) => {
-        const usersDB = JSON.parse(localStorage.getItem('usersDB')) || {};
-        usersDB[user.email] = { role: user.role, name: user.name };
-        localStorage.setItem('usersDB', JSON.stringify(usersDB));
-    };
-
     // Make completeLogin globally accessible for other scripts like seller-register.js
     window.completeLogin = function(userData, forcedRole = null) {
         let role;
@@ -289,10 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (forcedRole) {
             role = forcedRole;
         } else {
-            // With One-Tap only, we always check the known role database.
-            // If not found, they default to 'buyer'.
-            const knownRole = getKnownRole(userData.email);
-            role = knownRole || 'buyer';
+            // Roles are now handled strictly by login.php
+            role = 'buyer'; 
         }
         
         // Special check for hardcoded admin demo
@@ -304,17 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('luxeUser', JSON.stringify(user));
         
         // Sync with PHP Session for secure API access
-        fetch('api/auth/login.php', {
+        fetch('login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(user)
         });
 
-        // Save to our local "Database" so One Tap remembers them next time
-        saveKnownUser(user);
-        
         updateAccountUI();
-        const loginModal = document.getElementById('loginModal');
         if (loginModal) loginModal.classList.remove('show');
         window.showToast(`Welcome back, ${user.name}! Signed in as ${role.toUpperCase()}.`, 'success');
 
@@ -336,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // My google client id for log in with google
             google.accounts.id.initialize({
                 client_id: "459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com", 
-                callback: handleCredentialResponse
+                callback: window.handleCredentialResponse
             });
             const btnContainer = document.getElementById("googleBtnContainer");
             if (btnContainer) {
@@ -458,7 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('luxeUser');
-            fetch('api/auth/logout.php'); // Clear PHP session
             updateAccountUI();
             window.showToast('Logged out successfully', 'info');
         });

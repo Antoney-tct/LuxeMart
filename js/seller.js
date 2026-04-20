@@ -161,14 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Event Delegation for Table Buttons
-    document.getElementById('sellerProductsTableBody').addEventListener('click', (e) => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        const id = btn.dataset.id;
+    const tableBody = document.getElementById('sellerProductsTableBody');
+    if (tableBody) {
+        tableBody.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const id = btn.dataset.id;
 
-        if (btn.classList.contains('delete-btn')) deleteProduct(id);
-        if (btn.classList.contains('edit-btn')) startEdit(id);
-    });
+            if (btn.classList.contains('delete-btn')) deleteProduct(id);
+            if (btn.classList.contains('edit-btn')) startEdit(id);
+        });
+    }
 
     fetchSellerProducts();
     applyTheme();
@@ -231,23 +234,4 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Upload error:', error));
         });
     }
-    function saveToLocalStorage(product) {
-        // Get existing vendor products or initialize empty array
-        const vendorProducts = JSON.parse(localStorage.getItem('vendorProducts')) || [];
-        
-        vendorProducts.push(product);
-        localStorage.setItem('vendorProducts', JSON.stringify(vendorProducts));
-
-        // Show Success Feedback
-        if (window.showToast) window.showToast('Product listed successfully!', 'success');
-        else alert('Product listed successfully!');
-        
-        // Reset Form
-        form.reset();
-        previewContainer.innerHTML = '<span>No image selected</span>';
-        
-        // Optional: Redirect to shop to see the new item
-        // setTimeout(() => window.location.href = 'shop.html', 1500);
-    }
-
 });

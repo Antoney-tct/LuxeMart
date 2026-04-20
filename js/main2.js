@@ -1,35 +1,35 @@
 // ============================================================
 //  LuxeMart — main2.js
-//  Handles: product rendering, filtering, sorting, search,
-//           quick view, trending slider, hero slider,
-//           countdown timer, scroll animations, theme toggle
+//  ONLY handles: product rendering, filtering, sorting,
+//  quick view, trending slider, hero slider, countdown,
+//  scroll animations, video player
+//  (Search, cart UI, theme, mobile menu handled by common.js)
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── 1. CONSTANTS & STATE ──────────────────────────────────
   const PRODUCTS_PER_PAGE = 12;
-  let currentFilter   = 'all';
-  let currentSort     = 'popularity';
-  let currentPage     = 1;
-  let activeColors    = [];
-  let activeSizes     = [];
-  let quickViewProduct = null;
+  let currentFilter  = 'all';
+  let currentSort    = 'popularity';
+  let currentPage    = 1;
+  let activeColors   = [];
+  let activeSizes    = [];
 
   // ── 2. DOM REFS ───────────────────────────────────────────
-  const grid         = document.getElementById('featuredProductsGrid');
-  const sliderTrack  = document.getElementById('productSliderTrack');
-  const loadMoreBtn  = document.getElementById('loadMoreBtn');
-  const sortSelect   = document.getElementById('sort');
-  const filterBtns   = document.querySelectorAll('.filter-btn');
-  const brandFilter  = document.getElementById('brandFilter');
-  const minPrice     = document.getElementById('minPrice');
-  const maxPrice     = document.getElementById('maxPrice');
-  const ratingFilter = document.getElementById('ratingFilter');
-  const colorFilter  = document.getElementById('colorFilter');
-  const sizeFilter   = document.getElementById('sizeFilter');
-  const inStockChk   = document.getElementById('inStockFilter');
-  const onSaleChk    = document.getElementById('onSaleFilter');
+  const grid        = document.getElementById('featuredProductsGrid');
+  const sliderTrack = document.getElementById('productSliderTrack');
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  const sortSelect  = document.getElementById('sort');
+  const filterBtns  = document.querySelectorAll('.filter-btn');
+  const brandFilter = document.getElementById('brandFilter');
+  const minPrice    = document.getElementById('minPrice');
+  const maxPrice    = document.getElementById('maxPrice');
+  const ratingFilter= document.getElementById('ratingFilter');
+  const colorFilter = document.getElementById('colorFilter');
+  const sizeFilter  = document.getElementById('sizeFilter');
+  const inStockChk  = document.getElementById('inStockFilter');
+  const onSaleChk   = document.getElementById('onSaleFilter');
 
   // ── 3. HELPERS ────────────────────────────────────────────
   const fmt = n => `KSh ${Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
@@ -37,22 +37,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function stars(rating) {
     let html = '';
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i)       html += '<i class="fas fa-star"></i>';
+      if (rating >= i) html += '<i class="fas fa-star"></i>';
       else if (rating >= i - 0.5) html += '<i class="fas fa-star-half-alt"></i>';
-      else                   html += '<i class="far fa-star"></i>';
+      else html += '<i class="far fa-star"></i>';
     }
     return html;
   }
 
-  function discount(orig, sale) {
+  function discountBadge(orig, sale) {
     if (!orig) return '';
-    const pct = Math.round((1 - sale / orig) * 100);
-    return `<span class="discount-badge">-${pct}%</span>`;
+    return `<span class="discount-badge">-${Math.round((1 - sale/orig)*100)}%</span>`;
   }
 
-  // ── 4. BUILD FILTER OPTIONS ──────────────────────────────
+  // ── 4. BUILD FILTER OPTIONS ───────────────────────────────
   function buildFilterOptions() {
-    // Brands
+    if (!window.products) return;
+
     if (brandFilter) {
       const brands = [...new Set(window.products.map(p => p.brand))].sort();
       brands.forEach(b => {
@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Colors
     if (colorFilter) {
       const colors = [...new Set(window.products.flatMap(p => p.colors))].filter(Boolean).sort();
       colors.forEach(c => {
@@ -77,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Sizes
     if (sizeFilter) {
       const sizes = [...new Set(window.products.flatMap(p => p.sizes))].filter(Boolean);
       sizes.forEach(s => {
@@ -93,46 +91,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── 5. FILTER + SORT PIPELINE ────────────────────────────
+  // ── 5. FILTER + SORT PIPELINE ─────────────────────────────
   function getFilteredProducts() {
+    if (!window.products) return [];
     let list = [...window.products];
 
-    // Category
     if (currentFilter !== 'all') list = list.filter(p => p.category === currentFilter);
-
-    // Brand
     if (brandFilter && brandFilter.value !== 'all') list = list.filter(p => p.brand === brandFilter.value);
 
-    // Price
     const min = parseFloat(minPrice?.value) || 0;
     const max = parseFloat(maxPrice?.value) || Infinity;
     list = list.filter(p => p.price >= min && p.price <= max);
 
-    // Rating
     const minRating = parseFloat(ratingFilter?.value) || 0;
     if (minRating) list = list.filter(p => p.rating >= minRating);
 
-    // Colors
     if (activeColors.length) list = list.filter(p => activeColors.some(c => p.colors.includes(c)));
-
-    // Sizes
-    if (activeSizes.length) list = list.filter(p => activeSizes.some(s => p.sizes.includes(s)));
-
-    // In Stock
+    if (activeSizes.length)  list = list.filter(p => activeSizes.some(s => p.sizes.includes(s)));
     if (inStockChk?.checked) list = list.filter(p => p.inStock);
+    if (onSaleChk?.checked)  list = list.filter(p => p.onSale);
 
-    // On Sale
-    if (onSaleChk?.checked) list = list.filter(p => p.onSale);
-
-    // Sort
     switch (currentSort) {
-      case 'price-asc':    list.sort((a, b) => a.price - b.price); break;
-      case 'price-desc':   list.sort((a, b) => b.price - a.price); break;
-      case 'rating':       list.sort((a, b) => b.rating - a.rating); break;
-      case 'newest':       list.sort((a, b) => b.id - a.id); break;
-      default:             list.sort((a, b) => b.reviews - a.reviews); // popularity
+      case 'price-asc':  list.sort((a,b) => a.price - b.price); break;
+      case 'price-desc': list.sort((a,b) => b.price - a.price); break;
+      case 'rating':     list.sort((a,b) => b.rating - a.rating); break;
+      case 'newest':     list.sort((a,b) => b.id - a.id); break;
+      default:           list.sort((a,b) => b.reviews - a.reviews);
     }
-
     return list;
   }
 
@@ -140,32 +125,20 @@ document.addEventListener('DOMContentLoaded', () => {
   function productCard(p) {
     const badge = p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : '';
     const origPrice = p.originalPrice ? `<span class="original-price">${fmt(p.originalPrice)}</span>` : '';
-    const disc = discount(p.originalPrice, p.price);
-    const outOfStock = !p.inStock ? '<div class="out-of-stock-overlay"><span>Out of Stock</span></div>' : '';
-
     return `
       <div class="product-card" data-id="${p.id}" data-category="${p.category}">
-        ${outOfStock}
         <div class="product-img-wrapper">
           ${badge}
           <img src="${p.img}" alt="${p.name}" class="product-img" loading="lazy">
           <div class="product-overlay">
-            <button class="overlay-btn quick-view-btn" data-id="${p.id}" title="Quick View">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="overlay-btn wishlist-btn" data-id="${p.id}" title="Add to Wishlist">
-              <i class="far fa-heart"></i>
-            </button>
-            <button class="overlay-btn add-to-cart-overlay" data-id="${p.id}" title="Add to Cart">
-              <i class="fas fa-shopping-bag"></i>
-            </button>
+            <button class="overlay-btn quick-view-btn" data-id="${p.id}" title="Quick View"><i class="fas fa-eye"></i></button>
+            <button class="overlay-btn wishlist-btn" data-id="${p.id}" title="Add to Wishlist"><i class="far fa-heart"></i></button>
+            <button class="overlay-btn add-to-cart-overlay" data-id="${p.id}" title="Add to Cart"><i class="fas fa-shopping-bag"></i></button>
           </div>
         </div>
         <div class="product-info">
           <p class="product-brand">${p.brand}</p>
-          <h3 class="product-name">
-            <a href="product.html?id=${p.id}">${p.name}</a>
-          </h3>
+          <h3 class="product-name"><a href="product.html?id=${p.id}">${p.name}</a></h3>
           <div class="product-rating">
             <div class="stars">${stars(p.rating)}</div>
             <span class="rating-count">(${p.reviews})</span>
@@ -173,11 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="product-price">
             <span class="current-price">${fmt(p.price)}</span>
             ${origPrice}
-            ${disc}
+            ${discountBadge(p.originalPrice, p.price)}
           </div>
-          <button class="btn-add-cart" data-id="${p.id}" ${!p.inStock ? 'disabled' : ''}>
-            <i class="fas fa-shopping-bag"></i>
-            ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
+          <button class="btn-add-cart" data-id="${p.id}" ${!p.inStock?'disabled':''}>
+            <i class="fas fa-shopping-bag"></i> ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
           </button>
         </div>
       </div>`;
@@ -186,87 +158,64 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── 7. RENDER PRODUCTS GRID ───────────────────────────────
   function renderProducts(reset = true) {
     if (!grid) return;
-
     if (reset) currentPage = 1;
 
     const filtered = getFilteredProducts();
-    const total    = filtered.length;
     const slice    = filtered.slice(0, currentPage * PRODUCTS_PER_PAGE);
 
     if (reset) grid.innerHTML = '';
 
-    if (total === 0) {
-      grid.innerHTML = `
-        <div class="no-products">
-          <i class="fas fa-search" style="font-size:3rem;color:var(--light-text);margin-bottom:1rem;"></i>
-          <h3>No products found</h3>
-          <p>Try adjusting your filters or search terms.</p>
-        </div>`;
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="no-products" style="grid-column:1/-1;text-align:center;padding:4rem;color:#888;">
+        <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;display:block;"></i>
+        <h3>No products found</h3><p>Try adjusting your filters.</p></div>`;
       if (loadMoreBtn) loadMoreBtn.style.display = 'none';
       return;
     }
 
     if (reset) {
-      slice.forEach(p => { grid.innerHTML += productCard(p); });
+      slice.forEach(p => grid.innerHTML += productCard(p));
     } else {
       const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-      filtered.slice(start, currentPage * PRODUCTS_PER_PAGE).forEach(p => { grid.innerHTML += productCard(p); });
+      filtered.slice(start, currentPage * PRODUCTS_PER_PAGE).forEach(p => grid.innerHTML += productCard(p));
     }
 
-    // Show/hide Load More
     if (loadMoreBtn) {
-      loadMoreBtn.style.display = slice.length < total ? 'inline-flex' : 'none';
+      loadMoreBtn.style.display = slice.length < filtered.length ? 'inline-flex' : 'none';
     }
 
     attachCardEvents();
   }
 
-  // ── 8. CARD EVENT LISTENERS ───────────────────────────────
+  // ── 8. CARD EVENTS ────────────────────────────────────────
   function attachCardEvents() {
-    // Quick View
     document.querySelectorAll('.quick-view-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
+      btn.onclick = (e) => {
         e.preventDefault();
         const p = window.products.find(x => x.id == btn.dataset.id);
         if (p) openQuickView(p);
-      });
+      };
     });
 
-    // Add to Cart (card button)
     document.querySelectorAll('.btn-add-cart, .add-to-cart-overlay').forEach(btn => {
-      btn.addEventListener('click', e => {
+      btn.onclick = (e) => {
         e.preventDefault();
         const p = window.products.find(x => x.id == btn.dataset.id);
         if (p && p.inStock) {
           if (typeof addToCart === 'function') addToCart(p);
-          showToast(`${p.name} added to cart!`, 'success');
+          if (typeof window.showToast === 'function') window.showToast(`${p.name} added to cart!`, 'success');
         }
-      });
-    });
-
-    // Wishlist
-    document.querySelectorAll('.wishlist-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const p = window.products.find(x => x.id == btn.dataset.id);
-        if (p) {
-          if (typeof addToWishlist === 'function') addToWishlist(p);
-          btn.querySelector('i').classList.replace('far', 'fas');
-          btn.style.color = 'var(--secondary)';
-          showToast(`${p.name} added to wishlist!`, 'info');
-        }
-      });
+      };
     });
   }
 
   // ── 9. QUICK VIEW MODAL ───────────────────────────────────
   function openQuickView(p) {
-    quickViewProduct = p;
     const modal = document.getElementById('quickViewModal');
     if (!modal) return;
 
-    document.getElementById('qvImg').src   = p.img;
-    document.getElementById('qvImg').alt   = p.name;
+    document.getElementById('qvImg').src  = p.img;
+    document.getElementById('qvImg').alt  = p.name;
     document.getElementById('qvTitle').textContent = p.name;
     document.getElementById('qvStars').innerHTML   = stars(p.rating);
     document.getElementById('qvRatingCount').textContent = `(${p.reviews} reviews)`;
@@ -275,25 +224,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const priceEl = document.getElementById('qvPrice');
     priceEl.innerHTML = `<span class="current-price">${fmt(p.price)}</span>`;
-    if (p.originalPrice) {
-      priceEl.innerHTML += ` <span class="original-price">${fmt(p.originalPrice)}</span> ${discount(p.originalPrice, p.price)}`;
-    }
+    if (p.originalPrice) priceEl.innerHTML += ` <span class="original-price">${fmt(p.originalPrice)}</span> ${discountBadge(p.originalPrice, p.price)}`;
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Qty controls
     document.querySelectorAll('#quickViewModal .qty-btn').forEach(btn => {
       btn.onclick = () => {
-        const qtyEl = document.getElementById('qvQty');
-        let qty = parseInt(qtyEl.textContent);
-        if (btn.dataset.action === 'increase') qty++;
-        else if (qty > 1) qty--;
-        qtyEl.textContent = qty;
+        const qEl = document.getElementById('qvQty');
+        let q = parseInt(qEl.textContent);
+        if (btn.dataset.action === 'increase') q++;
+        else if (q > 1) q--;
+        qEl.textContent = q;
       };
     });
 
-    // Add to cart from quick view
     const qvAdd = document.getElementById('qvAddToCart');
     if (qvAdd) {
       qvAdd.onclick = () => {
@@ -301,18 +246,26 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < qty; i++) {
           if (typeof addToCart === 'function') addToCart(p);
         }
-        showToast(`${p.name} added to cart!`, 'success');
-        closeModal(modal);
+        if (typeof window.showToast === 'function') window.showToast(`${p.name} added to cart!`, 'success');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
       };
     }
+
+    // Close quick view
+    document.getElementById('closeQuickView').onclick = () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+    modal.onclick = (e) => {
+      if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
+    };
   }
 
   // ── 10. TRENDING SLIDER ───────────────────────────────────
   function buildTrendingSlider() {
-    if (!sliderTrack) return;
-    const trending = [...window.products]
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 10);
+    if (!sliderTrack || !window.products) return;
+    const trending = [...window.products].sort((a,b) => b.rating - a.rating).slice(0, 10);
 
     sliderTrack.innerHTML = trending.map(p => `
       <div class="product-slide">
@@ -321,9 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
             <img src="${p.img}" alt="${p.name}" class="product-img" loading="lazy">
             <div class="product-overlay">
-              <button class="overlay-btn quick-view-btn" data-id="${p.id}" title="Quick View"><i class="fas fa-eye"></i></button>
-              <button class="overlay-btn wishlist-btn" data-id="${p.id}" title="Wishlist"><i class="far fa-heart"></i></button>
-              <button class="overlay-btn add-to-cart-overlay" data-id="${p.id}" title="Add to Cart"><i class="fas fa-shopping-bag"></i></button>
+              <button class="overlay-btn quick-view-btn" data-id="${p.id}"><i class="fas fa-eye"></i></button>
+              <button class="overlay-btn wishlist-btn" data-id="${p.id}"><i class="far fa-heart"></i></button>
+              <button class="overlay-btn add-to-cart-overlay" data-id="${p.id}"><i class="fas fa-shopping-bag"></i></button>
             </div>
           </div>
           <div class="product-info">
@@ -338,14 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>`).join('');
 
-    // Slider prev/next
-    const prev = document.getElementById('sliderPrev');
-    const next = document.getElementById('sliderNext');
-    if (prev && next) {
-      const cardWidth = 280 + 24; // card width + gap
-      prev.addEventListener('click', () => { sliderTrack.scrollBy({ left: -cardWidth * 2, behavior: 'smooth' }); });
-      next.addEventListener('click', () => { sliderTrack.scrollBy({ left:  cardWidth * 2, behavior: 'smooth' }); });
-    }
+    const cardWidth = 304;
+    document.getElementById('sliderPrev')?.addEventListener('click', () => sliderTrack.scrollBy({ left: -cardWidth * 2, behavior: 'smooth' }));
+    document.getElementById('sliderNext')?.addEventListener('click', () => sliderTrack.scrollBy({ left:  cardWidth * 2, behavior: 'smooth' }));
 
     attachCardEvents();
   }
@@ -359,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let current = 0;
     let timer;
 
-    // Build dots
     if (dotsWrap) {
       slides.forEach((_, i) => {
         const dot = document.createElement('button');
@@ -376,17 +323,13 @@ document.addEventListener('DOMContentLoaded', () => {
       current = (idx + slides.length) % slides.length;
       slides[current].classList.add('active');
       dotsWrap?.children[current]?.classList.add('active');
-      resetTimer();
-    }
-
-    function resetTimer() {
       clearInterval(timer);
       timer = setInterval(() => goTo(current + 1), 5000);
     }
 
     document.querySelector('.prev-btn')?.addEventListener('click', () => goTo(current - 1));
     document.querySelector('.next-btn')?.addEventListener('click', () => goTo(current + 1));
-    resetTimer();
+    timer = setInterval(() => goTo(current + 1), 5000);
   }
 
   // ── 12. COUNTDOWN TIMER ───────────────────────────────────
@@ -398,10 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function update() {
       const diff = end - new Date();
       if (diff <= 0) return;
-      document.getElementById('days')?.textContent    = String(Math.floor(diff / 86400000)).padStart(2, '0');
-      document.getElementById('hours')?.textContent   = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-      document.getElementById('minutes')?.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-      document.getElementById('seconds')?.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      document.getElementById('days')?.textContent    = String(Math.floor(diff / 86400000)).padStart(2,'0');
+      document.getElementById('hours')?.textContent   = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+      document.getElementById('minutes')?.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+      document.getElementById('seconds')?.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
     }
     update();
     setInterval(update, 1000);
@@ -409,144 +352,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── 13. SCROLL ANIMATIONS ─────────────────────────────────
   function initScrollAnimations() {
-    const sections = document.querySelectorAll('.fade-in-section');
-    sections.forEach(el => el.classList.add('animate-ready'));
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
+    // Use a small delay so elements are visible by default first
+    setTimeout(() => {
+      const sections = document.querySelectorAll('.fade-in-section');
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            observer.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.05 });
+
+      sections.forEach(el => {
+        // Only animate if not already in viewport
+        const rect = el.getBoundingClientRect();
+        if (rect.top > window.innerHeight) {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(30px)';
+          el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         }
+        observer.observe(el);
       });
-    }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
-    sections.forEach(el => observer.observe(el));
+    }, 100);
   }
 
-  // ── 14. THEME TOGGLE ─────────────────────────────────────
-  function initTheme() {
-    const btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    const saved = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', saved);
-    btn.innerHTML = saved === 'dark'
-      ? '<i class="fas fa-sun"></i> Theme'
-      : '<i class="fas fa-moon"></i> Theme';
-
-    btn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-      btn.innerHTML = next === 'dark'
-        ? '<i class="fas fa-sun"></i> Theme'
-        : '<i class="fas fa-moon"></i> Theme';
+  // ── 14. VIDEO PROMO PLAYER ────────────────────────────────
+  function initVideoPlayer() {
+    const video   = document.getElementById('promoVideo');
+    const playBtn = document.querySelector('.video-play-btn');
+    if (!video || !playBtn) return;
+    playBtn.addEventListener('click', () => {
+      if (video.paused) { video.play(); playBtn.innerHTML = '<i class="fas fa-pause"></i>'; }
+      else              { video.pause(); playBtn.innerHTML = '<i class="fas fa-play"></i>'; }
     });
   }
 
-  // ── 15. SEARCH ────────────────────────────────────────────
-  function initSearch() {
-    const input   = document.getElementById('searchInput');
-    const suggestions = document.getElementById('searchSuggestions');
-    if (!input || !suggestions) return;
-
-    input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
-      suggestions.innerHTML = '';
-      if (!q) return;
-
-      const matches = window.products.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q)
-      ).slice(0, 6);
-
-      matches.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'suggestion-item';
-        item.innerHTML = `<img src="${p.img}" alt="${p.name}"><span>${p.name}</span><span class="suggestion-price">${fmt(p.price)}</span>`;
-        item.addEventListener('click', () => { window.location.href = `product.html?id=${p.id}`; });
-        suggestions.appendChild(item);
-      });
-
-      if (!matches.length) {
-        suggestions.innerHTML = '<div class="suggestion-item">No results found</div>';
-      }
-    });
-  }
-
-  // ── 16. MODAL CLOSE HELPERS ───────────────────────────────
-  function closeModal(el) {
-    el.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  function initModals() {
-    // Search modal
-    document.getElementById('searchBtn')?.addEventListener('click', () => {
-      document.getElementById('searchModal')?.classList.add('active');
-      document.getElementById('searchInput')?.focus();
-    });
-    document.getElementById('mobileSearchBtn')?.addEventListener('click', () => {
-      document.getElementById('searchModal')?.classList.add('active');
-    });
-    document.getElementById('closeSearch')?.addEventListener('click', () => {
-      closeModal(document.getElementById('searchModal'));
-    });
-
-    // Cart sidebar
-    document.getElementById('cartBtn')?.addEventListener('click', () => {
-      document.getElementById('cartSidebar')?.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    });
-    document.getElementById('mobileCartBtn')?.addEventListener('click', () => {
-      document.getElementById('cartSidebar')?.classList.add('active');
-    });
-    document.getElementById('closeCart')?.addEventListener('click', () => {
-      document.getElementById('cartSidebar')?.classList.remove('active');
-      document.body.style.overflow = '';
-    });
-
-    // Quick view close
-    document.getElementById('closeQuickView')?.addEventListener('click', () => {
-      closeModal(document.getElementById('quickViewModal'));
-    });
-
-    // Close modals on overlay click
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', e => {
-        if (e.target === overlay) closeModal(overlay);
-      });
-    });
-
-    // Mobile menu
-    document.querySelector('.mobile-menu-toggle')?.addEventListener('click', () => {
-      document.getElementById('mobileMenu')?.classList.add('active');
-    });
-    document.getElementById('closeMenu')?.addEventListener('click', () => {
-      document.getElementById('mobileMenu')?.classList.remove('active');
-    });
-
-    // Exit intent popup
-    document.getElementById('closeExitIntent')?.addEventListener('click', () => {
-      closeModal(document.getElementById('exitIntentModal'));
-    });
-    document.getElementById('continueShoppingExit')?.addEventListener('click', e => {
-      e.preventDefault();
-      closeModal(document.getElementById('exitIntentModal'));
-    });
-
-    let exitShown = false;
-    document.addEventListener('mouseleave', e => {
-      if (e.clientY < 10 && !exitShown) {
-        exitShown = true;
-        setTimeout(() => document.getElementById('exitIntentModal')?.classList.add('active'), 500);
-      }
-    });
-  }
-
-  // ── 17. FILTER EVENT WIRING ───────────────────────────────
+  // ── 15. FILTER EVENTS ─────────────────────────────────────
   function initFilters() {
-    // Category filter buttons
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         filterBtns.forEach(b => b.classList.remove('active'));
@@ -556,120 +400,87 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Sort select
-    sortSelect?.addEventListener('change', () => {
-      currentSort = sortSelect.value;
-      renderProducts(true);
-    });
+    sortSelect?.addEventListener('change', () => { currentSort = sortSelect.value; renderProducts(true); });
+    brandFilter?.addEventListener('change', () => renderProducts(true));
+    ratingFilter?.addEventListener('change', () => renderProducts(true));
+    inStockChk?.addEventListener('change', () => renderProducts(true));
+    onSaleChk?.addEventListener('change', () => renderProducts(true));
+    minPrice?.addEventListener('input', () => renderProducts(true));
+    maxPrice?.addEventListener('input', () => renderProducts(true));
 
-    // Advanced filters
-    [brandFilter, ratingFilter, inStockChk, onSaleChk].forEach(el => {
-      el?.addEventListener('change', () => renderProducts(true));
-    });
-    [minPrice, maxPrice].forEach(el => {
-      el?.addEventListener('input', () => renderProducts(true));
-    });
-
-    // Load More
-    loadMoreBtn?.addEventListener('click', () => {
-      currentPage++;
-      renderProducts(false);
-    });
+    loadMoreBtn?.addEventListener('click', () => { currentPage++; renderProducts(false); });
   }
 
-  // ── 18. NEWSLETTER ────────────────────────────────────────
+  // ── 16. URL PARAM FILTER ──────────────────────────────────
+  function checkUrlFilter() {
+    const cat = new URLSearchParams(window.location.search).get('category');
+    if (cat) {
+      currentFilter = cat;
+      filterBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.filter === cat));
+    }
+
+    // Also handle search param from common.js
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q && grid) {
+      const results = window.products.filter(p =>
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        p.brand.toLowerCase().includes(q.toLowerCase()) ||
+        p.category.toLowerCase().includes(q.toLowerCase())
+      );
+      grid.innerHTML = '';
+      if (results.length === 0) {
+        grid.innerHTML = `<div class="no-products" style="grid-column:1/-1;text-align:center;padding:4rem;color:#888;">
+          <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;display:block;"></i>
+          <h3>No results for "${q}"</h3></div>`;
+      } else {
+        results.forEach(p => grid.innerHTML += productCard(p));
+        attachCardEvents();
+      }
+      if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+      return true; // skip normal render
+    }
+    return false;
+  }
+
+  // ── 17. NEWSLETTER ────────────────────────────────────────
   function initNewsletter() {
     document.querySelectorAll('.newsletter-form').forEach(form => {
       form.addEventListener('submit', e => {
         e.preventDefault();
-        const email = form.querySelector('input[type="email"]')?.value;
-        if (email) {
-          showToast('🎉 Thank you! Check your inbox for your discount code.', 'success');
-          form.reset();
-        }
+        if (typeof window.showToast === 'function') window.showToast('🎉 Subscribed! Check your inbox.', 'success');
+        form.reset();
       });
     });
   }
 
-  // ── 19. TOAST NOTIFICATION ────────────────────────────────
-  function showToast(msg, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i> ${msg}`;
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('show'));
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 400);
-    }, 3000);
-  }
-
-  // Make toast globally available
-  window.showToast = showToast;
-
-  // ── 20. ACCOUNT & AUTH UI ─────────────────────────────────
-  function initAuthUI() {
-    const user = JSON.parse(localStorage.getItem('luxemart_user') || 'null');
-    const accountLink = document.getElementById('accountLink');
-    const logoutLink  = document.getElementById('logoutLink');
-
-    if (user && accountLink) {
-      accountLink.textContent = user.name || 'My Account';
-      accountLink.href = 'account.html';
-    }
-
-    logoutLink?.addEventListener('click', e => {
-      e.preventDefault();
-      localStorage.removeItem('luxemart_user');
-      localStorage.removeItem('luxemart_token');
-      showToast('Logged out successfully.', 'info');
-      setTimeout(() => window.location.href = 'index.html', 1000);
+  // ── 18. CART SIDEBAR CLOSE (complement to common.js) ──────
+  function initCartClose() {
+    document.getElementById('cartBtn')?.addEventListener('click', () => {
+      document.getElementById('cartSidebar')?.classList.add('active');
+    });
+    document.getElementById('closeCart')?.addEventListener('click', () => {
+      document.getElementById('cartSidebar')?.classList.remove('active');
     });
   }
 
-  // ── 21. URL PARAM FILTER (for category links) ─────────────
-  function checkUrlFilter() {
-    const params = new URLSearchParams(window.location.search);
-    const cat = params.get('category');
-    if (cat) {
-      currentFilter = cat;
-      filterBtns.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === cat);
-      });
-    }
+  // ── 19. INIT ALL ──────────────────────────────────────────
+  if (!window.products || window.products.length === 0) {
+    console.error('LuxeMart: products.js not loaded! Check the script tag order in HTML.');
+    if (grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:red;">
+      <h3>⚠️ Products failed to load</h3><p>Please check the browser console for errors.</p></div>`;
+    return;
   }
 
-  // ── 22. VIDEO PROMO PLAYER ────────────────────────────────
-  function initVideoPlayer() {
-    const video   = document.getElementById('promoVideo');
-    const playBtn = document.querySelector('.video-play-btn');
-    if (!video || !playBtn) return;
-
-    playBtn.addEventListener('click', () => {
-      if (video.paused) {
-        video.play();
-        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-      } else {
-        video.pause();
-        playBtn.innerHTML = '<i class="fas fa-play"></i>';
-      }
-    });
-  }
-
-  // ── 23. INIT ALL ─────────────────────────────────────────
+  const searchHandled = checkUrlFilter();
   buildFilterOptions();
-  checkUrlFilter();
-  renderProducts(true);
+  if (!searchHandled) renderProducts(true);
   buildTrendingSlider();
   initHeroSlider();
   initCountdown();
   initScrollAnimations();
-  initTheme();
-  initSearch();
-  initModals();
+  initVideoPlayer();
   initFilters();
   initNewsletter();
-  initAuthUI();
-  initVideoPlayer();
+  initCartClose();
 
 });
