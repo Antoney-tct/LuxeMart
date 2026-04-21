@@ -109,6 +109,21 @@
                         <label for="pPrice">Price (KSh) *</label>
                         <input type="number" id="pPrice" required min="1" placeholder="e.g. 1500">
                     </div>
+
+                    <!-- Add inside your .form-grid, after pPrice -->
+                    <div class="form-group">
+                        <label for="pStock">Stock Quantity *</label>
+                        <input type="number" id="pStock" min="0" placeholder="e.g. 50" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pOldPrice">Original Price (KSh)</label>
+                        <input type="number" id="pOldPrice" min="0" placeholder="Leave blank if not on sale">
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
+                        <input type="checkbox" id="pOnSale" style="width:auto;">
+                        <label for="pOnSale" style="margin:0;">Mark as On Sale</label>
+                    </div>
+                    
                     <div class="form-group full-width">
                         <label for="pDesc">Description *</label>
                         <textarea id="pDesc" required placeholder="Describe your product..."></textarea>
