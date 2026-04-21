@@ -3,180 +3,1368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - LuxeMart</title>
+    <title>Admin Dashboard — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Icons & Stylesheet -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Admin-specific styles */
-        .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        .admin-header { text-align: left; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-        
-        /* Stats Cards */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); border-left: 5px solid var(--secondary); }
-        .stat-card h3 { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
-        .stat-card p { color: var(--light-text); font-weight: 500; }
+        /* ── RESET & BASE ─────────────────────────────── */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Tables */
-        .admin-section { margin-bottom: 3rem; }
-        .admin-section h2 { margin-bottom: 1.5rem; }
-        .table-wrapper { overflow-x: auto; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: var(--accent); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        td { font-size: 0.95rem; }
+        :root {
+            --primary:     #1a1a1a;
+            --secondary:   #ff6b35;
+            --accent:      #f8f7f4;
+            --text:        #1a1a1a;
+            --light-text:  #6b7280;
+            --white:       #ffffff;
+            --border:      #e5e7eb;
+            --success:     #10b981;
+            --danger:      #ef4444;
+            --warning:     #f59e0b;
+            --info:        #3b82f6;
+            --shadow-sm:   0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md:   0 4px 16px rgba(0,0,0,0.10);
+            --shadow-lg:   0 8px 32px rgba(0,0,0,0.12);
+            --radius-sm:   8px;
+            --radius-md:   12px;
+            --radius-lg:   16px;
+            --sidebar-w:   260px;
+            --header-h:    64px;
+            --transition:  all 0.2s ease;
+        }
+
+        body[data-theme="dark"] {
+            --primary:    #f9fafb;
+            --accent:     #1f2937;
+            --text:       #e5e7eb;
+            --light-text: #9ca3af;
+            --white:      #111827;
+            --border:     #374151;
+            --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--accent);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; font-family: inherit; border: none; }
+        img { max-width: 100%; display: block; }
+
+        /* ── LAYOUT ───────────────────────────────────── */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ──────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 200;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo img { width: 36px; height: 36px; }
+
+        .sidebar-logo span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .sidebar-logo .badge {
+            margin-left: auto;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0.75rem;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--light-text);
+            padding: 0.75rem 0.75rem 0.4rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.875rem;
+            border-radius: var(--radius-sm);
+            color: var(--light-text);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: 2px;
+            cursor: pointer;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: var(--accent);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: rgba(255,107,53,0.1);
+            color: var(--secondary);
+        }
+
+        .nav-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .nav-item .nav-badge {
+            margin-left: auto;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 20px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+        }
+
+        .sidebar-user img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .sidebar-user-info { flex: 1; min-width: 0; }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        /* ── MAIN CONTENT ─────────────────────────────── */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOP HEADER ───────────────────────────────── */
+        .admin-header {
+            height: var(--header-h);
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .page-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            color: var(--text);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .header-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .header-search {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 0.875rem;
+            height: 36px;
+        }
+
+        .header-search input {
+            border: none;
+            background: none;
+            font-size: 0.875rem;
+            color: var(--text);
+            width: 180px;
+            outline: none;
+        }
+
+        .header-search input::placeholder { color: var(--light-text); }
+        .header-search i { color: var(--light-text); font-size: 0.85rem; }
+
+        /* ── PAGE CONTENT ─────────────────────────────── */
+        .page-content {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        /* ── SECTIONS ─────────────────────────────────── */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .section-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* ── CARDS ────────────────────────────────────── */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-body { padding: 1.25rem; }
+
+        /* ── STAT CARDS ───────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.up   { color: var(--success); }
+        .stat-change.down { color: var(--danger); }
+
+        /* ── CHART ────────────────────────────────────── */
+        .chart-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .chart-filter-btn {
+            padding: 0.35rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            background: var(--accent);
+            color: var(--light-text);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .chart-filter-btn.active,
+        .chart-filter-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+
+        /* ── TABLES ───────────────────────────────────── */
+        .table-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .table-card-title {
+            font-weight: 600;
+            font-size: 0.975rem;
+        }
+
+        .search-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 0.75rem;
+            height: 34px;
+        }
+
+        .search-input input {
+            border: none;
+            background: none;
+            font-size: 0.82rem;
+            color: var(--text);
+            width: 160px;
+            outline: none;
+        }
+
+        .search-input i { color: var(--light-text); font-size: 0.8rem; }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        thead th {
+            background: var(--accent);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--light-text);
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
         tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background-color: var(--accent); }
 
-        /* Status Dropdown */
-        .status-select { padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); font-weight: 500; cursor: pointer; }
-        .status-select.processing { background: #dbeafe; color: #1e40af; }
-        .status-select.shipped { background: #ffedd5; color: #9a3412; }
-        .status-select.delivered { background: #d1fae5; color: #065f46; }
-        .status-select.cancelled { background: #fee2e2; color: #991b1b; }
+        tbody tr:hover { background: var(--accent); }
 
-        /* Buttons */
-        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 6px; background: var(--primary); color: white; border: none; }
-        .btn-sm.btn-danger { background: #dc2626; }
+        /* ── BADGES & PILLS ───────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-processing { background: #dbeafe; color: #1e40af; }
+        .badge-shipped    { background: #ffedd5; color: #9a3412; }
+        .badge-delivered  { background: #d1fae5; color: #065f46; }
+        .badge-cancelled  { background: #fee2e2; color: #991b1b; }
+        .badge-admin      { background: #fee2e2; color: #991b1b; }
+        .badge-seller     { background: #ffedd5; color: #9a3412; }
+        .badge-buyer      { background: #dbeafe; color: #1e40af; }
+        .badge-active     { background: #d1fae5; color: #065f46; }
+        .badge-hidden     { background: #f3f4f6; color: #6b7280; }
+
+        /* ── BUTTONS ──────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover { background: #e55a2b; }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+        }
+
+        /* ── STATUS SELECT ────────────────────────────── */
+        .status-select {
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--white);
+            color: var(--text);
+            outline: none;
+        }
+
+        .status-select:focus { border-color: var(--secondary); }
+
+        /* ── MODALS ───────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: var(--transition);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-overlay.show .modal { transform: scale(1); }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            z-index: 1;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            font-size: 1.1rem;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body { padding: 1.5rem; }
+
+        /* ── FORM ELEMENTS ────────────────────────────── */
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--light-text);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--white);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(255,107,53,0.1); }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* ── TOAST ────────────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.875rem 1.25rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-width: 280px;
+            animation: slideIn 0.3s ease;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.success i { color: var(--success); }
+        .toast.error   { border-left: 4px solid var(--danger); }
+        .toast.error   i { color: var(--danger); }
+        .toast.info    { border-left: 4px solid var(--info); }
+        .toast.info    i { color: var(--info); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        /* ── SKELETON ─────────────────────────────────── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--accent) 25%, var(--border) 50%, var(--accent) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-sm);
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ── OVERVIEW GRID ────────────────────────────── */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── RECENT LIST ──────────────────────────────── */
+        .recent-list { display: flex; flex-direction: column; }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .recent-item:last-child { border-bottom: none; }
+        .recent-item:hover { background: var(--accent); }
+
+        .recent-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .recent-info { flex: 1; min-width: 0; }
+
+        .recent-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .recent-sub {
+            font-size: 0.78rem;
+            color: var(--light-text);
+        }
+
+        .recent-amount {
+            font-weight: 700;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* ── MOBILE OVERLAY ───────────────────────────── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 199;
+        }
+
+        /* ── RESPONSIVE ───────────────────────────────── */
+        @media (max-width: 1024px) {
+            .overview-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --sidebar-w: 280px; }
+
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.open { transform: translateX(0); }
+
+            .sidebar-overlay.show { display: block; }
+
+            .main-content { margin-left: 0; }
+
+            .sidebar-toggle { display: flex; }
+
+            .header-search { display: none; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+            .form-grid { grid-template-columns: 1fr; }
+
+            .section-actions { width: 100%; }
+
+            .admin-header { padding: 0 1rem; }
+
+            .page-content { padding: 1rem; }
+
+            table { font-size: 0.8rem; }
+
+            thead th, tbody td { padding: 0.625rem 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-inner">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-                <span>LuxeMart</span>
-            </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Back to Shop</a>
-            </nav>
-            <div class="nav-actions">
-                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
+
+<div class="admin-layout">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span>LuxeMart</span>
+            <div class="badge">ADMIN</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Main</div>
+
+            <button class="nav-item active" data-section="overview">
+                <i class="fas fa-chart-pie"></i>
+                Overview
+                <span class="nav-badge" id="pendingBadge">0</span>
+            </button>
+
+            <button class="nav-item" data-section="orders">
+                <i class="fas fa-shopping-bag"></i>
+                Orders
+            </button>
+
+            <button class="nav-item" data-section="products">
+                <i class="fas fa-box"></i>
+                Products
+            </button>
+
+            <button class="nav-item" data-section="users">
+                <i class="fas fa-users"></i>
+                Users
+            </button>
+
+            <div class="nav-label" style="margin-top:0.5rem;">Settings</div>
+
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-store"></i>
+                View Shop
+            </a>
+
+            <button class="nav-item" id="themeToggleBtn">
+                <i class="fas fa-moon"></i>
+                Dark Mode
+            </button>
+
+            <button class="nav-item" id="logoutBtn" style="color:#ef4444;">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=ff6b35&color=fff"
+                     alt="Admin" id="sidebarAvatar">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="sidebarName">Admin</div>
+                    <div class="sidebar-user-role">Administrator</div>
                 </div>
             </div>
         </div>
-    </header>
+    </aside>
 
-    <main class="page-content">
-        <div class="container admin-container">
-            <div class="admin-header">
-                <h1>Admin Dashboard</h1>
-                <p>Manage orders, products, and view site statistics.</p>
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ── MAIN ─────────────────────────────────────────── -->
+    <div class="main-content">
+
+        <!-- Top header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title" id="pageTitle">Overview</div>
             </div>
 
-            <!-- Stats Section -->
-            <div class="stats-grid" id="adminStats">
-                <!-- Stat cards will be injected by admin.js -->
-                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
-                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
-                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
-                <div class="skeleton" style="height: 120px; border-radius: 12px;"></div>
+            <div class="header-right">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Quick search..." id="globalSearch">
+                </div>
+                <button class="header-btn" id="refreshBtn" title="Refresh data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="header-btn" id="themeToggle" title="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
+        </header>
 
-            <!-- Edit Product Modal -->
-            <div class="modal-overlay" id="editProductModal">
-                <div class="modal" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Edit Product</h3>
-                        <button class="modal-close" id="closeEditModal">×</button>
+        <!-- Page content -->
+        <div class="page-content">
+
+            <!-- ── OVERVIEW SECTION ────────────────────── -->
+            <div class="section active" id="section-overview">
+
+                <!-- Stats -->
+                <div class="stats-grid" id="adminStats">
+                    <!-- Injected by admin.js -->
+                    <div class="skeleton" style="height:110px;"></div>
+                    <div class="skeleton" style="height:110px;"></div>
+                    <div class="skeleton" style="height:110px;"></div>
+                    <div class="skeleton" style="height:110px;"></div>
+                    <div class="skeleton" style="height:110px;"></div>
+                    <div class="skeleton" style="height:110px;"></div>
+                </div>
+
+                <!-- Chart + Recent Orders -->
+                <div class="overview-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Revenue Over Time</div>
+                            <div class="chart-filters">
+                                <button class="chart-filter-btn active" data-range="7">7d</button>
+                                <button class="chart-filter-btn" data-range="30">30d</button>
+                                <button class="chart-filter-btn" data-range="90">90d</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <form id="editProductForm">
-                            <input type="hidden" id="editProductId">
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label for="editProductName" style="display: block; margin-bottom: 0.5rem;">Product Name</label>
-                                <input type="text" id="editProductName" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label for="editProductPrice" style="display: block; margin-bottom: 0.5rem;">Price (KSh)</label>
-                                <input type="number" id="editProductPrice" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
-                            </div>
-                            <div class="form-group">
-                                <label for="editProductStock" style="display: block; margin-bottom: 0.5rem;">Stock</label>
-                                <input type="number" id="editProductStock" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;">
-                            </div>
-                            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem; border-radius: 8px;">Save Changes</button>
-                        </form>
+
+                    <div class="table-card">
+                        <div class="table-card-header">
+                            <div class="table-card-title">Recent Orders</div>
+                            <button class="btn btn-outline btn-sm" data-section="orders">View all</button>
+                        </div>
+                        <div class="recent-list" id="recentOrdersList">
+                            <div class="skeleton" style="height:60px;margin:0.5rem;border-radius:8px;"></div>
+                            <div class="skeleton" style="height:60px;margin:0.5rem;border-radius:8px;"></div>
+                            <div class="skeleton" style="height:60px;margin:0.5rem;border-radius:8px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low stock alert -->
+                <div class="table-card" id="lowStockCard" style="display:none;">
+                    <div class="table-card-header">
+                        <div class="table-card-title">
+                            <i class="fas fa-exclamation-triangle" style="color:var(--warning);margin-right:6px;"></i>
+                            Low Stock Alert
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Stock</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lowStockTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Sales Chart Section -->
-            <section class="admin-section">
-                <h2>Sales Over Time</h2>
-                <div class="chart-container" style="position: relative; height:40vh; width:100%; background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow);">
-                    <canvas id="salesChart"></canvas>
+            <!-- ── ORDERS SECTION ──────────────────────── -->
+            <div class="section" id="section-orders">
+                <div class="section-header">
+                    <div class="section-title">Orders</div>
+                    <div class="section-actions">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orderSearch" placeholder="Search orders...">
+                        </div>
+                        <select class="form-control" id="orderStatusFilter"
+                                style="height:34px;padding:0 0.75rem;font-size:0.82rem;width:auto;">
+                            <option value="all">All Status</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
                 </div>
-            </section>
 
-            <!-- Orders Management Section -->
-            <section class="admin-section">
-                <h2>Recent Orders</h2>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminOrdersTableBody">
-                            <!-- Order rows will be injected by admin.js -->
-                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading orders...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="table-card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;padding:2rem;color:var(--light-text);">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Product Management Section -->
-            <section class="admin-section">
-                <h2>Product Management (Latest 20)</h2>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Seller</th>
-                                <th>Price</th>
-                                <th>Stock</th> 
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminProductsTableBody">
-                            <!-- Product rows will be injected by admin.js -->
-                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading products...</td></tr>
-                        </tbody>
-                    </table>
+            <!-- ── PRODUCTS SECTION ────────────────────── -->
+            <div class="section" id="section-products">
+                <div class="section-header">
+                    <div class="section-title">Products</div>
+                    <div class="section-actions">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="productSearch" placeholder="Search products...">
+                        </div>
+                        <select class="form-control" id="productCategoryFilter"
+                                style="height:34px;padding:0 0.75rem;font-size:0.82rem;width:auto;">
+                            <option value="all">All Categories</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="home">Home</option>
+                            <option value="beauty">Beauty</option>
+                            <option value="sports">Sports</option>
+                            <option value="footwear">Footwear</option>
+                            <option value="watches">Watches</option>
+                            <option value="kids">Kids</option>
+                        </select>
+                    </div>
                 </div>
-            </section>
 
+                <div class="table-card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Seller</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminProductsTableBody">
+                                <tr>
+                                    <td colspan="8" style="text-align:center;padding:2rem;color:var(--light-text);">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading products...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── USERS SECTION ───────────────────────── -->
+            <div class="section" id="section-users">
+                <div class="section-header">
+                    <div class="section-title">Users</div>
+                    <div class="section-actions">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="userSearch" placeholder="Search users...">
+                        </div>
+                        <select class="form-control" id="userRoleFilter"
+                                style="height:34px;padding:0 0.75rem;font-size:0.82rem;width:auto;">
+                            <option value="all">All Roles</option>
+                            <option value="buyer">Buyers</option>
+                            <option value="seller">Sellers</option>
+                            <option value="admin">Admins</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Phone</th>
+                                    <th>Change Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align:center;padding:2rem;color:var(--light-text);">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading users...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+</div><!-- /admin-layout -->
+
+<!-- ── EDIT PRODUCT MODAL ──────────────────────────────── -->
+<div class="modal-overlay" id="editProductModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Edit Product</div>
+            <button class="modal-close" id="closeEditModal">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-    </main>
+        <div class="modal-body">
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" id="editProductName" class="form-control" required>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Price (KSh)</label>
+                        <input type="number" id="editProductPrice" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock</label>
+                        <input type="number" id="editProductStock" class="form-control" min="0" required>
+                    </div>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem;">
+                    <button type="button" class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    <div id="toastContainer" class="toast-container"></div>
+<!-- ── ORDER VIEW MODAL ────────────────────────────────── -->
+<div class="modal-overlay" id="orderViewModal">
+    <div class="modal">
+        <div id="orderViewContent"></div>
+    </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="js/products.js"></script>
-    <script src="js/users.js"></script> <!-- Add users data -->
-    <script src="js/admin.js"></script>
-    <script src="js/common.js"></script>
+<!-- ── TOAST CONTAINER ────────────────────────────────── -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ── SCRIPTS ─────────────────────────────────────────── -->
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script>
+// ── SIDEBAR NAVIGATION ──────────────────────────────────
+(function() {
+    const navItems   = document.querySelectorAll('.nav-item[data-section]');
+    const sections   = document.querySelectorAll('.section');
+    const pageTitle  = document.getElementById('pageTitle');
+    const sidebar    = document.getElementById('sidebar');
+    const overlay    = document.getElementById('sidebarOverlay');
+    const toggleBtn  = document.getElementById('sidebarToggle');
+
+    const titles = {
+        overview: 'Overview',
+        orders:   'Orders',
+        products: 'Products',
+        users:    'Users',
+    };
+
+    const switchSection = (target) => {
+        navItems.forEach(i => i.classList.toggle('active', i.dataset.section === target));
+        sections.forEach(s => s.classList.toggle('active', s.id === `section-${target}`));
+        if (pageTitle) pageTitle.textContent = titles[target] || target;
+        // Close sidebar on mobile after nav
+        if (window.innerWidth <= 768) closeSidebar();
+    };
+
+    navItems.forEach(btn => {
+        btn.addEventListener('click', () => switchSection(btn.dataset.section));
+    });
+
+    // Also allow "View all" buttons in overview to switch section
+    document.querySelectorAll('[data-section]').forEach(el => {
+        if (!el.classList.contains('nav-item')) {
+            el.addEventListener('click', () => switchSection(el.dataset.section));
+        }
+    });
+
+    // Mobile sidebar toggle
+    const openSidebar  = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
+    const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
+
+    toggleBtn?.addEventListener('click', openSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+
+    // Theme toggle
+    const applyTheme = (theme) => {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+        document.querySelectorAll('#themeToggle i, #themeToggleBtn i').forEach(i => {
+            i.className = `fas ${icon}`;
+        });
+        document.querySelector('#themeToggleBtn')
+            && (document.querySelector('#themeToggleBtn').childNodes[1]
+                ? document.querySelector('#themeToggleBtn').childNodes[1].textContent = theme === 'dark' ? ' Light Mode' : ' Dark Mode'
+                : null);
+    };
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    document.getElementById('themeToggle')?.addEventListener('click', () => {
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
+    });
+    document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await window.api?.('api/auth/logout.php');
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    });
+
+    // Refresh
+    document.getElementById('refreshBtn')?.addEventListener('click', () => {
+        window.showToast?.('Refreshing data...', 'info');
+        location.reload();
+    });
+
+    // Close modals
+    document.getElementById('closeEditModal')?.addEventListener('click', () => {
+        document.getElementById('editProductModal').classList.remove('show');
+    });
+    document.getElementById('cancelEditBtn')?.addEventListener('click', () => {
+        document.getElementById('editProductModal').classList.remove('show');
+    });
+    document.getElementById('orderViewModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'orderViewModal') e.target.classList.remove('show');
+    });
+    document.getElementById('editProductModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'editProductModal') e.target.classList.remove('show');
+    });
+
+    // Status + category filters wired in admin.js
+    // Order status filter
+    document.getElementById('orderStatusFilter')?.addEventListener('change', (e) => {
+        window._adminFilterOrders?.(e.target.value);
+    });
+
+    // Product category filter
+    document.getElementById('productCategoryFilter')?.addEventListener('change', (e) => {
+        window._adminFilterProducts?.(e.target.value);
+    });
+
+    // User role filter
+    document.getElementById('userRoleFilter')?.addEventListener('change', (e) => {
+        window._adminFilterUsers?.(e.target.value);
+    });
+
+    // Update sidebar user info
+    const updateSidebarUser = () => {
+        const user = window.getUser?.();
+        if (!user) return;
+        const nameEl   = document.getElementById('sidebarName');
+        const avatarEl = document.getElementById('sidebarAvatar');
+        if (nameEl)   nameEl.textContent = user.name;
+        if (avatarEl && user.picture) avatarEl.src = user.picture;
+    };
+
+    // Wait for common.js to verify session
+    setTimeout(updateSidebarUser, 800);
+
+})();
+</script>
+<script src="js/products.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>
