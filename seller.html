@@ -3,177 +3,1418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard - LuxeMart</title>
+    <title>Seller Dashboard — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Icons & Stylesheet -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
     <style>
-        .seller-container { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
-        .seller-header { text-align: center; margin-bottom: 2rem; }
-        .seller-form { background: var(--white); padding: 2rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text); }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; background: var(--white); color: var(--text); }
-        .form-group textarea { resize: vertical; min-height: 100px; }
-        .full-width { grid-column: 1 / -1; }
-        .image-preview { width: 100%; height: 200px; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 0.5rem; overflow: hidden; background: var(--accent); position: relative; }
-        .image-preview img { width: 100%; height: 100%; object-fit: contain; }
-        .image-preview span { color: var(--light-text); pointer-events: none; }
-        
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+        /* ── RESET & BASE ─────────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --primary:    #1a1a1a;
+            --secondary:  #ff6b35;
+            --accent:     #f8f7f4;
+            --text:       #1a1a1a;
+            --light-text: #6b7280;
+            --white:      #ffffff;
+            --border:     #e5e7eb;
+            --success:    #10b981;
+            --danger:     #ef4444;
+            --warning:    #f59e0b;
+            --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+            --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
+            --radius-sm:  8px;
+            --radius-md:  12px;
+            --radius-lg:  16px;
+            --sidebar-w:  260px;
+            --header-h:   64px;
+            --transition: all 0.2s ease;
+        }
+
+        body[data-theme="dark"] {
+            --primary:    #f9fafb;
+            --accent:     #1f2937;
+            --text:       #e5e7eb;
+            --light-text: #9ca3af;
+            --white:      #111827;
+            --border:     #374151;
+            --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--accent);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration:none; color:inherit; }
+        button { cursor:pointer; font-family:inherit; border:none; }
+        img { max-width:100%; display:block; }
+
+        /* ── LAYOUT ───────────────────────────────────── */
+        .seller-layout { display:flex; min-height:100vh; }
+
+        /* ── SIDEBAR ──────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 200;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo img { width:36px; height:36px; }
+
+        .sidebar-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .sidebar-logo .badge {
+            margin-left: auto;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav { flex:1; padding:1rem 0.75rem; }
+
+        .nav-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--light-text);
+            padding: 0.75rem 0.75rem 0.35rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.875rem;
+            border-radius: var(--radius-sm);
+            color: var(--light-text);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: 2px;
+            cursor: pointer;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover { background:var(--accent); color:var(--text); }
+
+        .nav-item.active {
+            background: rgba(255,107,53,0.10);
+            color: var(--secondary);
+        }
+
+        .nav-item i { width:18px; text-align:center; font-size:0.9rem; }
+
+        .sidebar-footer {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+        }
+
+        .sidebar-user img {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.72rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        /* ── MAIN CONTENT ─────────────────────────────── */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HEADER ───────────────────────────────────── */
+        .seller-header {
+            height: var(--header-h);
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 1rem;
+        }
+
+        .header-left { display:flex; align-items:center; gap:1rem; }
+
+        .sidebar-toggle {
+            display: none;
+            width: 36px; height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .page-title { font-size:1.05rem; font-weight:600; }
+
+        .header-right { display:flex; align-items:center; gap:0.75rem; }
+
+        .header-btn {
+            width: 36px; height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .header-btn:hover { background:var(--secondary); color:white; border-color:var(--secondary); }
+
+        /* ── PAGE CONTENT ─────────────────────────────── */
+        .page-content { flex:1; padding:1.5rem; }
+
+        /* ── SECTIONS ─────────────────────────────────── */
+        .section { display:none; }
+        .section.active { display:block; }
+
+        /* ── STATS ROW ────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-label { font-size:0.78rem; color:var(--light-text); font-weight:500; }
+
+        /* ── CARD ─────────────────────────────────────── */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .card-title { font-weight:600; font-size:0.975rem; }
+
+        .card-body { padding:1.25rem; }
+
+        /* ── BUTTONS ──────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-primary { background:var(--secondary); color:white; }
+        .btn-primary:hover { background:#e55a2b; transform:translateY(-1px); }
+        .btn-success { background:var(--success); color:white; }
+        .btn-success:hover { background:#059669; }
+        .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
+        .btn-outline:hover { background:var(--accent); }
+        .btn-danger { background:var(--danger); color:white; }
+        .btn-danger:hover { background:#dc2626; }
+        .btn-sm { padding:0.35rem 0.75rem; font-size:0.78rem; }
+        .btn-icon { width:32px; height:32px; padding:0; justify-content:center; border-radius:var(--radius-sm); }
+        .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; }
+
+        /* ── TABLE ────────────────────────────────────── */
+        .table-wrapper { overflow-x:auto; }
+
+        table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+
+        thead th {
+            background: var(--accent);
+            padding: 0.7rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--light-text);
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td { border-bottom:none; }
+        tbody tr:hover { background:var(--accent); }
+
+        /* ── BADGES ───────────────────────────────────── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-active   { background:#d1fae5; color:#065f46; }
+        .badge-hidden   { background:#f3f4f6; color:#6b7280; }
+        .badge-sale     { background:#ffedd5; color:#9a3412; }
+        .badge-low      { background:#fef3c7; color:#92400e; }
+        .badge-out      { background:#fee2e2; color:#991b1b; }
+
+        /* ── FORM ─────────────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--light-text);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--white);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
+        }
+
+        .form-control.error { border-color:var(--danger); }
+        .field-error { color:var(--danger); font-size:0.78rem; margin-top:0.3rem; }
+
+        textarea.form-control { resize:vertical; min-height:100px; }
+
+        select.form-control { cursor:pointer; }
+
+        /* ── IMAGE UPLOAD ─────────────────────────────── */
+        .image-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--accent);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .image-upload-area:hover,
+        .image-upload-area.dragover {
+            border-color: var(--secondary);
+            background: rgba(255,107,53,0.04);
+        }
+
+        .image-upload-area i {
+            font-size: 2rem;
+            color: var(--light-text);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-upload-area p {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            margin-bottom: 0.5rem;
+        }
+
+        .image-upload-area small { font-size:0.75rem; color:var(--light-text); }
+
+        .image-preview-box {
+            width: 100%;
+            height: 200px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .image-preview-box img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+
+        .image-preview-box .no-image {
+            color: var(--light-text);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .image-preview-box .remove-image {
+            position: absolute;
+            top: 0.5rem; right: 0.5rem;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.9);
+            color: white;
+            font-size: 0.75rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview-box:hover .remove-image { display:flex; }
+
+        .url-or-upload {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .url-or-upload .form-control { flex:1; }
+
+        .url-divider {
+            font-size: 0.78rem;
+            color: var(--light-text);
+            white-space: nowrap;
+        }
+
+        /* ── TOGGLE SWITCH ────────────────────────────── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 42px; height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0; height: 0;
+            position: absolute;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 12px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            top: 3px; left: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toggle-switch input:checked + .toggle-track { background:var(--secondary); }
+        .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+
+        .toggle-label { font-size:0.875rem; font-weight:500; cursor:pointer; }
+
+        /* ── MODAL ────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            padding: 1rem;
+        }
+
+        .modal-overlay.show { opacity:1; visibility:visible; }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: var(--transition);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-overlay.show .modal { transform:scale(1); }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            z-index: 1;
+        }
+
+        .modal-title { font-weight:700; font-size:1.05rem; }
+
+        .modal-close {
+            width: 32px; height: 32px;
+            border-radius: var(--radius-sm);
+            background: var(--accent);
+            font-size: 1.1rem;
+            color: var(--light-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover { background:var(--danger); color:white; }
+
+        .modal-body { padding:1.5rem; }
+
+        /* ── TOAST ────────────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem; right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.875rem 1.25rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-width: 260px;
+            animation: toastIn 0.3s ease;
+            transition: opacity 0.3s;
+        }
+
+        .toast.success { border-left:4px solid var(--success); }
+        .toast.success i { color:var(--success); }
+        .toast.error   { border-left:4px solid var(--danger); }
+        .toast.error   i { color:var(--danger); }
+        .toast.info    { border-left:4px solid #3b82f6; }
+        .toast.info    i { color:#3b82f6; }
+
+        @keyframes toastIn {
+            from { transform:translateX(100%); opacity:0; }
+            to   { transform:translateX(0);    opacity:1; }
+        }
+
+        /* ── SKELETON ─────────────────────────────────── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--accent) 25%, var(--border) 50%, var(--accent) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-sm);
+        }
+
+        @keyframes shimmer {
+            0%   { background-position:200% 0; }
+            100% { background-position:-200% 0; }
+        }
+
+        /* ── EMPTY STATE ──────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--light-text);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 { color:var(--text); margin-bottom:0.5rem; font-size:1.1rem; }
+        .empty-state p  { margin-bottom:1.25rem; font-size:0.9rem; }
+
+        /* ── PRODUCT CARD GRID (mobile) ───────────────── */
+        .product-cards {
+            display: none;
+            gap: 1rem;
+        }
+
+        .product-card-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .product-card-img {
+            width: 100%; height: 160px;
+            object-fit: cover;
+        }
+
+        .product-card-body { padding:0.875rem; }
+
+        .product-card-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .product-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.75rem;
+        }
+
+        .product-card-price {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--secondary);
+        }
+
+        .product-card-actions { display:flex; gap:0.4rem; }
+
+        /* ── SIDEBAR OVERLAY ──────────────────────────── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 199;
+        }
+
+        /* ── RESPONSIVE ───────────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.open { transform:translateX(0); }
+            .sidebar-overlay.show { display:block; }
+            .main-content { margin-left:0; }
+            .sidebar-toggle { display:flex; }
+
+            .stats-row { grid-template-columns:repeat(2,1fr); }
+
+            .form-grid { grid-template-columns:1fr; }
+
+            /* Show cards instead of table on mobile */
+            .table-wrapper table { display:none; }
+            .product-cards { display:grid; grid-template-columns:repeat(2,1fr); }
+
+            .page-content { padding:1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns:1fr 1fr; }
+            .product-cards { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
-    <!-- Header (Simplified) -->
-    <header>
-        <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
-            </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Back to Shop</a>
-            </nav>
-            <div class="nav-actions">
-                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+
+<div class="seller-layout">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="sidebar-logo-text">LuxeMart</span>
+            <span class="badge">Seller</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Dashboard</div>
+
+            <button class="nav-item active" data-section="products">
+                <i class="fas fa-box"></i>
+                My Products
+            </button>
+
+            <button class="nav-item" data-section="add">
+                <i class="fas fa-plus-circle"></i>
+                Add Product
+            </button>
+
+            <button class="nav-item" data-section="orders">
+                <i class="fas fa-shopping-bag"></i>
+                My Orders
+            </button>
+
+            <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-store"></i>
+                View Shop
+            </a>
+
+            <a href="seller-register.html" class="nav-item">
+                <i class="fas fa-user-circle"></i>
+                Profile
+            </a>
+
+            <button class="nav-item" id="themeToggleBtn">
+                <i class="fas fa-moon"></i>
+                Dark Mode
+            </button>
+
+            <button class="nav-item" id="logoutBtn" style="color:var(--danger);">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <img src="https://ui-avatars.com/api/?name=Seller&background=ff6b35&color=fff"
+                     alt="Seller" id="sidebarAvatar">
+                <div>
+                    <div class="sidebar-user-name" id="sidebarName">Loading...</div>
+                    <div class="sidebar-user-role">Seller Account</div>
+                </div>
             </div>
         </div>
-    </header>
+    </aside>
 
-    <main class="page-content">
-        <div class="container seller-container">
-            <div class="seller-header">
-                <h1>List Your Product</h1>
-                <p>Welcome back! Fill in the details below to add your item to the LuxeMart marketplace.</p>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ── MAIN ─────────────────────────────────────────── -->
+    <div class="main-content">
+
+        <header class="seller-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title" id="pageTitle">My Products</div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary btn-sm" data-section="add">
+                    <i class="fas fa-plus"></i>
+                    <span class="hide-xs">Add Product</span>
+                </button>
+                <button class="header-btn" id="themeToggle" title="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="page-content">
+
+            <!-- ── PRODUCTS SECTION ────────────────────── -->
+            <div class="section active" id="section-products">
+
+                <!-- Stats -->
+                <div class="stats-row" id="sellerStats">
+                    <div class="skeleton" style="height:100px;"></div>
+                    <div class="skeleton" style="height:100px;"></div>
+                    <div class="skeleton" style="height:100px;"></div>
+                    <div class="skeleton" style="height:100px;"></div>
+                </div>
+
+                <!-- Products table -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Your Listings</div>
+                        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;
+                                        background:var(--accent);border:1px solid var(--border);
+                                        border-radius:var(--radius-sm);padding:0 0.75rem;height:34px;">
+                                <i class="fas fa-search" style="color:var(--light-text);font-size:0.8rem;"></i>
+                                <input type="text" id="productSearch"
+                                       placeholder="Search products..."
+                                       style="border:none;background:none;font-size:0.82rem;
+                                              color:var(--text);width:150px;outline:none;">
+                            </div>
+                            <button class="btn btn-primary btn-sm" data-section="add">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Desktop table -->
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sellerProductsTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--light-text);">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading your products...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile card view -->
+                    <div class="product-cards" id="productCardsMobile" style="padding:1rem;"></div>
+                </div>
             </div>
 
-            <!-- My Products Section -->
-            <section class="admin-section" style="margin-bottom: 3rem;">
-                <h2>My Products</h2>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sellerProductsTableBody">
-                            <!-- Product rows will be injected by seller.js -->
-                            <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading products...</td></tr>
-                        </tbody>
-                    </table>
+            <!-- ── ADD / EDIT PRODUCT SECTION ─────────── -->
+            <div class="section" id="section-add">
+
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.25rem;"
+                            id="formHeading">Add New Product</h2>
+                        <p style="color:var(--light-text);font-size:0.875rem;" id="formSubheading">
+                            Fill in the details to list your product on LuxeMart.
+                        </p>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="cancelFormBtn" style="display:none;">
+                        <i class="fas fa-times"></i> Cancel Edit
+                    </button>
                 </div>
-            </section>
 
-            <!-- Add Product Form -->
-            <section>
-                <h2>Add New Product</h2>
-                <p>Fill in the details below to add your item to the LuxeMart marketplace.</p>
-            </section>
+                <form id="addProductForm">
+                    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:1.5rem;align-items:start;">
 
-            <!-- Add Product Form (same as before) -->
+                        <!-- Left column -->
+                        <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-            <form class="seller-form" id="addProductForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="pName">Product Name *</label>
-                        <input type="text" id="pName" required placeholder="e.g. Vintage Leather Jacket">
-                    </div>
-                    <div class="form-group">
-                        <label for="pBrand">Brand *</label>
-                        <input type="text" id="pBrand" required placeholder="e.g. Generic or Brand Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="pCategory">Category *</label>
-                        <select id="pCategory" required>
-                            <option value="fashion">Fashion</option>
-                            <option value="electronics">Electronics</option>
-                            <option value="home">Home & Living</option>
-                            <option value="beauty">Beauty</option>
-                            <option value="sports">Sports</option>
-                            <option value="kids">Kids</option>
-                            <option value="footwear">Footwear</option>
-                            <option value="watches">Watches</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="pPrice">Price (KSh) *</label>
-                        <input type="number" id="pPrice" required min="1" placeholder="e.g. 1500">
-                    </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <i class="fas fa-info-circle" style="color:var(--secondary);margin-right:6px;"></i>
+                                        Basic Information
+                                    </div>
+                                </div>
+                                <div class="card-body" style="display:flex;flex-direction:column;gap:1.1rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Product Name *</label>
+                                        <input type="text" id="pName" class="form-control"
+                                               placeholder="e.g. Men's Classic Leather Jacket" required>
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">Brand *</label>
+                                            <input type="text" id="pBrand" class="form-control"
+                                                   placeholder="e.g. Nike" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Category *</label>
+                                            <select id="pCategory" class="form-control" required>
+                                                <option value="">Select category</option>
+                                                <option value="fashion">Fashion</option>
+                                                <option value="electronics">Electronics</option>
+                                                <option value="home">Home & Living</option>
+                                                <option value="beauty">Beauty</option>
+                                                <option value="sports">Sports</option>
+                                                <option value="kids">Kids</option>
+                                                <option value="footwear">Footwear</option>
+                                                <option value="watches">Watches</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Description *</label>
+                                        <textarea id="pDesc" class="form-control"
+                                                  placeholder="Describe your product — materials, features, sizing..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- Add inside your .form-grid, after pPrice -->
-                    <div class="form-group">
-                        <label for="pStock">Stock Quantity *</label>
-                        <input type="number" id="pStock" min="0" placeholder="e.g. 50" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="pOldPrice">Original Price (KSh)</label>
-                        <input type="number" id="pOldPrice" min="0" placeholder="Leave blank if not on sale">
-                    </div>
-                    <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
-                        <input type="checkbox" id="pOnSale" style="width:auto;">
-                        <label for="pOnSale" style="margin:0;">Mark as On Sale</label>
-                    </div>
-                    
-                    <div class="form-group full-width">
-                        <label for="pDesc">Description *</label>
-                        <textarea id="pDesc" required placeholder="Describe your product..."></textarea>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Product Image *</label>
-                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;">
-                            <input type="url" id="pImageUrl" placeholder="Paste Image URL..." style="flex: 1;">
-                            <span style="font-size: 0.9rem;">OR</span>
-                            <label for="pImageFile" class="btn-primary" style="cursor: pointer; padding: 0.75rem 1rem; border-radius: 8px; margin: 0;">Upload</label>
-                            <input type="file" id="pImageFile" accept="image/*" style="display: none;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <i class="fas fa-tag" style="color:var(--secondary);margin-right:6px;"></i>
+                                        Pricing & Stock
+                                    </div>
+                                </div>
+                                <div class="card-body" style="display:flex;flex-direction:column;gap:1.1rem;">
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">Price (KSh) *</label>
+                                            <input type="number" id="pPrice" class="form-control"
+                                                   placeholder="e.g. 2500" min="1" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Original Price (KSh)</label>
+                                            <input type="number" id="pOldPrice" class="form-control"
+                                                   placeholder="Leave blank if not on sale" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Stock Quantity *</label>
+                                        <input type="number" id="pStock" class="form-control"
+                                               placeholder="e.g. 50" min="0" value="10" required>
+                                    </div>
+                                    <div class="toggle-row">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="pOnSale">
+                                            <span class="toggle-track"></span>
+                                        </label>
+                                        <label for="pOnSale" class="toggle-label">Mark as On Sale</label>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-                        <div class="image-preview" id="imagePreview">
-                            <span>No image selected</span>
+
+                        <!-- Right column -->
+                        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        <i class="fas fa-image" style="color:var(--secondary);margin-right:6px;"></i>
+                                        Product Image
+                                    </div>
+                                </div>
+                                <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+
+                                    <!-- Preview -->
+                                    <div class="image-preview-box" id="imagePreview">
+                                        <div class="no-image">
+                                            <i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i>
+                                            No image selected
+                                        </div>
+                                        <button type="button" class="remove-image" id="removeImageBtn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- URL input -->
+                                    <div class="form-group">
+                                        <label class="form-label">Image URL</label>
+                                        <input type="url" id="pImageUrl" class="form-control"
+                                               placeholder="https://example.com/image.jpg">
+                                    </div>
+
+                                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                                        <div style="flex:1;height:1px;background:var(--border);"></div>
+                                        <span style="font-size:0.78rem;color:var(--light-text);">OR</span>
+                                        <div style="flex:1;height:1px;background:var(--border);"></div>
+                                    </div>
+
+                                    <!-- File upload -->
+                                    <div class="image-upload-area" id="uploadArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Drag & drop or click to upload</p>
+                                        <small>JPG, PNG or WEBP — max 2MB</small>
+                                        <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp"
+                                               style="display:none;">
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Tips card -->
+                            <div class="card" style="border-color:rgba(255,107,53,0.2);background:rgba(255,107,53,0.03);">
+                                <div class="card-body" style="padding:1rem;">
+                                    <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.75rem;color:var(--secondary);">
+                                        <i class="fas fa-lightbulb" style="margin-right:6px;"></i> Listing Tips
+                                    </div>
+                                    <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;">
+                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
+                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
+                                            Use a clear, white-background image
+                                        </li>
+                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
+                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
+                                            Write a detailed description with sizing info
+                                        </li>
+                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
+                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
+                                            Set stock accurately to avoid overselling
+                                        </li>
+                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
+                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
+                                            Add original price to show the discount
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
+
+                    <!-- Submit -->
+                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;gap:0.75rem;">
+                        <button type="button" class="btn btn-outline" id="resetFormBtn">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitProductBtn">
+                            <i class="fas fa-plus"></i> List Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ── ORDERS SECTION ──────────────────────── -->
+            <div class="section" id="section-orders">
+                <div style="margin-bottom:1.5rem;">
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.25rem;">
+                        Orders for Your Products
+                    </h2>
+                    <p style="color:var(--light-text);font-size:0.875rem;">
+                        Orders placed by customers for your listings.
+                    </p>
                 </div>
-                <div style="margin-top: 2rem; text-align: right;">
-                    <button type="submit" class="btn-primary" style="padding: 1rem 3rem;">List Item</button>
+
+                <div class="card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sellerOrdersTableBody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--light-text);">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </form>
-        </div>
-    </main>
+            </div>
 
-    <div id="toastContainer" class="toast-container"></div>
+        </div><!-- /page-content -->
+    </div><!-- /main-content -->
+</div><!-- /seller-layout -->
 
-    <script src="js/common.js"></script>
-    <script>
-     document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggle');
-    const moonIcon = '<i class="fas fa-moon"></i>';
-    const sunIcon = '<i class="fas fa-sun"></i>';
+<!-- ── TOAST CONTAINER ────────────────────────────────── -->
+<div id="toastContainer" class="toast-container"></div>
 
-    const applyTheme = (theme) => {
-        if (theme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            if (themeToggle) {
-                themeToggle.innerHTML = sunIcon;
+<!-- ── SCRIPTS ─────────────────────────────────────────── -->
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script>
+// ── SIDEBAR + NAVIGATION ────────────────────────────────
+(function () {
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const navItems  = document.querySelectorAll('.nav-item[data-section], .btn[data-section]');
+    const sections  = document.querySelectorAll('.section');
+    const pageTitle = document.getElementById('pageTitle');
+
+    const titles = {
+        products: 'My Products',
+        add:      'Add Product',
+        orders:   'My Orders',
+    };
+
+    window.switchSection = (target) => {
+        navItems.forEach(i => {
+            if (i.classList.contains('nav-item')) {
+                i.classList.toggle('active', i.dataset.section === target);
             }
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.setAttribute('data-theme', 'light');
-            if (themeToggle) {
-                themeToggle.innerHTML = moonIcon;
-            }
-            localStorage.setItem('theme', 'light');
+        });
+        sections.forEach(s => s.classList.toggle('active', s.id === `section-${target}`));
+        if (pageTitle) pageTitle.textContent = titles[target] || target;
+        if (window.innerWidth <= 768) closeSidebar();
+
+        // Load orders when switching to orders tab
+        if (target === 'orders' && typeof window.loadSellerOrders === 'function') {
+            window.loadSellerOrders();
         }
     };
-});
-    <script src="js/cart.js"></script>
-    <script src="js/seller.js"></script>
+
+    navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.dataset.section) window.switchSection(btn.dataset.section);
+        });
+    });
+
+    const openSidebar  = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
+    const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
+
+    toggleBtn?.addEventListener('click', openSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+
+    // Theme
+    const applyTheme = (theme) => {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        ['#themeToggle i', '#themeToggleBtn i'].forEach(sel => {
+            const el = document.querySelector(sel);
+            if (el) el.className = `fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`;
+        });
+    };
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+    document.getElementById('themeToggle')?.addEventListener('click', () => {
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
+    });
+    document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        await window.api?.('api/auth/logout.php');
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    });
+
+    // Reset form button
+    document.getElementById('resetFormBtn')?.addEventListener('click', () => {
+        if (typeof window.resetSellerForm === 'function') window.resetSellerForm();
+    });
+
+    // Cancel edit button
+    document.getElementById('cancelFormBtn')?.addEventListener('click', () => {
+        if (typeof window.resetSellerForm === 'function') window.resetSellerForm();
+        window.switchSection('products');
+    });
+
+    // Product search
+    document.getElementById('productSearch')?.addEventListener('input', (e) => {
+        if (typeof window.filterSellerProducts === 'function') {
+            window.filterSellerProducts(e.target.value);
+        }
+    });
+
+    // Image upload area drag & drop
+    const uploadArea  = document.getElementById('uploadArea');
+    const fileInput   = document.getElementById('pImageFile');
+
+    uploadArea?.addEventListener('click', () => fileInput?.click());
+
+    uploadArea?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea?.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && fileInput) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // Remove image button
+    document.getElementById('removeImageBtn')?.addEventListener('click', () => {
+        const preview = document.getElementById('imagePreview');
+        if (preview) {
+            preview.innerHTML = `
+                <div class="no-image">
+                    <i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i>
+                    No image selected
+                </div>
+                <button type="button" class="remove-image" id="removeImageBtn">
+                    <i class="fas fa-times"></i>
+                </button>`;
+        }
+        if (fileInput) fileInput.value = '';
+        const urlInput = document.getElementById('pImageUrl');
+        if (urlInput) urlInput.value = '';
+    });
+
+    // Update sidebar user info after session loads
+    setTimeout(() => {
+        const user = window.getUser?.();
+        if (!user) return;
+        const nameEl   = document.getElementById('sidebarName');
+        const avatarEl = document.getElementById('sidebarAvatar');
+        if (nameEl) nameEl.textContent = user.name;
+        if (avatarEl && user.picture) avatarEl.src = user.picture;
+    }, 800);
+
+})();
+
+// ── SELLER STATS RENDERER ───────────────────────────────
+window.renderSellerStats = (products) => {
+    const container = document.getElementById('sellerStats');
+    if (!container) return;
+
+    const total     = products.length;
+    const active    = products.filter(p => p.is_active).length;
+    const outOfStock= products.filter(p => p.stock === 0).length;
+    const revenue   = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+
+    const stats = [
+        { label:'Total Listings',  value: total,      icon:'fa-box',           color:'#3b82f6' },
+        { label:'Active',          value: active,     icon:'fa-check-circle',  color:'#10b981' },
+        { label:'Out of Stock',    value: outOfStock, icon:'fa-exclamation-circle', color:'#ef4444' },
+        { label:'Inventory Value', value:`KSh ${revenue.toLocaleString('en-KE')}`, icon:'fa-coins', color:'#f59e0b' },
+    ];
+
+    container.innerHTML = stats.map(s => `
+        <div class="stat-card">
+            <div class="stat-icon" style="background:${s.color}18;">
+                <i class="fas ${s.icon}" style="color:${s.color};"></i>
+            </div>
+            <div class="stat-value">${s.value}</div>
+            <div class="stat-label">${s.label}</div>
+        </div>
+    `).join('');
+};
+
+// ── MOBILE CARD VIEW RENDERER ───────────────────────────
+window.renderMobileCards = (products) => {
+    const container = document.getElementById('productCardsMobile');
+    if (!container) return;
+
+    if (!products.length) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = products.map(p => `
+        <div class="product-card-item">
+            <img src="${p.image_url}" alt="${p.name}" class="product-card-img"
+                 onerror="this.src='https://via.placeholder.com/300x160?text=${encodeURIComponent(p.name)}'">
+            <div class="product-card-body">
+                <div class="product-card-name">${p.name}</div>
+                <div style="font-size:0.78rem;color:var(--light-text);margin-bottom:0.5rem;text-transform:capitalize;">
+                    ${p.category} · Stock: ${p.stock}
+                </div>
+                <div class="product-card-meta">
+                    <div class="product-card-price">
+                        KSh ${Number(p.price).toLocaleString('en-KE')}
+                    </div>
+                    <div class="product-card-actions">
+                        <button class="btn btn-outline btn-icon edit-btn" data-id="${p.id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-icon delete-btn" data-id="${p.id}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Bind events for mobile cards — seller.js handles these
+    container.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (typeof window._sellerStartEdit === 'function') window._sellerStartEdit(parseInt(btn.dataset.id));
+        });
+    });
+    container.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (typeof window._sellerDelete === 'function') window._sellerDelete(parseInt(btn.dataset.id));
+        });
+    });
+};
+
+// ── SELLER ORDERS LOADER ────────────────────────────────
+window.loadSellerOrders = async () => {
+    const tbody = document.getElementById('sellerOrdersTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--light-text);">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+    </td></tr>`;
+
+    const result = await window.api?.('api/orders/seller_orders.php');
+    if (!result?.success || !result.orders?.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;">
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>No orders yet</h3>
+                <p>Orders for your products will appear here.</p>
+            </div>
+        </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = result.orders.map(o => {
+        const statusColors = {
+            processing: '#3b82f6',
+            shipped:    '#f59e0b',
+            delivered:  '#10b981',
+            cancelled:  '#ef4444',
+        };
+        const color = statusColors[o.status?.toLowerCase()] || '#6b7280';
+        const date  = new Date(o.created_at).toLocaleDateString('en-KE', {
+            year:'numeric', month:'short', day:'numeric',
+        });
+
+        return `
+            <tr>
+                <td style="font-weight:600;font-size:0.82rem;">#${o.order_number}</td>
+                <td>
+                    <div style="font-weight:500;font-size:0.875rem;">${o.customer_name}</div>
+                    <div style="font-size:0.78rem;color:var(--light-text);">${o.customer_email}</div>
+                </td>
+                <td style="font-size:0.85rem;">${o.product_name || '—'}</td>
+                <td style="font-weight:600;">${o.qty || '—'}</td>
+                <td style="font-weight:600;">
+                    KSh ${Number(o.item_total || o.total).toLocaleString('en-KE', { minimumFractionDigits:2 })}
+                </td>
+                <td style="font-size:0.82rem;color:var(--light-text);">${date}</td>
+                <td>
+                    <span style="padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;
+                                 background:${color}18;color:${color};">
+                        ${o.status}
+                    </span>
+                </td>
+            </tr>`;
+    }).join('');
+};
+</script>
+<script src="js/seller.js"></script>
 </body>
 </html>

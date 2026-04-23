@@ -366,7 +366,16 @@
         }
 
         const cancelBtn = document.getElementById('cancelEditBtn');
+     
         if (cancelBtn) cancelBtn.style.display = 'none';
+
+        // Add these lines inside resetForm():
+const heading    = document.getElementById('formHeading');
+const subheading = document.getElementById('formSubheading');
+const cancelBtn  = document.getElementById('cancelFormBtn');
+if (heading)    heading.textContent    = 'Add New Product';
+if (subheading) subheading.textContent = 'Fill in the details to list your product on LuxeMart.';
+if (cancelBtn)  cancelBtn.style.display = 'none';
     };
 
     // ── FORM VALIDATION ────────────────────────────────────
@@ -468,5 +477,32 @@
                 </td>
             </tr>`;
     };
+// Expose for mobile card view wired in seller.html
+window._sellerStartEdit = startEdit;
+window._sellerDelete    = deleteProduct;
 
+// Wire filter function for search input
+window.filterSellerProducts = (query) => {
+    const q = query.toLowerCase().trim();
+    const filtered = q
+        ? sellerProducts.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            (p.brand || '').toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q)
+          )
+        : sellerProducts;
+    renderTable(filtered);
+    window.renderMobileCards?.(filtered);
+};
+renderTable();
+window.renderMobileCards?.(sellerProducts);
+window.renderSellerStats?.(sellerProducts);
+// Add these lines inside startEdit(), after scrollIntoView:
+window.switchSection?.('add');
+const heading    = document.getElementById('formHeading');
+const subheading = document.getElementById('formSubheading');
+const cancelBtn  = document.getElementById('cancelFormBtn');
+if (heading)    heading.textContent    = 'Edit Product';
+if (subheading) subheading.textContent = 'Update the details for this product.';
+if (cancelBtn)  cancelBtn.style.display = 'inline-flex';
 })();
