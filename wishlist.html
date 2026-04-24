@@ -3,101 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist - LuxeMart</title>
+    <title>My Wishlist — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:   #1a1a1a;
+        --secondary: #ff6b35;
+        --sec-dark:  #e55a2b;
+        --accent:    #f8f7f4;
+        --text:      #1a1a1a;
+        --muted:     #6b7280;
+        --white:     #ffffff;
+        --border:    #e5e7eb;
+        --success:   #10b981;
+        --danger:    #ef4444;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md: 0 4px 20px rgba(0,0,0,0.09);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.13);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --nav-h:     68px;
+        --ease:      cubic-bezier(.4,0,.2,1);
+        --dur:       0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary:   #f9fafb;
+        --accent:    #1f2937;
+        --text:      #e5e7eb;
+        --muted:     #9ca3af;
+        --white:     #111827;
+        --border:    #374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+    .container { width:100%; max-width:1320px; margin:0 auto; padding:0 1.25rem; }
+
+    /* Header */
+    header {
+        position:fixed; top:0; left:0; width:100%;
+        height:var(--nav-h);
+        background:rgba(255,255,255,0.94);
+        backdrop-filter:blur(16px);
+        border-bottom:1px solid rgba(229,231,235,0.6);
+        z-index:1000;
+        box-shadow:var(--shadow-sm);
+    }
+
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+
+    .header-inner { height:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:34px; height:34px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:700; color:var(--text); }
+
+    .nav-links { display:flex; align-items:center; gap:0.2rem; }
+
+    .nav-link { padding:0.45rem 0.8rem; border-radius:var(--radius-sm); font-size:0.875rem; font-weight:500; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .nav-link:hover, .nav-link.active { color:var(--text); background:var(--accent); }
+
+    .nav-actions { display:flex; align-items:center; gap:0.4rem; }
+
+    .nav-icon-btn { width:38px; height:38px; border-radius:var(--radius-sm); background:transparent; display:flex; align-items:center; justify-content:center; font-size:0.95rem; color:var(--muted); transition:all var(--dur) var(--ease); position:relative; }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    .nav-badge { position:absolute; top:3px; right:3px; background:var(--secondary); color:white; font-size:0.58rem; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+
+    /* Page hero */
+    .page-hero {
+        margin-top: var(--nav-h);
+        background: linear-gradient(135deg, #1a1a1a 0%, #1e0a1e 50%, #1a1a1a 100%);
+        padding: 2.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-hero::before {
+        content:'';
+        position:absolute; inset:0;
+        background: radial-gradient(ellipse at 30% 50%, rgba(255,107,53,0.1) 0%, transparent 60%);
+    }
+
+    .page-hero-inner { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap; }
+
+    .page-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.6rem,3vw,2.2rem); color:white; margin-bottom:0.3rem; }
+    .page-hero p  { color:rgba(255,255,255,0.6); font-size:0.9rem; }
+
+    /* Wishlist toolbar */
+    .wishlist-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+    }
+
+    .wishlist-count { font-size:0.875rem; color:var(--muted); }
+    .wishlist-count strong { color:var(--text); }
+
+    .btn-add-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1.25rem;
+        background: var(--secondary);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: all var(--dur) var(--ease);
+    }
+
+    .btn-add-all:hover { background:var(--sec-dark); transform:translateY(-1px); }
+
+    /* Products grid */
+    .page-content { padding:2rem 0 4rem; }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.25rem;
+    }
+
+    /* Product card */
+    .product-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: all var(--dur) var(--ease);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .product-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-3px); border-color:transparent; }
+
+    .product-img-wrap {
+        position: relative;
+        aspect-ratio: 1/1;
+        overflow: hidden;
+        background: var(--accent);
+    }
+
+    .product-img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s var(--ease); }
+    .product-card:hover .product-img { transform:scale(1.06); }
+
+    .remove-btn {
+        position: absolute;
+        top: 0.75rem; right: 0.75rem;
+        width: 32px; height: 32px;
+        border-radius: var(--radius-sm);
+        background: white;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        color: var(--danger);
+        border: 1px solid var(--border);
+        transition: all var(--dur) var(--ease);
+        z-index: 2;
+        opacity: 0;
+    }
+
+    .product-card:hover .remove-btn { opacity:1; }
+    .remove-btn:hover { background:var(--danger); color:white; border-color:var(--danger); }
+
+    .product-info { padding:0.875rem 1rem 1rem; flex:1; display:flex; flex-direction:column; }
+
+    .product-brand { font-size:0.68rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--muted); margin-bottom:0.25rem; }
+
+    .product-name { font-weight:600; font-size:0.9rem; color:var(--text); margin-bottom:0.4rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .product-name:hover { color:var(--secondary); }
+
+    .stars { color:#fbbf24; font-size:0.75rem; margin-bottom:0.4rem; }
+
+    .price-row { display:flex; align-items:center; gap:0.4rem; margin-top:auto; margin-bottom:0.75rem; }
+    .price { font-size:1.05rem; font-weight:700; }
+    .price-old { font-size:0.82rem; color:var(--muted); text-decoration:line-through; }
+
+    .btn-atc {
+        width:100%;
+        padding:0.6rem;
+        border-radius:var(--radius-sm);
+        background:var(--primary);
+        color:white;
+        font-size:0.82rem;
+        font-weight:600;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:0.4rem;
+        transition:all var(--dur) var(--ease);
+        border:none;
+    }
+
+    .btn-atc:hover { background:var(--secondary); }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:5rem 1.5rem; }
+    .empty-state-icon { width:90px; height:90px; border-radius:50%; background:var(--white); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; }
+    .empty-state-icon i { font-size:2.5rem; color:var(--muted); opacity:0.4; }
+    .empty-state h3 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.625rem; }
+    .empty-state p  { color:var(--muted); margin-bottom:1.75rem; font-size:0.9rem; max-width:320px; margin-left:auto; margin-right:auto; }
+
+    .btn-shop { display:inline-flex; align-items:center; gap:0.4rem; padding:0.75rem 1.75rem; background:var(--secondary); color:white; border-radius:50px; font-weight:700; font-size:0.875rem; transition:background var(--dur) var(--ease); }
+    .btn-shop:hover { background:var(--sec-dark); }
+
+    /* Skeleton */
+    .skeleton { background:linear-gradient(90deg, var(--accent) 25%, var(--border) 50%, var(--accent) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius-sm); }
+    @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+    /* Toast */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:2000; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); transition:opacity 0.3s; }
+    .toast.success { border-left:4px solid var(--success); }
+    .toast.success i { color:var(--success); }
+    .toast.error { border-left:4px solid var(--danger); }
+    .toast.error i { color:var(--danger); }
+    .toast.info { border-left:4px solid #3b82f6; }
+    .toast.info i { color:#3b82f6; }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* Cart sidebar */
+    .cart-sidebar { position:fixed; top:0; right:-100%; width:min(400px,100vw); height:100vh; background:var(--white); z-index:1200; box-shadow:var(--shadow-lg); transition:right 0.35s var(--ease); display:flex; flex-direction:column; }
+    .cart-sidebar.open { right:0; }
+    .cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1150; display:none; }
+    .cart-overlay.show { display:block; }
+
+    /* Responsive */
+    @media (max-width:768px) { .nav-links { display:none; } .products-grid { grid-template-columns:repeat(2,1fr); gap:0.75rem; } .remove-btn { opacity:1; } }
+    @media (max-width:480px) { .products-grid { grid-template-columns:repeat(2,1fr); gap:0.625rem; } }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
-            </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-            </nav>
-            <div class="nav-actions">
-                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
-                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
-                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
-                    <i class="fas fa-heart"></i>
-                    <span class="cart-count" id="wishlistCount">0</span>
-                </a>
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
-                </div>
-                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <div class="mobile-menu" id="mobileMenu">
-        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="categories.html">Categories</a></li>
-            <li><a href="sale.html">Sale</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html"    class="nav-link">Home</a>
+            <a href="shop.html"     class="nav-link">Shop</a>
+            <a href="wishlist.html" class="nav-link active">Wishlist</a>
+        </nav>
         <div class="nav-actions">
-            <button class="icon-btn" id="mobileSearchBtn">
-                <i class="fas fa-search"></i> Search
-            </button>
-            <button class="icon-btn" id="mobileCartBtn">
-                <i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)
-            </button>
-            <button class="icon-btn" id="themeToggle">
-                <i class="fas fa-moon"></i> Theme
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            <a href="wishlist.html" class="nav-icon-btn">
+                <i class="fas fa-heart" style="color:var(--secondary);"></i>
+                <span class="nav-badge" id="wishlistCount">0</span>
+            </a>
+            <button class="nav-icon-btn" id="cartBtn">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="nav-badge" id="cartCount">0</span>
             </button>
         </div>
     </div>
+</header>
 
-    <main class="page-content">
-        <div class="container">
-            <div class="wishlist-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>My Wishlist</h1>
-                <button id="addAllToCartBtn" class="btn-primary" style="display: none;">Add All to Cart</button>
-            </div>
-            <div class="products-grid" id="wishlistGrid">
-                <!-- Wishlist items will be loaded here -->
-            </div>
+<div class="page-hero">
+    <div class="container page-hero-inner">
+        <div>
+            <h1><i class="fas fa-heart" style="color:var(--secondary);margin-right:0.5rem;"></i>My Wishlist</h1>
+            <p>Items you've saved for later.</p>
         </div>
-    </main>
-
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart">×</button></div>
-        <div id="cartItems"></div>
-        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
-        <div class="cart-actions"><a href="checkout.html" class="btn-primary">Checkout</a></div>
     </div>
+</div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2025 LuxeMart. All rights reserved.</p>
-            </div>
+<main class="page-content">
+    <div class="container">
+        <div class="wishlist-toolbar">
+            <div class="wishlist-count" id="wishlistCountLabel">Loading...</div>
+            <button class="btn-add-all" id="addAllBtn" style="display:none;">
+                <i class="fas fa-shopping-bag"></i> Add All to Cart
+            </button>
         </div>
-    </footer>
+        <div class="products-grid" id="wishlistGrid"></div>
+    </div>
+</main>
 
-    <script src="js/common.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/wishlist.js"></script>
+<!-- Cart sidebar -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+        <h3 style="font-weight:700;font-size:1rem;">Shopping Cart</h3>
+        <button id="closeCart" style="width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:var(--muted);"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="cartItems" style="flex:1;overflow-y:auto;padding:1rem 1.5rem;"></div>
+    <div style="padding:1.25rem 1.5rem;border-top:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:1rem;"><span>Total</span><span id="cartTotal">KSh 0.00</span></div>
+        <a href="checkout.html" style="display:flex;align-items:center;justify-content:center;gap:0.4rem;padding:0.7rem;background:var(--secondary);color:white;border-radius:8px;font-weight:700;font-size:0.875rem;"><i class="fas fa-lock"></i> Checkout</a>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="js/products.js"></script>
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script>
+(function(){
+    'use strict';
+
+    const applyTheme = (t) => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if(i) i.className = `fas ${t==='dark'?'fa-sun':'fa-moon'}`;
+    };
+    applyTheme(localStorage.getItem('theme')||'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme')==='dark'?'light':'dark')
+    );
+
+    // Cart
+    const sidebar  = document.getElementById('cartSidebar');
+    const overlay  = document.getElementById('cartOverlay');
+    document.getElementById('cartBtn')?.addEventListener('click', () => { sidebar?.classList.add('open'); overlay?.classList.add('show'); document.body.style.overflow='hidden'; if(typeof window.fetchCart==='function') window.fetchCart(); });
+    document.getElementById('closeCart')?.addEventListener('click', () => { sidebar?.classList.remove('open'); overlay?.classList.remove('show'); document.body.style.overflow=''; });
+    overlay?.addEventListener('click', () => { sidebar?.classList.remove('open'); overlay?.classList.remove('show'); document.body.style.overflow=''; });
+
+    // Load wishlist
+    const starHtml = (r) => {
+        let h='';
+        for(let i=1;i<=5;i++) h += i<=Math.floor(r)?'<i class="fas fa-star"></i>':i-0.5<=r?'<i class="fas fa-star-half-alt"></i>':'<i class="far fa-star"></i>';
+        return h;
+    };
+
+    const loadWishlist = async () => {
+        const grid  = document.getElementById('wishlistGrid');
+        const label = document.getElementById('wishlistCountLabel');
+        const addAllBtn = document.getElementById('addAllBtn');
+        if(!grid) return;
+
+        // Try server wishlist first
+        const user = window.getUser?.();
+        let wishlistProducts = [];
+
+        if(user) {
+            const result = await window.api?.('api/wishlist/get.php');
+            if(result?.success) {
+                wishlistProducts = result.wishlist || [];
+            }
+        } else {
+            // Fallback to localStorage IDs + products.js
+            const ids = JSON.parse(localStorage.getItem('wishlist')||'[]');
+            if(window.products) {
+                wishlistProducts = window.products.filter(p => ids.includes(String(p.id)));
+            }
+        }
+
+        if(label) {
+            label.innerHTML = wishlistProducts.length
+                ? `<strong>${wishlistProducts.length}</strong> item${wishlistProducts.length!==1?'s':''} saved`
+                : 'No items saved yet';
+        }
+
+        if(!wishlistProducts.length) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column:1/-1;">
+                    <div class="empty-state-icon"><i class="fas fa-heart"></i></div>
+                    <h3>Your wishlist is empty</h3>
+                    <p>Browse our shop and save items you love for later.</p>
+                    <a href="shop.html" class="btn-shop">
+                        <i class="fas fa-shopping-bag"></i> Discover Products
+                    </a>
+                </div>`;
+            if(addAllBtn) addAllBtn.style.display='none';
+            return;
+        }
+
+        if(addAllBtn) addAllBtn.style.display='inline-flex';
+
+        grid.innerHTML = wishlistProducts.map(p => {
+            const price    = Number(p.price);
+            const oldPrice = p.oldPrice ? Number(p.oldPrice) : null;
+            const discount = oldPrice ? Math.round((1 - price/oldPrice)*100) : 0;
+            return `
+            <div class="product-card" data-id="${p.id}">
+                <div class="product-img-wrap">
+                    <a href="product.html?id=${p.id}">
+                        <img src="${p.img||p.image_url}" alt="${p.name}" class="product-img" loading="lazy"
+                             onerror="this.src='https://via.placeholder.com/300?text=?'">
+                    </a>
+                    ${discount>0?`<div style="position:absolute;top:0.75rem;left:0.75rem;background:var(--secondary);color:white;padding:2px 8px;border-radius:50px;font-size:0.65rem;font-weight:700;">-${discount}%</div>`:''}
+                    <button class="remove-btn" data-id="${p.id}" title="Remove from wishlist">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <div class="product-brand">${p.brand||''}</div>
+                    <a href="product.html?id=${p.id}" class="product-name">${p.name}</a>
+                    <div class="stars">${starHtml(p.rating||4.5)}</div>
+                    <div class="price-row">
+                        <span class="price">KSh ${price.toLocaleString('en-KE')}</span>
+                        ${oldPrice?`<span class="price-old">KSh ${oldPrice.toLocaleString('en-KE')}</span>`:''}
+                    </div>
+                    <button class="btn-atc add-to-cart" data-id="${p.id}">
+                        <i class="fas fa-shopping-bag"></i> Add to Cart
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Remove from wishlist
+        grid.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                if(user) {
+                    await window.api?.('api/wishlist/toggle.php', { method:'POST', body:JSON.stringify({ product_id:id }) });
+                } else {
+                    let ids = JSON.parse(localStorage.getItem('wishlist')||'[]');
+                    ids = ids.filter(i => i !== String(id));
+                    localStorage.setItem('wishlist', JSON.stringify(ids));
+                }
+                btn.closest('.product-card').style.opacity='0';
+                btn.closest('.product-card').style.transform='scale(0.9)';
+                btn.closest('.product-card').style.transition='all 0.3s ease';
+                setTimeout(() => { loadWishlist(); window.updateWishlistCount?.(); }, 300);
+                window.showToast?.('Removed from wishlist.', 'info');
+            });
+        });
+
+        // Add all to cart
+        addAllBtn?.addEventListener('click', async () => {
+            for(const p of wishlistProducts) {
+                if(typeof window.addToCart==='function') {
+                    await window.addToCart(p, 1);
+                }
+            }
+            window.showToast?.(`${wishlistProducts.length} items added to cart!`, 'success');
+            sidebar?.classList.add('open');
+            overlay?.classList.add('show');
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', loadWishlist);
+})();
+</script>
 </body>
 </html>
