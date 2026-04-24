@@ -3,101 +3,544 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - LuxeMart</title>
+    <title>Contact Us — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:   #1a1a1a;
+        --secondary: #ff6b35;
+        --sec-dark:  #e55a2b;
+        --accent:    #f8f7f4;
+        --text:      #1a1a1a;
+        --muted:     #6b7280;
+        --white:     #ffffff;
+        --border:    #e5e7eb;
+        --success:   #10b981;
+        --danger:    #ef4444;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md: 0 4px 20px rgba(0,0,0,0.09);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.13);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --nav-h:     68px;
+        --ease:      cubic-bezier(.4,0,.2,1);
+        --dur:       0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary: #f9fafb; --accent: #1f2937; --text: #e5e7eb;
+        --muted: #9ca3af;   --white: #111827;  --border: #374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+    .container { width:100%; max-width:1100px; margin:0 auto; padding:0 1.25rem; }
+
+    /* Header */
+    header { position:fixed; top:0; left:0; width:100%; height:var(--nav-h); background:rgba(255,255,255,0.94); backdrop-filter:blur(16px); border-bottom:1px solid rgba(229,231,235,0.6); z-index:1000; box-shadow:var(--shadow-sm); }
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+    .header-inner { height:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:34px; height:34px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:700; color:var(--text); }
+    .nav-links { display:flex; align-items:center; gap:0.2rem; }
+    .nav-link { padding:0.45rem 0.8rem; border-radius:var(--radius-sm); font-size:0.875rem; font-weight:500; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .nav-link:hover, .nav-link.active { color:var(--text); background:var(--accent); }
+    .nav-actions { display:flex; align-items:center; gap:0.4rem; }
+    .nav-icon-btn { width:38px; height:38px; border-radius:var(--radius-sm); background:transparent; display:flex; align-items:center; justify-content:center; font-size:0.95rem; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    /* Hero */
+    .page-hero {
+        margin-top: var(--nav-h);
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        padding: 3rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .page-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 50%, rgba(255,107,53,0.12) 0%, transparent 65%); }
+    .page-hero-inner { position:relative; z-index:1; text-align:center; }
+    .page-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,4vw,2.8rem); color:white; margin-bottom:0.625rem; }
+    .page-hero p  { color:rgba(255,255,255,0.6); font-size:0.95rem; max-width:480px; margin:0 auto; }
+
+    /* Contact info cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin: -2rem auto 0;
+        position: relative;
+        z-index: 10;
+        padding: 0 1.25rem;
+        max-width: 1100px;
+    }
+
+    .info-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        transition: all var(--dur) var(--ease);
+    }
+
+    .info-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+
+    .info-card-icon {
+        width: 52px; height: 52px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--secondary), var(--sec-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.2rem;
+        color: white;
+        box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+
+    .info-card h3 { font-size:0.9rem; font-weight:700; margin-bottom:0.375rem; }
+    .info-card p  { font-size:0.82rem; color:var(--muted); line-height:1.6; }
+    .info-card a  { color:var(--secondary); font-weight:600; }
+
+    /* Main content */
+    .contact-layout {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 2rem;
+        padding: 3rem 0 4rem;
+        margin-top: 2rem;
+    }
+
+    /* Form card */
+    .form-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 2rem;
+    }
+
+    .form-card h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.375rem; }
+    .form-card > p { color:var(--muted); font-size:0.875rem; margin-bottom:1.75rem; }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .form-row.full { grid-template-columns:1fr; }
+
+    .form-group { display:flex; flex-direction:column; gap:0.35rem; }
+
+    .form-label { font-size:0.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+    .form-control { width:100%; padding:0.7rem 0.875rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:0.9rem; font-family:inherit; color:var(--text); background:var(--white); outline:none; transition:all var(--dur) var(--ease); }
+    .form-control:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(255,107,53,0.1); }
+
+    select.form-control { cursor:pointer; }
+    textarea.form-control { resize:vertical; min-height:130px; }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.875rem;
+        border-radius: var(--radius-sm);
+        background: var(--secondary);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all var(--dur) var(--ease);
+        box-shadow: 0 4px 14px rgba(255,107,53,0.3);
+        margin-top: 1.25rem;
+    }
+
+    .btn-submit:hover { background:var(--sec-dark); transform:translateY(-1px); }
+    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+    /* Success state */
+    .form-success {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        display: none;
+    }
+
+    .form-success.show { display:block; animation:fadeIn 0.4s var(--ease); }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:none;} }
+
+    .success-icon {
+        width: 64px; height: 64px;
+        background: rgba(16,185,129,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 1.75rem;
+        color: var(--success);
+    }
+
+    /* Sidebar */
+    .contact-sidebar { display:flex; flex-direction:column; gap:1.25rem; }
+
+    /* FAQ teaser */
+    .sidebar-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .sidebar-card-head {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+    }
+
+    .sidebar-card-head i { color:var(--secondary); }
+
+    .sidebar-card-body { padding:1.25rem; }
+
+    /* Hours */
+    .hours-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.875rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .hours-row:last-child { border-bottom:none; }
+    .hours-row .day   { color:var(--muted); }
+    .hours-row .time  { font-weight:600; }
+    .hours-row .open  { color:var(--success); }
+    .hours-row .closed{ color:var(--danger); }
+
+    /* Social */
+    .social-links { display:flex; gap:0.625rem; margin-top:1rem; }
+
+    .social-link {
+        width: 38px; height: 38px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        color: var(--muted);
+        transition: all var(--dur) var(--ease);
+    }
+
+    .social-link:hover { background:var(--secondary); color:white; border-color:var(--secondary); }
+
+    /* Map placeholder */
+    .map-wrap {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .map-placeholder {
+        height: 220px;
+        background: linear-gradient(135deg, #e8f0fe, #f3e8ff);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: var(--muted);
+        font-size: 0.875rem;
+    }
+
+    .map-placeholder i { font-size:2.5rem; opacity:0.3; }
+
+    .map-address { padding:1rem 1.25rem; font-size:0.875rem; display:flex; align-items:center; gap:0.625rem; color:var(--muted); }
+    .map-address i { color:var(--secondary); }
+
+    /* Toast */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:2000; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); }
+    .toast.success { border-left:4px solid var(--success); }
+    .toast.success i { color:var(--success); }
+    .toast.error { border-left:4px solid var(--danger); }
+    .toast.error i { color:var(--danger); }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* Responsive */
+    @media (max-width:900px) {
+        .info-cards { grid-template-columns:1fr; margin-top:1.5rem; }
+        .contact-layout { grid-template-columns:1fr; }
+    }
+
+    @media (max-width:768px) { .nav-links { display:none; } .form-row { grid-template-columns:1fr; } }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html"   class="nav-link">Home</a>
+            <a href="shop.html"    class="nav-link">Shop</a>
+            <a href="about.html"   class="nav-link">About</a>
+            <a href="contact.html" class="nav-link active">Contact</a>
+        </nav>
+        <div class="nav-actions">
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            <a href="wishlist.html" class="nav-icon-btn"><i class="fas fa-heart"></i></a>
+            <a href="cart.html"     class="nav-icon-btn"><i class="fas fa-shopping-bag"></i></a>
+        </div>
+    </div>
+</header>
+
+<!-- Hero -->
+<div class="page-hero">
+    <div class="container page-hero-inner">
+        <h1>Get In Touch</h1>
+        <p>Have a question, concern, or just want to say hello? We'd love to hear from you.</p>
+    </div>
+</div>
+
+<!-- Info cards -->
+<div class="info-cards">
+    <div class="info-card">
+        <div class="info-card-icon"><i class="fas fa-phone-alt"></i></div>
+        <h3>Call Us</h3>
+        <p><a href="tel:+254712345678">+254 712 345 678</a><br>Mon–Fri, 8AM–6PM EAT</p>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon"><i class="fas fa-envelope"></i></div>
+        <h3>Email Us</h3>
+        <p><a href="mailto:support@luxemart.co.ke">support@luxemart.co.ke</a><br>We reply within 24 hours</p>
+    </div>
+    <div class="info-card">
+        <div class="info-card-icon"><i class="fab fa-whatsapp"></i></div>
+        <h3>WhatsApp</h3>
+        <p><a href="https://wa.me/254712345678" target="_blank">Chat on WhatsApp</a><br>Fastest response</p>
+    </div>
+</div>
+
+<main>
+<div class="container">
+<div class="contact-layout">
+
+    <!-- Contact form -->
+    <div class="form-card">
+        <h2>Send Us a Message</h2>
+        <p>Fill out the form and we'll get back to you within one business day.</p>
+
+        <div id="contactFormWrap">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" id="contactName" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" id="contactEmail" class="form-control" placeholder="john@example.com" required>
+                </div>
             </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html" style="color: var(--secondary);">Contact</a>
-            </nav>
-            <div class="nav-actions">
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" id="contactPhone" class="form-control" placeholder="0712345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject *</label>
+                    <select id="contactSubject" class="form-control" required>
+                        <option value="">Select topic...</option>
+                        <option>Order Issue</option>
+                        <option>Product Question</option>
+                        <option>Return / Refund</option>
+                        <option>Seller Inquiry</option>
+                        <option>Payment Problem</option>
+                        <option>Feedback</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Order Number (if applicable)</label>
+                    <input type="text" id="contactOrder" class="form-control" placeholder="e.g. LUX-123456">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label class="form-label">Message *</label>
+                    <textarea id="contactMessage" class="form-control" placeholder="Describe your issue or question in detail..."></textarea>
+                </div>
+            </div>
+            <button class="btn-submit" id="contactSubmitBtn">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </div>
+
+        <div class="form-success" id="formSuccess">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.5rem;">Message Sent!</h3>
+            <p style="color:var(--muted);font-size:0.9rem;line-height:1.6;max-width:320px;margin:0 auto 1.5rem;">
+                Thank you for reaching out. Our team will get back to you within 24 hours.
+            </p>
+            <button onclick="document.getElementById('formSuccess').classList.remove('show');document.getElementById('contactFormWrap').style.display='block';" style="padding:0.6rem 1.25rem;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;">
+                Send Another Message
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="contact-sidebar">
+
+        <!-- Business hours -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-head">
+                <i class="fas fa-clock"></i> Business Hours
+            </div>
+            <div class="sidebar-card-body" style="padding:0;">
+                <div class="hours-row" style="padding:0.625rem 1.25rem;">
+                    <span class="day">Monday – Friday</span>
+                    <span class="time open">8:00 AM – 6:00 PM</span>
+                </div>
+                <div class="hours-row" style="padding:0.625rem 1.25rem;">
+                    <span class="day">Saturday</span>
+                    <span class="time open">9:00 AM – 4:00 PM</span>
+                </div>
+                <div class="hours-row" style="padding:0.625rem 1.25rem;border-bottom:none;">
+                    <span class="day">Sunday</span>
+                    <span class="time closed">Closed</span>
                 </div>
             </div>
         </div>
-    </header>
 
-    <main class="page-content">
-        <div class="container">
-            <div class="section-header">
-                <h1>Get in Touch</h1>
-                <p>Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        <!-- Social -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-head">
+                <i class="fas fa-share-alt"></i> Follow Us
             </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; margin-top: 3rem;">
-                <div class="contact-info">
-                    <div style="margin-bottom: 2rem;">
-                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-map-marker-alt" style="color: var(--secondary); margin-right: 10px;"></i> Address</h3>
-                        <p style="color: var(--light-text);">LuxeMart HQ, 123 Premium Plaza<br>Nairobi, Kenya</p>
-                    </div>
-                    <div style="margin-bottom: 2rem;">
-                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-phone-alt" style="color: var(--secondary); margin-right: 10px;"></i> Phone</h3>
-                        <p style="color: var(--light-text);">+254 700 000 000</p>
-                    </div>
-                    <div style="margin-bottom: 2rem;">
-                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-envelope" style="color: var(--secondary); margin-right: 10px;"></i> Email</h3>
-                        <p style="color: var(--light-text);">support@luxemart.co.ke</p>
-                    </div>
-                </div>
-
-                <div class="contact-form-wrapper" style="background: var(--accent); padding: 3rem; border-radius: 16px;">
-                    <form id="contactForm">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Your Name</label>
-                                <input type="text" placeholder="John Doe" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px;" required>
-                            </div>
-                            <div class="form-group">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email Address</label>
-                                <input type="email" placeholder="john@example.com" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px;" required>
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 1.5rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Subject</label>
-                            <input type="text" placeholder="Order Inquiry" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px;" required>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 1.5rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Message</label>
-                            <textarea rows="5" placeholder="How can we help you?" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit;" required></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Send Message</button>
-                    </form>
+            <div class="sidebar-card-body">
+                <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.875rem;">Stay updated with deals, new arrivals, and announcements.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link" title="Twitter/X"><i class="fab fa-x-twitter"></i></a>
+                    <a href="#" class="social-link" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://wa.me/254712345678" class="social-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
         </div>
-    </main>
 
-    <footer style="margin-top: 5rem;">
-        <div class="container"><div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div></div>
-    </footer>
+        <!-- Map -->
+        <div class="map-wrap">
+            <div class="map-placeholder">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Nairobi, Kenya</span>
+            </div>
+            <div class="map-address">
+                <i class="fas fa-map-marker-alt"></i>
+                LuxeMart HQ, Westlands, Nairobi, Kenya
+            </div>
+        </div>
 
-    <script src="js/common.js"></script>
-    <script>
-        document.getElementById('contactForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Thank you! Your message has been sent. We will get back to you shortly.');
-            e.target.reset();
-        });
-    </script>
+        <!-- Quick links -->
+        <div class="sidebar-card">
+            <div class="sidebar-card-head">
+                <i class="fas fa-link"></i> Quick Links
+            </div>
+            <div class="sidebar-card-body" style="padding:0.5rem 0;">
+                <a href="faq.html"    style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background=''"><i class="fas fa-question-circle" style="color:var(--secondary);width:16px;"></i> FAQ</a>
+                <a href="orders.html" style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background=''"><i class="fas fa-box" style="color:var(--secondary);width:16px;"></i> Track My Order</a>
+                <a href="shop.html"   style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background=''"><i class="fas fa-shopping-bag" style="color:var(--secondary);width:16px;"></i> Browse Products</a>
+                <a href="seller.html" style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 1.25rem;font-size:0.875rem;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background=''"><i class="fas fa-store" style="color:var(--secondary);width:16px;"></i> Become a Seller</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="js/common.js"></script>
+<script>
+(function(){
+    'use strict';
+
+    // Theme
+    const applyTheme = (t) => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if(i) i.className = `fas ${t==='dark'?'fa-sun':'fa-moon'}`;
+    };
+    applyTheme(localStorage.getItem('theme')||'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme')==='dark'?'light':'dark')
+    );
+
+    // Pre-fill user info
+    document.addEventListener('DOMContentLoaded', () => {
+        const user = window.getUser?.();
+        if(user) {
+            const n = document.getElementById('contactName');
+            const e = document.getElementById('contactEmail');
+            if(n && !n.value) n.value = user.name  || '';
+            if(e && !e.value) e.value = user.email || '';
+        }
+    });
+
+    // Form submission
+    document.getElementById('contactSubmitBtn')?.addEventListener('click', async () => {
+        const name    = document.getElementById('contactName')?.value.trim();
+        const email   = document.getElementById('contactEmail')?.value.trim();
+        const subject = document.getElementById('contactSubject')?.value;
+        const message = document.getElementById('contactMessage')?.value.trim();
+
+        if(!name || !email || !subject || !message) {
+            window.showToast?.('Please fill in all required fields.', 'error');
+            return;
+        }
+
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            window.showToast?.('Enter a valid email address.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('contactSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+        // Simulate send (replace with real API call if needed)
+        await new Promise(r => setTimeout(r, 1400));
+
+        document.getElementById('contactFormWrap').style.display = 'none';
+        document.getElementById('formSuccess').classList.add('show');
+        window.showToast?.('Message sent successfully!', 'success');
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+    });
+})();
+</script>
 </body>
 </html>

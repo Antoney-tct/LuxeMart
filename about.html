@@ -3,86 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - LuxeMart</title>
+    <title>About Us — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
+    <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:   #1a1a1a;
+        --secondary: #ff6b35;
+        --sec-dark:  #e55a2b;
+        --accent:    #f8f7f4;
+        --text:      #1a1a1a;
+        --muted:     #6b7280;
+        --white:     #ffffff;
+        --border:    #e5e7eb;
+        --success:   #10b981;
+        --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md: 0 4px 20px rgba(0,0,0,0.09);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.13);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --nav-h:     68px;
+        --ease:      cubic-bezier(.4,0,.2,1);
+        --dur:       0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary: #f9fafb; --accent: #1f2937; --text: #e5e7eb;
+        --muted: #9ca3af;   --white: #111827;  --border: #374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+    .container { width:100%; max-width:1100px; margin:0 auto; padding:0 1.25rem; }
+
+    /* Header */
+    header { position:fixed; top:0; left:0; width:100%; height:var(--nav-h); background:rgba(255,255,255,0.94); backdrop-filter:blur(16px); border-bottom:1px solid rgba(229,231,235,0.6); z-index:1000; box-shadow:var(--shadow-sm); }
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+    .header-inner { height:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:34px; height:34px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:700; color:var(--text); }
+    .nav-links { display:flex; align-items:center; gap:0.2rem; }
+    .nav-link { padding:0.45rem 0.8rem; border-radius:var(--radius-sm); font-size:0.875rem; font-weight:500; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .nav-link:hover, .nav-link.active { color:var(--text); background:var(--accent); }
+    .nav-actions { display:flex; align-items:center; gap:0.4rem; }
+    .nav-icon-btn { width:38px; height:38px; border-radius:var(--radius-sm); background:transparent; display:flex; align-items:center; justify-content:center; font-size:0.95rem; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    /* Hero */
+    .about-hero {
+        margin-top: var(--nav-h);
+        min-height: 480px;
+        background: linear-gradient(135deg, #0f172a 0%, #111827 40%, #1c1c1c 100%);
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .about-hero::before {
+        content:'';
+        position:absolute; inset:0;
+        background:
+            radial-gradient(ellipse at 15% 60%, rgba(255,107,53,0.14) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 30%, rgba(99,102,241,0.1) 0%, transparent 55%);
+    }
+
+    /* Animated dots */
+    .hero-dots {
+        position:absolute;
+        inset:0;
+        overflow:hidden;
+        pointer-events:none;
+    }
+
+    .hero-dots span {
+        position:absolute;
+        width:3px; height:3px;
+        border-radius:50%;
+        background:rgba(255,255,255,0.15);
+        animation:float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%,100% { transform:translateY(0); opacity:0.15; }
+        50%      { transform:translateY(-20px); opacity:0.4; }
+    }
+
+    .about-hero-inner {
+        position:relative; z-index:1;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:3rem;
+        align-items:center;
+        padding:3rem 0;
+    }
+
+    .hero-badge {
+        display:inline-flex;
+        align-items:center;
+        gap:0.5rem;
+        background:rgba(255,107,53,0.15);
+        border:1px solid rgba(255,107,53,0.3);
+        color:var(--secondary);
+        padding:0.35rem 0.875rem;
+        border-radius:50px;
+        font-size:0.72rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:1px;
+        margin-bottom:1.25rem;
+    }
+
+    .about-hero h1 {
+        font-family:'Playfair Display',serif;
+        font-size:clamp(2rem,4vw,3rem);
+        color:white;
+        line-height:1.15;
+        margin-bottom:1.25rem;
+    }
+
+    .about-hero h1 span { color:var(--secondary); }
+
+    .about-hero p {
+        color:rgba(255,255,255,0.65);
+        font-size:0.95rem;
+        line-height:1.75;
+        margin-bottom:2rem;
+    }
+
+    .hero-btns { display:flex; gap:0.875rem; flex-wrap:wrap; }
+
+    .btn-primary {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        padding:0.75rem 1.5rem;
+        background:var(--secondary);
+        color:white;
+        border-radius:50px;
+        font-weight:700;
+        font-size:0.875rem;
+        transition:all var(--dur) var(--ease);
+        box-shadow:0 4px 14px rgba(255,107,53,0.4);
+    }
+
+    .btn-primary:hover { background:var(--sec-dark); transform:translateY(-1px); }
+
+    .btn-outline {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        padding:0.75rem 1.5rem;
+        border:2px solid rgba(255,255,255,0.25);
+        color:white;
+        border-radius:50px;
+        font-weight:600;
+        font-size:0.875rem;
+        transition:all var(--dur) var(--ease);
+    }
+
+    .btn-outline:hover { background:rgba(255,255,255,0.08); }
+
+    /* Hero visual */
+    .hero-visual {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:0.875rem;
+    }
+
+    .hero-stat-card {
+        background:rgba(255,255,255,0.07);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:var(--radius-md);
+        padding:1.25rem;
+        text-align:center;
+        backdrop-filter:blur(4px);
+        transition:all var(--dur) var(--ease);
+    }
+
+    .hero-stat-card:hover { background:rgba(255,255,255,0.1); transform:translateY(-2px); }
+
+    .hero-stat-card .num { font-family:'Playfair Display',serif; font-size:1.75rem; font-weight:700; color:white; }
+    .hero-stat-card .num span { color:var(--secondary); }
+    .hero-stat-card .lbl { font-size:0.72rem; color:rgba(255,255,255,0.55); margin-top:0.25rem; font-weight:500; }
+
+    /* Sections */
+    section { padding:4rem 0; }
+
+    section + section { padding-top:0; }
+
+    .section-label {
+        display:inline-flex;
+        align-items:center;
+        gap:0.4rem;
+        background:rgba(255,107,53,0.08);
+        color:var(--secondary);
+        padding:0.25rem 0.75rem;
+        border-radius:50px;
+        font-size:0.72rem;
+        font-weight:700;
+        letter-spacing:1px;
+        text-transform:uppercase;
+        margin-bottom:0.875rem;
+    }
+
+    .section-title { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,3vw,2.2rem); margin-bottom:0.75rem; }
+
+    .section-sub { color:var(--muted); font-size:0.95rem; line-height:1.7; max-width:600px; }
+
+    /* Mission grid */
+    .mission-grid {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:2rem;
+        align-items:center;
+    }
+
+    .mission-text p { color:var(--muted); font-size:0.9rem; line-height:1.75; margin-bottom:1rem; }
+
+    .mission-visual {
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:1rem;
+    }
+
+    .mission-block {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        padding:1.25rem;
+        box-shadow:var(--shadow-sm);
+        transition:all var(--dur) var(--ease);
+    }
+
+    .mission-block:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .mission-block:first-child { grid-column:1/-1; }
+
+    .mission-block-icon { font-size:1.5rem; margin-bottom:0.625rem; }
+    .mission-block h4  { font-weight:700; font-size:0.875rem; margin-bottom:0.25rem; }
+    .mission-block p   { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+
+    /* Values */
+    .values-section { background:var(--white); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+    .values-grid {
+        display:grid;
+        grid-template-columns:repeat(4, 1fr);
+        gap:1.5rem;
+        margin-top:2.5rem;
+    }
+
+    .value-card {
+        text-align:center;
+        padding:1.5rem 1rem;
+    }
+
+    .value-icon {
+        width:56px; height:56px;
+        border-radius:var(--radius-md);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:1.4rem;
+        margin:0 auto 1rem;
+        background:linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,107,53,0.05));
+        color:var(--secondary);
+    }
+
+    .value-card h3 { font-weight:700; font-size:0.9rem; margin-bottom:0.375rem; }
+    .value-card p  { font-size:0.8rem; color:var(--muted); line-height:1.6; }
+
+    /* Team */
+    .team-grid {
+        display:grid;
+        grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+        gap:1.5rem;
+        margin-top:2.5rem;
+    }
+
+    .team-card {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        overflow:hidden;
+        text-align:center;
+        box-shadow:var(--shadow-sm);
+        transition:all var(--dur) var(--ease);
+    }
+
+    .team-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+
+    .team-avatar {
+        width:80px; height:80px;
+        border-radius:50%;
+        margin:1.5rem auto 1rem;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:2rem;
+        font-weight:700;
+        color:white;
+        font-family:'Playfair Display',serif;
+    }
+
+    .team-name  { font-weight:700; font-size:0.95rem; margin-bottom:0.2rem; }
+    .team-role  { font-size:0.75rem; color:var(--muted); font-weight:500; margin-bottom:1rem; }
+    .team-links { display:flex; justify-content:center; gap:0.5rem; padding:0.875rem; border-top:1px solid var(--border); }
+    .team-link  { width:30px; height:30px; border-radius:6px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:0.78rem; color:var(--muted); transition:all var(--dur) var(--ease); }
+    .team-link:hover { background:var(--secondary); color:white; }
+
+    /* Timeline */
+    .timeline { margin-top:2.5rem; position:relative; }
+
+    .timeline::before {
+        content:'';
+        position:absolute;
+        left:24px; top:0; bottom:0;
+        width:2px;
+        background:linear-gradient(to bottom, var(--secondary), var(--border));
+    }
+
+    .timeline-item {
+        display:flex;
+        gap:1.5rem;
+        margin-bottom:2rem;
+        padding-left:0.5rem;
+    }
+
+    .timeline-dot {
+        width:48px; height:48px;
+        border-radius:50%;
+        background:var(--secondary);
+        color:white;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:800;
+        font-size:0.8rem;
+        flex-shrink:0;
+        box-shadow:0 0 0 4px rgba(255,107,53,0.15);
+        position:relative;
+        z-index:1;
+    }
+
+    .timeline-content {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        padding:1rem 1.25rem;
+        box-shadow:var(--shadow-sm);
+        flex:1;
+    }
+
+    .timeline-year  { font-size:0.72rem; font-weight:700; color:var(--secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.25rem; }
+    .timeline-title { font-weight:700; font-size:0.9rem; margin-bottom:0.25rem; }
+    .timeline-desc  { font-size:0.8rem; color:var(--muted); line-height:1.5; }
+
+    /* Stats banner */
+    .stats-banner {
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--sec-dark) 100%);
+        border-radius:var(--radius-lg);
+        padding:2.5rem;
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:2rem;
+        text-align:center;
+        margin:2rem 0 4rem;
+    }
+
+    .stat-item .num { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:white; }
+    .stat-item .lbl { font-size:0.78rem; color:rgba(255,255,255,0.75); margin-top:0.25rem; }
+
+    /* CTA */
+    .cta-section {
+        text-align:center;
+        padding:4rem 0;
+        background: linear-gradient(135deg, #0f172a 0%, #1a1a1a 100%);
+        border-radius:var(--radius-lg);
+        margin-bottom:3rem;
+        position:relative;
+        overflow:hidden;
+    }
+
+    .cta-section::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%, rgba(255,107,53,0.15) 0%, transparent 65%); }
+
+    .cta-section h2 { font-family:'Playfair Display',serif; font-size:clamp(1.75rem,3vw,2.5rem); color:white; margin-bottom:0.875rem; position:relative; z-index:1; }
+    .cta-section p  { color:rgba(255,255,255,0.6); font-size:0.95rem; margin-bottom:2rem; position:relative; z-index:1; }
+    .cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; position:relative; z-index:1; }
+
+    /* Toast */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:2000; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* Responsive */
+    @media (max-width:900px) {
+        .about-hero-inner { grid-template-columns:1fr; }
+        .hero-visual { display:none; }
+        .mission-grid { grid-template-columns:1fr; }
+        .values-grid  { grid-template-columns:repeat(2,1fr); }
+        .stats-banner { grid-template-columns:repeat(2,1fr); }
+    }
+
+    @media (max-width:768px) {
+        .nav-links { display:none; }
+        .values-grid { grid-template-columns:1fr 1fr; }
+        .stats-banner { grid-template-columns:1fr 1fr; }
+    }
+
+    @media (max-width:480px) {
+        .values-grid  { grid-template-columns:1fr; }
+        .stats-banner { grid-template-columns:1fr 1fr; gap:1rem; }
+    }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
+
+<header>
+    <div class="container header-inner">
+        <a href="index.html" class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html"   class="nav-link">Home</a>
+            <a href="shop.html"    class="nav-link">Shop</a>
+            <a href="about.html"   class="nav-link active">About</a>
+            <a href="contact.html" class="nav-link">Contact</a>
+        </nav>
+        <div class="nav-actions">
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+            <a href="wishlist.html" class="nav-icon-btn"><i class="fas fa-heart"></i></a>
+            <a href="cart.html"     class="nav-icon-btn"><i class="fas fa-shopping-bag"></i></a>
+        </div>
+    </div>
+</header>
+
+<!-- Hero -->
+<div class="about-hero">
+    <div class="hero-dots" id="heroDots"></div>
+    <div class="container about-hero-inner">
+        <div>
+            <div class="hero-badge"><i class="fas fa-star"></i> Our Story</div>
+            <h1>East Africa's <span>Premium</span> Shopping Destination</h1>
+            <p>Born in Nairobi, built for Africa. LuxeMart connects discerning shoppers with authentic premium products — curated, trusted, and delivered with care.</p>
+            <div class="hero-btns">
+                <a href="shop.html"    class="btn-primary"><i class="fas fa-shopping-bag"></i> Shop Now</a>
+                <a href="contact.html" class="btn-outline"><i class="fas fa-envelope"></i> Get in Touch</a>
             </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html" style="color: var(--secondary);">About</a>
-                <a href="contact.html">Contact</a>
-            </nav>
-            <div class="nav-actions">
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-stat-card">
+                <div class="num">50<span>K+</span></div>
+                <div class="lbl">Happy Customers</div>
+            </div>
+            <div class="hero-stat-card">
+                <div class="num">10<span>K+</span></div>
+                <div class="lbl">Products Listed</div>
+            </div>
+            <div class="hero-stat-card">
+                <div class="num">500<span>+</span></div>
+                <div class="lbl">Verified Sellers</div>
+            </div>
+            <div class="hero-stat-card">
+                <div class="num">4.8<span>★</span></div>
+                <div class="lbl">Average Rating</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main>
+<div class="container">
+
+    <!-- Mission -->
+    <section>
+        <div class="mission-grid">
+            <div class="mission-text">
+                <div class="section-label"><i class="fas fa-bullseye"></i> Our Mission</div>
+                <h2 class="section-title">Shopping That Works For Everyone</h2>
+                <p>We started LuxeMart with a simple belief: people across East Africa deserve access to premium products without compromise — whether that's on quality, trust, or delivery.</p>
+                <p>We connect independent sellers with customers who care about what they buy. Every product listed goes through our verification process, and every seller is held to our quality standards.</p>
+                <p>We're not just a marketplace. We're a community built on trust, backed by technology, and driven by a genuine love for East African commerce.</p>
+            </div>
+            <div class="mission-visual">
+                <div class="mission-block" style="background:linear-gradient(135deg,#fff7ed,#fff);">
+                    <div class="mission-block-icon">🎯</div>
+                    <h4>Our Mission</h4>
+                    <p>Make premium shopping accessible to every East African, everywhere.</p>
+                </div>
+                <div class="mission-block">
+                    <div class="mission-block-icon">👁️</div>
+                    <h4>Our Vision</h4>
+                    <p>Africa's most trusted e-commerce ecosystem by 2027.</p>
+                </div>
+                <div class="mission-block">
+                    <div class="mission-block-icon">💎</div>
+                    <h4>Our Promise</h4>
+                    <p>Every order protected. Every seller verified. Always.</p>
                 </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <main class="page-content">
-        <div class="container">
-            <div class="story-grid" style="margin-top: 2rem;">
-                <div class="story-content">
-                    <h1>Our Story</h1>
-                    <p>Founded in 2024, LuxeMart began with a simple mission: to make premium lifestyle products accessible to everyone. We believe that quality shouldn't always come with a massive price tag.</p>
-                    <p>What started as a small boutique for fashion enthusiasts has grown into a global destination for curated electronics, home essentials, and beauty products.</p>
-                    
-                    <h2>Our Values</h2>
-                    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
-                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>Quality First:</strong> Every product is tested for durability and performance.</li>
-                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>Customer Centric:</strong> Your satisfaction is our driving force.</li>
-                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>Transparency:</strong> Honest pricing and clear shipping policies.</li>
-                    </ul>
-                </div>
-                <div class="story-img">
-                    <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=800&q=80" alt="LuxeMart Team">
+</div>
+
+<!-- Values -->
+<div class="values-section">
+<div class="container">
+    <section>
+        <div style="text-align:center;">
+            <div class="section-label" style="margin:0 auto;"><i class="fas fa-heart"></i> What We Stand For</div>
+            <h2 class="section-title" style="margin-top:0.875rem;">Our Core Values</h2>
+        </div>
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Trust First</h3>
+                <p>Every seller is verified. Every product is authenticated. You shop with complete confidence.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Speed & Reliability</h3>
+                <p>Fast delivery across Kenya with real-time tracking. We know your time matters.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                <h3>Customer First</h3>
+                <p>30-day returns, buyer protection, and a support team that actually cares.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon"><i class="fas fa-leaf"></i></div>
+                <h3>Community Growth</h3>
+                <p>We empower local sellers and invest in the communities where we operate.</p>
+            </div>
+        </div>
+    </section>
+</div>
+</div>
+
+<div class="container">
+
+    <!-- Stats -->
+    <div class="stats-banner">
+        <div class="stat-item"><div class="num">2021</div><div class="lbl">Year Founded</div></div>
+        <div class="stat-item"><div class="num">50K+</div><div class="lbl">Active Customers</div></div>
+        <div class="stat-item"><div class="num">500+</div><div class="lbl">Verified Sellers</div></div>
+        <div class="stat-item"><div class="num">98%</div><div class="lbl">Satisfaction Rate</div></div>
+    </div>
+
+    <!-- Team -->
+    <section>
+        <div class="section-label"><i class="fas fa-users"></i> The Team</div>
+        <h2 class="section-title">People Behind LuxeMart</h2>
+        <p class="section-sub">A small, passionate team based in Nairobi working to make commerce better in Africa.</p>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar" style="background:linear-gradient(135deg,#ff6b35,#e55a2b);">A</div>
+                <div class="team-name">Amara Osei</div>
+                <div class="team-role">Co-Founder & CEO</div>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-x-twitter"></i></a>
                 </div>
             </div>
-
-            <section class="stats" style="margin: 5rem 0; padding: 3rem; background: var(--accent); border-radius: 16px; text-align: center;">
-                <div class="stats-grid">
-                    <div class="stat-item"><h3>50k+</h3><p>Happy Customers</p></div>
-                    <div class="stat-item"><h3>10+</h3><p>Brand Partners</p></div>
-                    <div class="stat-item"><h3>24/7</h3><p>Customer Support</p></div>
-                    <div class="stat-item"><h3>100%</h3><p>Secure Payments</p></div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>LuxeMart</h3>
-                    <p>Premium lifestyle products delivered to your doorstep.</p>
-                </div>
-                <div class="footer-col">
-                    <h3>Quick Links</h3>
-                    <ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="contact.html">Contact</a></li></ul>
+            <div class="team-card">
+                <div class="team-avatar" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">N</div>
+                <div class="team-name">Nia Kamau</div>
+                <div class="team-role">Head of Product</div>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-x-twitter"></i></a>
                 </div>
             </div>
-            <div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div>
+            <div class="team-card">
+                <div class="team-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">K</div>
+                <div class="team-name">Kwame Diallo</div>
+                <div class="team-role">CTO</div>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">Z</div>
+                <div class="team-name">Zara Mwangi</div>
+                <div class="team-role">Head of Operations</div>
+                <div class="team-links">
+                    <a href="#" class="team-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="team-link"><i class="fab fa-x-twitter"></i></a>
+                </div>
+            </div>
         </div>
-    </footer>
-    <script src="js/common.js"></script>
+    </section>
+
+    <!-- Timeline -->
+    <section>
+        <div class="section-label"><i class="fas fa-road"></i> Our Journey</div>
+        <h2 class="section-title">How We Got Here</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot">2021</div>
+                <div class="timeline-content">
+                    <div class="timeline-year">Year One</div>
+                    <div class="timeline-title">LuxeMart Launches in Nairobi</div>
+                    <div class="timeline-desc">Started with 12 sellers and a small team of 4. First 100 orders shipped within the first month.</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot">2022</div>
+                <div class="timeline-content">
+                    <div class="timeline-year">Expansion</div>
+                    <div class="timeline-title">M-Pesa Integration & Mobile App</div>
+                    <div class="timeline-desc">Added M-Pesa payments and launched our mobile app. Seller count grew to 150+.</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot">2023</div>
+                <div class="timeline-content">
+                    <div class="timeline-year">Regional Growth</div>
+                    <div class="timeline-title">Expanding Beyond Kenya</div>
+                    <div class="timeline-desc">Began shipping to Uganda and Tanzania. Crossed 20,000 active customers and launched express delivery.</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot">2025</div>
+                <div class="timeline-content">
+                    <div class="timeline-year">Today</div>
+                    <div class="timeline-title">50K Customers, 500+ Sellers</div>
+                    <div class="timeline-desc">Full platform rebuild with AI-powered recommendations, multi-currency support, and seller analytics.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-section">
+        <h2>Ready to Experience LuxeMart?</h2>
+        <p>Join thousands of satisfied customers shopping smarter every day.</p>
+        <div class="cta-btns">
+            <a href="shop.html"          class="btn-primary"><i class="fas fa-shopping-bag"></i> Start Shopping</a>
+            <a href="seller.html"        class="btn-outline" style="color:white;border-color:rgba(255,255,255,0.3);"><i class="fas fa-store"></i> Become a Seller</a>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="js/common.js"></script>
+<script>
+(function(){
+    const applyTheme = (t) => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if(i) i.className = `fas ${t==='dark'?'fa-sun':'fa-moon'}`;
+    };
+    applyTheme(localStorage.getItem('theme')||'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme')==='dark'?'light':'dark')
+    );
+
+    // Floating dots
+    const dotsEl = document.getElementById('heroDots');
+    if(dotsEl) {
+        for(let i=0; i<30; i++) {
+            const d = document.createElement('span');
+            d.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*6}s;animation-duration:${4+Math.random()*4}s;`;
+            dotsEl.appendChild(d);
+        }
+    }
+
+    // Count-up animation for stats
+    document.addEventListener('DOMContentLoaded', () => {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.querySelectorAll('.num').forEach(el => {
+                        el.style.opacity = '0';
+                        setTimeout(() => {
+                            el.style.transition = 'opacity 0.4s';
+                            el.style.opacity = '1';
+                        }, 100);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold:0.3 });
+
+        document.querySelectorAll('.stats-banner, .hero-visual').forEach(el => observer.observe(el));
+    });
+})();
+</script>
 </body>
 </html>
