@@ -95,13 +95,15 @@
     };
 
     // ── LOGIN ──────────────────────────────────────────────
-    window.completeLogin = async (userData, forcedRole = null) => {
+    window.completeLogin = async (userData, forcedRole = null, credential = null) => {
         const result = await window.api('api/auth/login.php', {
             method: 'POST',
             body: JSON.stringify({
                 name:    userData.name,
                 email:   userData.email,
                 picture: userData.picture || '',
+                credential: credential, // Send the raw JWT for verification
+                role: forcedRole
             }),
         });
 
@@ -422,7 +424,7 @@
                     name:    payload.name,
                     email:   payload.email,
                     picture: payload.picture,
-                });
+                }, null, response.credential);
             } catch (err) {
                 window.showToast('Google login failed.', 'error');
             }
@@ -433,6 +435,8 @@
                 google.accounts.id.initialize({
                     client_id: '459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com',
                     callback:  window.handleCredentialResponse,
+                    auto_select: false,
+                    use_fedcm_for_prompt: true // Required for modern browser support
                 });
 
                 const container = document.getElementById('googleBtnContainer');
@@ -444,7 +448,15 @@
 
                 // One Tap — only show if not logged in
                 if (!getUser()) {
-                    google.accounts.id.prompt();
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed()) {
+                            console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
+                        } else if (notification.isSkippedMoment()) {
+                            console.warn('One Tap skipped:', notification.getSkippedReason());
+                        } else if (notification.isDismissedMoment()) {
+                            console.warn('One Tap dismissed:', notification.getDismissedReason());
+                        }
+                    });
                 }
             } catch (e) {
                 console.warn('Google Sign-In failed to initialize.', e);
