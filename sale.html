@@ -3,126 +3,604 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flash Sale - LuxeMart</title>
+    <title>Seller Dashboard — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:#1a1a1a; --secondary:#ff6b35; --sec-dark:#e55a2b;
+        --accent:#f8f7f4;  --text:#1a1a1a;      --muted:#6b7280;
+        --white:#ffffff;   --border:#e5e7eb;     --success:#10b981;
+        --danger:#ef4444;  --warning:#f59e0b;
+        --shadow-sm:0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md:0 4px 20px rgba(0,0,0,0.09);
+        --radius-sm:8px; --radius-md:14px; --radius-lg:20px;
+        --nav-h:68px; --sidebar-w:240px;
+        --ease:cubic-bezier(.4,0,.2,1); --dur:0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary:#f9fafb; --accent:#1f2937; --text:#e5e7eb;
+        --muted:#9ca3af;   --white:#111827;  --border:#374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+
+    /* ── HEADER ───────────────────────────────────────────── */
+    header {
+        position:fixed; top:0; left:0; width:100%;
+        height:var(--nav-h);
+        background:rgba(255,255,255,0.94);
+        backdrop-filter:blur(16px);
+        border-bottom:1px solid var(--border);
+        z-index:200;
+        box-shadow:var(--shadow-sm);
+    }
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+
+    .header-inner {
+        height:100%; max-width:100%; padding:0 1.5rem;
+        display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    }
+
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:32px; height:32px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; color:var(--text); }
+
+    .header-right { display:flex; align-items:center; gap:0.75rem; }
+
+    .nav-icon-btn {
+        width:36px; height:36px; border-radius:var(--radius-sm);
+        background:transparent; display:flex; align-items:center;
+        justify-content:center; font-size:0.9rem; color:var(--muted);
+        transition:all var(--dur) var(--ease);
+    }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    .back-link {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        font-size:0.82rem; font-weight:600; color:var(--muted);
+        transition:color var(--dur) var(--ease);
+    }
+    .back-link:hover { color:var(--secondary); }
+
+    /* ── LAYOUT ───────────────────────────────────────────── */
+    .dashboard-layout {
+        display:grid;
+        grid-template-columns:var(--sidebar-w) 1fr;
+        min-height:100vh;
+        padding-top:var(--nav-h);
+    }
+
+    /* ── SIDEBAR ──────────────────────────────────────────── */
+    .sidebar {
+        position:fixed;
+        top:var(--nav-h); left:0;
+        width:var(--sidebar-w);
+        height:calc(100vh - var(--nav-h));
+        background:var(--white);
+        border-right:1px solid var(--border);
+        overflow-y:auto;
+        z-index:100;
+        padding:1.5rem 0;
+    }
+
+    .sidebar-section {
+        padding:0 0.75rem;
+        margin-bottom:1.5rem;
+    }
+
+    .sidebar-label {
+        font-size:0.65rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:1px; color:var(--muted); padding:0 0.5rem;
+        margin-bottom:0.5rem; display:block;
+    }
+
+    .sidebar-item {
+        display:flex; align-items:center; gap:0.75rem;
+        padding:0.65rem 0.875rem; border-radius:var(--radius-sm);
+        font-size:0.875rem; font-weight:500; color:var(--muted);
+        cursor:pointer; transition:all var(--dur) var(--ease);
+        margin-bottom:2px;
+    }
+
+    .sidebar-item:hover { background:var(--accent); color:var(--text); }
+    .sidebar-item.active { background:rgba(255,107,53,0.08); color:var(--secondary); font-weight:600; }
+    .sidebar-item i { width:16px; font-size:0.875rem; }
+
+    .sidebar-divider { height:1px; background:var(--border); margin:0.75rem 0.75rem; }
+
+    /* ── MAIN ─────────────────────────────────────────────── */
+    .main-content {
+        margin-left:var(--sidebar-w);
+        padding:2rem;
+        min-height:calc(100vh - var(--nav-h));
+    }
+
+    /* ── SECTION PANELS ───────────────────────────────────── */
+    .dash-section { display:none; }
+    .dash-section.active { display:block; }
+
+    /* ── STATS GRID ───────────────────────────────────────── */
+    #sellerStats {
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+        gap:1rem;
+        margin-bottom:2rem;
+    }
+
+    .stat-card {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        padding:1.25rem;
+        box-shadow:var(--shadow-sm);
+        border-left:4px solid var(--secondary);
+    }
+
+    /* ── FILTER TABS ──────────────────────────────────────── */
+    .filter-tabs {
+        display:flex; gap:0.4rem; flex-wrap:wrap;
+        margin-bottom:1.25rem;
+    }
+
+    .seller-filter-tab {
+        padding:0.4rem 0.875rem;
+        border-radius:50px;
+        font-size:0.78rem; font-weight:600;
+        border:1.5px solid var(--border);
+        background:var(--white); color:var(--muted);
+        transition:all var(--dur) var(--ease); cursor:pointer;
+    }
+
+    .seller-filter-tab:hover { border-color:var(--secondary); color:var(--secondary); }
+    .seller-filter-tab.active { background:var(--secondary); color:white; border-color:var(--secondary); }
+
+    /* ── TABLE ────────────────────────────────────────────── */
+    .table-wrapper {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        box-shadow:var(--shadow-sm);
+        overflow:hidden;
+        overflow-x:auto;
+    }
+
+    table { width:100%; border-collapse:collapse; }
+
+    th, td { padding:0.875rem 1rem; text-align:left; border-bottom:1px solid var(--border); }
+    th { background:var(--accent); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:rgba(248,247,244,0.6); }
+
+    .btn-sm {
+        padding:0.35rem 0.75rem; font-size:0.78rem; font-weight:700;
+        border-radius:6px; background:var(--primary); color:white;
+        border:none; cursor:pointer; transition:all var(--dur) var(--ease);
+        display:inline-flex; align-items:center; gap:0.3rem;
+    }
+    .btn-sm:hover { opacity:0.85; transform:translateY(-1px); }
+    .btn-sm.btn-danger { background:var(--danger); }
+
+    /* ── FORM CARD ────────────────────────────────────────── */
+    .form-card {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        box-shadow:var(--shadow-sm);
+        padding:2rem;
+    }
+
+    .form-card h2 { font-family:'Playfair Display',serif; font-size:1.35rem; margin-bottom:0.375rem; }
+    .form-card > p { color:var(--muted); font-size:0.875rem; margin-bottom:1.75rem; }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .form-full  { grid-column:1/-1; }
+    .form-group { display:flex; flex-direction:column; gap:0.35rem; }
+
+    .form-label { font-size:0.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+    .form-control {
+        width:100%; padding:0.7rem 0.875rem;
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        font-size:0.9rem; font-family:inherit; color:var(--text);
+        background:var(--white); outline:none;
+        transition:all var(--dur) var(--ease);
+    }
+    .form-control:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(255,107,53,0.1); }
+    select.form-control { cursor:pointer; }
+    textarea.form-control { resize:vertical; min-height:110px; }
+
+    /* Image upload */
+    .image-upload-row {
+        display:flex; gap:0.875rem; align-items:center;
+        margin-bottom:0.75rem;
+    }
+
+    .upload-label {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        padding:0.55rem 1rem;
+        background:var(--primary); color:white;
+        border-radius:var(--radius-sm);
+        font-size:0.82rem; font-weight:600;
+        cursor:pointer; transition:background var(--dur) var(--ease);
+    }
+    .upload-label:hover { background:var(--secondary); }
+
+    .image-preview {
+        width:100%; height:180px;
+        border:2px dashed var(--border);
+        border-radius:var(--radius-sm);
+        display:flex; align-items:center; justify-content:center;
+        overflow:hidden; background:var(--accent);
+        color:var(--muted); font-size:0.875rem;
+    }
+
+    .image-preview img { width:100%; height:100%; object-fit:contain; }
+
+    /* Submit */
+    .btn-submit {
+        padding:0.875rem 2rem;
+        background:var(--secondary); color:white;
+        border-radius:var(--radius-sm); font-size:0.95rem; font-weight:700;
+        display:inline-flex; align-items:center; gap:0.5rem;
+        transition:all var(--dur) var(--ease);
+        box-shadow:0 4px 14px rgba(255,107,53,0.3);
+    }
+    .btn-submit:hover { background:var(--sec-dark); transform:translateY(-1px); }
+    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+    .btn-cancel-edit {
+        padding:0.875rem 1.5rem;
+        background:var(--white); color:var(--muted);
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        font-size:0.875rem; font-weight:600;
+        transition:all var(--dur) var(--ease);
+    }
+    .btn-cancel-edit:hover { border-color:var(--secondary); color:var(--secondary); }
+
+    /* Mobile cards */
+    #sellerMobileCards { display:none; }
+
+    /* Toast */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-md); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); }
+    .toast.success { border-left:4px solid var(--success); }
+    .toast.success i { color:var(--success); }
+    .toast.error   { border-left:4px solid var(--danger); }
+    .toast.error   i { color:var(--danger); }
+    .toast.info    { border-left:4px solid #3b82f6; }
+    .toast.info    i { color:#3b82f6; }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* Responsive */
+    @media (max-width:900px) {
+        .dashboard-layout { grid-template-columns:1fr; }
+        .sidebar { display:none; }
+        .main-content { margin-left:0; padding:1.25rem; }
+        .form-grid { grid-template-columns:1fr; }
+        #sellerMobileCards { display:block; }
+        .table-wrapper table { display:none; }
+    }
+
+    @media (max-width:600px) {
+        .filter-tabs { gap:0.25rem; }
+        .seller-filter-tab { padding:0.3rem 0.7rem; font-size:0.72rem; }
+    }
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-                <span>LuxeMart</span>
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header>
+    <div class="header-inner">
+        <a href="index.html" class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <div class="header-right">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Shop
+            </a>
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</header>
+
+<!-- ── LAYOUT ─────────────────────────────────────────────── -->
+<div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <span class="sidebar-label">Dashboard</span>
+            <div class="sidebar-item active" data-section="overview">
+                <i class="fas fa-chart-bar"></i> Overview
             </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html" style="color: var(--secondary);">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-            </nav>
-            <div class="nav-actions">
-                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
-                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
-                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
-                    <i class="fas fa-heart"></i>
-                    <span class="cart-count" id="wishlistCount">0</span>
-                </a>
-                <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
-                    <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
-                        <a href="#" id="logoutLink">Logout</a>
-                    </div>
+        </div>
+        <div class="sidebar-section">
+            <span class="sidebar-label">Products</span>
+            <div class="sidebar-item" data-section="products">
+                <i class="fas fa-box"></i> My Products
+            </div>
+            <div class="sidebar-item" data-section="add">
+                <i class="fas fa-plus-circle"></i> Add Product
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <span class="sidebar-label">Sales</span>
+            <div class="sidebar-item" data-section="orders">
+                <i class="fas fa-shopping-bag"></i> My Orders
+            </div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">
+            <div class="sidebar-item" onclick="window.location.href='index.html'">
+                <i class="fas fa-store"></i> View Shop
+            </div>
+            <div class="sidebar-item" id="logoutLink">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+
+        <!-- ── OVERVIEW ────────────────────────────────────── -->
+        <section class="dash-section active" id="section-overview">
+            <h1 style="font-family:'Playfair Display',serif;font-size:1.75rem;margin-bottom:0.375rem;">Seller Dashboard</h1>
+            <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.75rem;">Manage your products and track your sales.</p>
+
+            <!-- Stats -->
+            <div id="sellerStats">
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:60%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:80%;border-radius:4px;"></div>
                 </div>
-                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
-                    <i class="fas fa-bars"></i>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:50%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:70%;border-radius:4px;"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:70%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:60%;border-radius:4px;"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:40%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:75%;border-radius:4px;"></div>
+                </div>
+            </div>
+
+            <!-- Quick links -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                <div class="stat-card" style="border-left-color:var(--success);cursor:pointer;" onclick="switchSection('products')">
+                    <i class="fas fa-box" style="font-size:1.5rem;color:var(--success);margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">View My Products</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">Edit, toggle, or delete listings</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#3b82f6;cursor:pointer;" onclick="switchSection('add')">
+                    <i class="fas fa-plus-circle" style="font-size:1.5rem;color:#3b82f6;margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">Add New Product</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">List a new item for sale</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#8b5cf6;cursor:pointer;" onclick="switchSection('orders')">
+                    <i class="fas fa-shopping-bag" style="font-size:1.5rem;color:#8b5cf6;margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">My Orders</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">Orders containing your products</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── MY PRODUCTS ─────────────────────────────────── -->
+        <section class="dash-section" id="section-products">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
+                <div>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.25rem;">My Products</h2>
+                    <p style="color:var(--muted);font-size:0.875rem;">All your active and inactive listings.</p>
+                </div>
+                <button class="btn-sm" onclick="switchSection('add')" style="background:var(--secondary);">
+                    <i class="fas fa-plus"></i> Add Product
                 </button>
             </div>
-        </div>
-    </header>
 
-    <div class="mobile-menu" id="mobileMenu">
-        <button class="mobile-menu-close" id="closeMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
-        <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="categories.html">Categories</a></li>
-            <li><a href="sale.html">Sale</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <div class="nav-actions">
-             <button class="icon-btn" id="mobileCartBtn"><i class="fas fa-shopping-bag"></i> Cart (<span id="mobileCartCount">0</span>)</button>
-             <button class="icon-btn" id="themeToggle">
-                <i class="fas fa-moon"></i> Theme
-            </button>
-        </div>
-    </div>
-
-    <div class="promo-strip" style="background: var(--secondary); color: white;">
-        <i class="fas fa-fire"></i> Limited Time! These deals won't last long.
-    </div>
-
-    <main class="page-content">
-        <div class="container">
-            <div class="section-header">
-                <h1 style="color: var(--secondary);">LuxeMart Flash Sale</h1>
-                <p>Don't miss out on these limited-time deals! Up to 50% off selected items.</p>
+            <div class="filter-tabs">
+                <button class="seller-filter-tab active" data-filter="all">All</button>
+                <button class="seller-filter-tab" data-filter="active">Active</button>
+                <button class="seller-filter-tab" data-filter="inactive">Inactive</button>
+                <button class="seller-filter-tab" data-filter="low">Low Stock</button>
             </div>
 
-            <div class="product-controls">
-                <div class="sort-options">
-                    <label for="sort">Sort By:</label>
-                    <select id="sort">
-                        <option value="default">Default</option>
-                        <option value="price-low-to-high">Price: Low to High</option>
-                        <option value="rating">Rating</option>
-                    </select>
-                </div>
+            <!-- Desktop table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">Image</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sellerProductsTableBody">
+                        <tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--muted);">Loading products...</td></tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div class="products-grid" id="featuredProductsGrid">
-                <!-- Filtered sale products injected via main2.js -->
+            <!-- Mobile cards -->
+            <div id="sellerMobileCards"></div>
+        </section>
+
+        <!-- ── ADD / EDIT PRODUCT ──────────────────────────── -->
+        <section class="dash-section" id="section-add" style="max-width:720px;">
+            <div style="margin-bottom:1.75rem;">
+                <h2 id="formHeading" style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.25rem;">Add New Product</h2>
+                <p style="color:var(--muted);font-size:0.875rem;">Fill in the details to list your item on LuxeMart.</p>
             </div>
-        </div>
+
+            <div class="form-card" id="addProductSection">
+                <form id="addProductForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Product Name *</label>
+                            <input type="text" id="pName" class="form-control" placeholder="e.g. Vintage Leather Jacket" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Brand *</label>
+                            <input type="text" id="pBrand" class="form-control" placeholder="e.g. UrbanEdge" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select id="pCategory" class="form-control" required>
+                                <option value="fashion">Fashion</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="home">Home & Living</option>
+                                <option value="beauty">Beauty</option>
+                                <option value="sports">Sports</option>
+                                <option value="kids">Kids</option>
+                                <option value="footwear">Footwear</option>
+                                <option value="watches">Watches</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price (KSh) *</label>
+                            <input type="number" id="pPrice" class="form-control" min="1" placeholder="e.g. 2500" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Quantity *</label>
+                            <input type="number" id="pStock" class="form-control" min="0" placeholder="e.g. 20" value="10" required>
+                        </div>
+                        <div class="form-group form-full">
+                            <label class="form-label">Description *</label>
+                            <textarea id="pDesc" class="form-control" placeholder="Describe your product — material, fit, features..." required></textarea>
+                        </div>
+                        <div class="form-group form-full">
+                            <label class="form-label">Product Image *</label>
+                            <div class="image-upload-row">
+                                <input type="url" id="pImageUrl" class="form-control" placeholder="Paste image URL..." style="flex:1;margin-bottom:0;">
+                                <span style="font-size:0.82rem;color:var(--muted);">or</span>
+                                <label for="pImageFile" class="upload-label">
+                                    <i class="fas fa-upload"></i> Upload
+                                </label>
+                                <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                            </div>
+                            <div class="image-preview" id="imagePreview">
+                                <span>No image selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:0.875rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap;">
+                        <button type="button" class="btn-cancel-edit" id="cancelEditBtn">Cancel</button>
+                        <button type="submit" class="btn-submit" id="addProductSubmitBtn">
+                            <i class="fas fa-plus"></i> List Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ── MY ORDERS ───────────────────────────────────── -->
+        <section class="dash-section" id="section-orders">
+            <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.375rem;">My Orders</h2>
+            <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.5rem;">Orders that contain your products.</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sellerOrdersTableBody">
+                        <tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--muted);">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </main>
+</div>
 
-    <!-- Newsletter Section -->
-    <section class="newsletter">
-        <div class="container">
-            <h2>Don't Miss Out</h2>
-            <p>Subscribe to be the first to know about our next big sale event!</p>
-            <form class="newsletter-form">
-                <label for="newsletter-email" class="visually-hidden">Email address for newsletter</label>
-                <input type="email" id="newsletter-email" placeholder="Enter your email" class="newsletter-input" required>
-                <button type="submit" class="newsletter-btn">Subscribe</button>
-            </form>
-        </div>
-    </section>
+<div id="toastContainer" class="toast-container"></div>
 
-    <!-- Cart Sidebar Reused -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header"><h3 class="cart-title">Shopping Cart</h3><button class="modal-close" id="closeCart">×</button></div>
-        <div id="cartItems"></div>
-        <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
-        <div class="cart-actions"><a href="checkout.html" class="btn-primary">Checkout</a></div>
-    </div>
-    
-    <!-- Quick View Reused -->
-    <div class="modal-overlay quickview-modal" id="quickViewModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">Quick View</h3><button class="modal-close" id="closeQuickView">×</button></div><div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;"><img id="qvImg" src="" alt="" class="quickview-img"><div><h3 id="qvTitle"></h3><div class="quickview-price" id="qvPrice"></div><p id="qvDesc"></p><button class="btn-primary add-to-cart" id="qvAddToCart">Add to Cart</button></div></div></div></div>
+<script src="js/products.js"></script>
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/seller.js"></script>
+<script>
+(function () {
+    // Theme
+    const applyTheme = t => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if (i) i.className = `fas ${t === 'dark' ? 'fa-sun' : 'fa-moon'}`;
+    };
+    applyTheme(localStorage.getItem('theme') || 'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark')
+    );
 
-    <footer>
-        <div class="container"><div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div></div>
-    </footer>
+    // Sidebar + section switching
+    window.switchSection = function (name) {
+        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(`section-${name}`)?.classList.add('active');
+        document.querySelector(`.sidebar-item[data-section="${name}"]`)?.classList.add('active');
+    };
 
-    <script src="js/products.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/main.js"></script>
+    document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+        item.addEventListener('click', () => switchSection(item.dataset.section));
+    });
+
+    // Seller orders table (loaded separately)
+    async function loadSellerOrders () {
+        const tbody = document.getElementById('sellerOrdersTableBody');
+        if (!tbody) return;
+
+        const res    = await window.api?.('api/orders/seller_orders.php');
+        const orders = res?.orders || [];
+
+        if (!orders.length) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted);">No orders yet.</td></tr>`;
+            return;
+        }
+
+        const statusColors = { Processing:'background:#dbeafe;color:#1d4ed8;', Shipped:'background:#fef3c7;color:#d97706;', Delivered:'background:#d1fae5;color:#065f46;', Cancelled:'background:#fee2e2;color:#991b1b;' };
+        const fmt = n => `KSh ${Number(n).toLocaleString('en-KE')}`;
+
+        tbody.innerHTML = orders.map(o => `
+            <tr>
+                <td style="font-family:monospace;font-weight:600;font-size:0.82rem;">${o.order_number}</td>
+                <td>
+                    <div style="font-weight:600;font-size:0.875rem;">${o.customer_name}</div>
+                    <div style="font-size:0.72rem;color:var(--muted);">${o.customer_email}</div>
+                </td>
+                <td style="font-size:0.82rem;">${(o.items||[]).map(i => `${i.name} ×${i.qty}`).join('<br>')}</td>
+                <td style="font-weight:700;">${fmt(o.total)}</td>
+                <td><span style="${statusColors[o.status]||''}padding:2px 10px;border-radius:50px;font-size:0.72rem;font-weight:700;">${o.status}</span></td>
+                <td style="font-size:0.82rem;color:var(--muted);">${o.date}</td>
+            </tr>
+        `).join('');
+    }
+
+    document.querySelector('.sidebar-item[data-section="orders"]')?.addEventListener('click', loadSellerOrders);
+})();
+</script>
 </body>
 </html>
