@@ -3,247 +3,686 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Become a Seller - LuxeMart</title>
+    <title>Become a Seller — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
     <style>
-        .register-container { max-width: 450px; margin: 0 auto; padding: 2rem 1rem; }
-        .register-box { background: var(--white); padding: 2.5rem; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center; }
-        .register-box h1 { font-size: 2rem; }
-        .register-box p { color: var(--light-text); margin-bottom: 2rem; }
-        .register-box form { text-align: left; }
-        .register-box input { width: 100%; padding: 0.875rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; }
-        .register-box .btn-primary { width: 100%; justify-content: center; }
-        .divider { margin: 1.5rem 0; font-size: 0.9rem; color: #888; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:#1a1a1a; --secondary:#ff6b35; --sec-dark:#e55a2b;
+        --accent:#f8f7f4;  --text:#1a1a1a;      --muted:#6b7280;
+        --white:#ffffff;   --border:#e5e7eb;
+        --success:#10b981; --danger:#ef4444;
+        --shadow-sm:0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md:0 4px 20px rgba(0,0,0,0.09);
+        --shadow-lg:0 20px 60px rgba(0,0,0,0.15);
+        --radius-sm:8px; --radius-md:14px; --radius-lg:24px;
+        --nav-h:68px;
+        --ease:cubic-bezier(.4,0,.2,1); --dur:0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary:#f9fafb; --accent:#1f2937; --text:#e5e7eb;
+        --muted:#9ca3af;   --white:#111827;  --border:#374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+
+    /* ── HEADER ───────────────────────────────────────── */
+    header {
+        position:fixed; top:0; left:0; width:100%;
+        height:var(--nav-h);
+        background:rgba(255,255,255,0.94);
+        backdrop-filter:blur(16px);
+        border-bottom:1px solid var(--border);
+        z-index:100; box-shadow:var(--shadow-sm);
+    }
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+
+    .header-inner {
+        height:100%; max-width:1100px; margin:0 auto; padding:0 1.5rem;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:32px; height:32px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; color:var(--text); }
+
+    .header-right { display:flex; align-items:center; gap:0.75rem; }
+
+    .nav-icon-btn {
+        width:36px; height:36px; border-radius:var(--radius-sm);
+        background:transparent; display:flex; align-items:center;
+        justify-content:center; font-size:0.9rem; color:var(--muted);
+        transition:all var(--dur) var(--ease);
+    }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    .back-link {
+        font-size:0.82rem; font-weight:600; color:var(--muted);
+        display:flex; align-items:center; gap:0.4rem;
+        transition:color var(--dur) var(--ease);
+    }
+    .back-link:hover { color:var(--secondary); }
+
+    /* ── PAGE LAYOUT ──────────────────────────────────── */
+    .page-wrap {
+        min-height:100vh;
+        padding-top:var(--nav-h);
+        display:grid;
+        grid-template-columns:1fr 480px;
+    }
+
+    /* ── LEFT PANEL ───────────────────────────────────── */
+    .left-panel {
+        background:linear-gradient(145deg, #0f172a 0%, #1a0a00 50%, #0f172a 100%);
+        position:relative; overflow:hidden;
+        display:flex; align-items:center;
+        padding:3rem;
+    }
+
+    .left-panel::before {
+        content:'';
+        position:absolute; inset:0;
+        background:
+            radial-gradient(ellipse at 20% 60%, rgba(255,107,53,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.1) 0%, transparent 50%);
+    }
+
+    .left-content { position:relative; z-index:1; max-width:460px; }
+
+    .seller-badge {
+        display:inline-flex; align-items:center; gap:0.5rem;
+        background:rgba(255,107,53,0.15);
+        border:1px solid rgba(255,107,53,0.3);
+        color:var(--secondary);
+        padding:0.35rem 0.875rem; border-radius:50px;
+        font-size:0.72rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:1px;
+        margin-bottom:1.5rem;
+    }
+
+    .left-content h1 {
+        font-family:'Playfair Display',serif;
+        font-size:clamp(1.8rem, 3vw, 2.6rem);
+        color:white; line-height:1.2;
+        margin-bottom:1rem;
+    }
+
+    .left-content h1 span { color:var(--secondary); }
+
+    .left-content p {
+        color:rgba(255,255,255,0.65);
+        font-size:0.95rem; line-height:1.7;
+        margin-bottom:2.5rem;
+    }
+
+    /* Perks */
+    .perks { display:flex; flex-direction:column; gap:1rem; }
+
+    .perk {
+        display:flex; align-items:flex-start; gap:1rem;
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.08);
+        border-radius:var(--radius-md);
+        padding:1rem 1.1rem;
+        transition:background var(--dur) var(--ease);
+    }
+
+    .perk:hover { background:rgba(255,255,255,0.08); }
+
+    .perk-icon {
+        width:38px; height:38px; border-radius:10px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1rem; flex-shrink:0;
+    }
+
+    .perk h4 { font-size:0.875rem; font-weight:700; color:white; margin-bottom:0.2rem; }
+    .perk p  { font-size:0.78rem; color:rgba(255,255,255,0.55); line-height:1.5; }
+
+    /* Floating dots */
+    .dots-bg { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .dots-bg span {
+        position:absolute; width:3px; height:3px;
+        border-radius:50%; background:rgba(255,255,255,0.15);
+        animation:dot-float 6s ease-in-out infinite;
+    }
+    @keyframes dot-float {
+        0%,100% { transform:translateY(0); opacity:0.15; }
+        50%      { transform:translateY(-18px); opacity:0.4; }
+    }
+
+    /* ── RIGHT PANEL (FORM) ───────────────────────────── */
+    .right-panel {
+        background:var(--white);
+        display:flex; flex-direction:column;
+        justify-content:center;
+        padding:3rem 2.5rem;
+        border-left:1px solid var(--border);
+        overflow-y:auto;
+    }
+
+    .form-logo {
+        display:flex; flex-direction:column; align-items:center;
+        margin-bottom:2rem; text-align:center;
+    }
+
+    .form-logo-icon {
+        width:56px; height:56px; border-radius:14px;
+        background:linear-gradient(135deg, var(--secondary), var(--sec-dark));
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.5rem; color:white; margin-bottom:0.875rem;
+        box-shadow:0 8px 24px rgba(255,107,53,0.35);
+    }
+
+    .form-logo h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.375rem; }
+    .form-logo p  { color:var(--muted); font-size:0.875rem; max-width:280px; line-height:1.6; }
+
+    /* ── STEP INDICATOR ───────────────────────────────── */
+    .steps {
+        display:flex; align-items:center; gap:0;
+        margin-bottom:2rem;
+    }
+
+    .step-item {
+        flex:1; display:flex; flex-direction:column;
+        align-items:center; gap:0.4rem; position:relative;
+    }
+
+    .step-item::after {
+        content:''; position:absolute;
+        top:14px; left:calc(50% + 14px); right:calc(-50% + 14px);
+        height:1px; background:var(--border);
+    }
+
+    .step-item:last-child::after { display:none; }
+
+    .step-num {
+        width:28px; height:28px; border-radius:50%;
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.75rem; font-weight:700;
+        background:var(--border); color:var(--muted);
+        transition:all var(--dur) var(--ease);
+        position:relative; z-index:1;
+    }
+
+    .step-item.done   .step-num { background:var(--success); color:white; }
+    .step-item.active .step-num { background:var(--secondary); color:white; box-shadow:0 0 0 4px rgba(255,107,53,0.2); }
+
+    .step-lbl { font-size:0.65rem; font-weight:600; color:var(--muted); text-align:center; }
+    .step-item.active .step-lbl { color:var(--secondary); }
+    .step-item.done   .step-lbl { color:var(--success); }
+
+    /* ── PANELS ───────────────────────────────────────── */
+    .form-panel { display:none; }
+    .form-panel.active { display:block; animation:slideIn 0.3s var(--ease); }
+    @keyframes slideIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ── SIGN IN PANEL ────────────────────────────────── */
+    .google-btn-wrap {
+        display:flex; justify-content:center;
+        margin:1.5rem 0;
+    }
+
+    .guest-note {
+        text-align:center; font-size:0.78rem; color:var(--muted);
+        margin-top:1rem; line-height:1.6;
+    }
+
+    .guest-note a { color:var(--secondary); font-weight:600; }
+
+    /* ── CONFIRM PANEL ────────────────────────────────── */
+    .confirm-card {
+        background:var(--accent); border:1px solid var(--border);
+        border-radius:var(--radius-md); padding:1.25rem;
+        margin-bottom:1.5rem;
+        display:flex; align-items:center; gap:0.875rem;
+    }
+
+    .confirm-avatar {
+        width:48px; height:48px; border-radius:50%;
+        object-fit:cover; flex-shrink:0;
+        border:2px solid var(--border);
+    }
+
+    .confirm-avatar-placeholder {
+        width:48px; height:48px; border-radius:50%;
+        background:var(--secondary); color:white;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.2rem; font-weight:700; flex-shrink:0;
+    }
+
+    .confirm-info { flex:1; min-width:0; }
+    .confirm-name  { font-weight:700; margin-bottom:0.2rem; }
+    .confirm-email { font-size:0.78rem; color:var(--muted); }
+
+    /* Checkbox */
+    .check-group {
+        display:flex; align-items:flex-start; gap:0.75rem;
+        margin-bottom:1.1rem;
+        padding:0.875rem;
+        border:1.5px solid var(--border);
+        border-radius:var(--radius-sm);
+        cursor:pointer;
+        transition:border-color var(--dur) var(--ease);
+    }
+
+    .check-group:has(input:checked) { border-color:var(--secondary); background:rgba(255,107,53,0.03); }
+
+    .check-group input { margin-top:2px; accent-color:var(--secondary); flex-shrink:0; }
+    .check-group label { font-size:0.82rem; color:var(--text); line-height:1.5; cursor:pointer; }
+    .check-group label strong { color:var(--text); }
+    .check-group label a { color:var(--secondary); font-weight:600; }
+
+    /* Submit button */
+    .btn-become {
+        width:100%; padding:0.95rem;
+        background:var(--secondary); color:white;
+        border-radius:var(--radius-sm); font-size:1rem; font-weight:700;
+        display:flex; align-items:center; justify-content:center; gap:0.5rem;
+        transition:all var(--dur) var(--ease);
+        box-shadow:0 4px 14px rgba(255,107,53,0.35);
+    }
+    .btn-become:hover { background:var(--sec-dark); transform:translateY(-1px); }
+    .btn-become:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+    /* ── SUCCESS PANEL ────────────────────────────────── */
+    .success-wrap {
+        text-align:center; padding:1rem 0;
+    }
+
+    .success-icon-wrap {
+        width:80px; height:80px; border-radius:50%;
+        background:rgba(16,185,129,0.1);
+        display:flex; align-items:center; justify-content:center;
+        margin:0 auto 1.5rem;
+        animation:pop 0.5s var(--ease) 0.1s both;
+    }
+
+    @keyframes pop { from{transform:scale(0);} to{transform:scale(1);} }
+
+    .success-icon-wrap i { font-size:2.2rem; color:var(--success); }
+
+    .success-wrap h3 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.625rem; }
+    .success-wrap p  { color:var(--muted); font-size:0.875rem; line-height:1.6; margin-bottom:2rem; }
+
+    .btn-go-dashboard {
+        display:inline-flex; align-items:center; gap:0.5rem;
+        padding:0.875rem 2rem; background:var(--secondary); color:white;
+        border-radius:50px; font-weight:700; font-size:0.95rem;
+        transition:background var(--dur) var(--ease);
+        box-shadow:0 4px 14px rgba(255,107,53,0.35);
+    }
+    .btn-go-dashboard:hover { background:var(--sec-dark); }
+
+    /* ── TOAST ────────────────────────────────────────── */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); }
+    .toast.success { border-left:4px solid var(--success); } .toast.success i { color:var(--success); }
+    .toast.error   { border-left:4px solid var(--danger);  } .toast.error   i { color:var(--danger);  }
+    .toast.info    { border-left:4px solid #3b82f6; }        .toast.info    i { color:#3b82f6; }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* ── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width:900px) {
+        .page-wrap { grid-template-columns:1fr; }
+        .left-panel { display:none; }
+        .right-panel { padding:2rem 1.5rem; min-height:calc(100vh - var(--nav-h)); }
+    }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container header-inner">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-                <span>LuxeMart</span>
-            </div>
-            <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-            </nav>
-            <div class="nav-actions">
-                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header>
+    <div class="header-inner">
+        <a href="index.html" class="logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <div class="header-right">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Shop
+            </a>
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </div>
+</header>
+
+<!-- ── PAGE ───────────────────────────────────────────────── -->
+<div class="page-wrap">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <div class="dots-bg" id="dotsBg"></div>
+        <div class="left-content">
+            <div class="seller-badge"><i class="fas fa-store"></i> Seller Program</div>
+            <h1>Start Selling on <span>LuxeMart</span> Today</h1>
+            <p>Join hundreds of sellers reaching thousands of customers across East Africa. List your products, get paid weekly, and grow your business.</p>
+
+            <div class="perks">
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h4>List in Minutes</h4>
+                        <p>Add your products with photos, prices, and descriptions. Go live instantly.</p>
+                    </div>
+                </div>
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(255,107,53,0.15);color:var(--secondary);">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div>
+                        <h4>Weekly M-Pesa Payouts</h4>
+                        <p>Receive earnings every Friday directly to your Safaricom number. Zero hidden fees.</p>
+                    </div>
+                </div>
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h4>Real-Time Analytics</h4>
+                        <p>Track sales, revenue, and inventory from your seller dashboard.</p>
+                    </div>
+                </div>
+                <div class="perk">
+                    <div class="perk-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h4>Buyer Protection Built-In</h4>
+                        <p>LuxeMart handles disputes and payment security so you can focus on selling.</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="page-content">
-        <div class="container register-container">
-            <div class="register-box">
-                <h1>Become a Seller</h1>
-                <p>Join our marketplace and start selling your products to thousands of customers.</p>
-                <p>Sign in with Google to create your seller account and get started.</p>
-                <div id="sellerGoogleBtnContainer" style="display: flex; justify-content: center; margin-top: 2rem;"></div>
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+        <!-- Step indicator -->
+        <div class="steps" id="stepIndicator">
+            <div class="step-item active" id="step1">
+                <div class="step-num">1</div>
+                <div class="step-lbl">Sign In</div>
+            </div>
+            <div class="step-item" id="step2">
+                <div class="step-num">2</div>
+                <div class="step-lbl">Confirm</div>
+            </div>
+            <div class="step-item" id="step3">
+                <div class="step-num">3</div>
+                <div class="step-lbl">Done</div>
             </div>
         </div>
-    </main>
 
-    <div id="toastContainer" class="toast-container"></div>
+        <!-- PANEL 1: Sign In -->
+        <div class="form-panel active" id="panelSignIn">
+            <div class="form-logo">
+                <div class="form-logo-icon"><i class="fas fa-store"></i></div>
+                <h2>Create Your Seller Account</h2>
+                <p>Sign in with Google to get started. Takes less than 60 seconds.</p>
+            </div>
 
-    <!-- Scripts -->
-    <script src="js/products.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/seller-register.js"></script>
+            <div class="google-btn-wrap" id="sellerGoogleBtnContainer"></div>
+
+            <div class="guest-note">
+                Already a seller? <a href="seller.html">Go to your dashboard →</a>
+                <br><br>
+                By signing up you agree to our
+                <a href="faq.html">Terms of Service</a> and
+                <a href="faq.html">Seller Policy</a>.
+            </div>
+        </div>
+
+        <!-- PANEL 2: Confirm -->
+        <div class="form-panel" id="panelConfirm">
+            <div style="margin-bottom:1.5rem;">
+                <h2 style="font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:0.375rem;">Almost There!</h2>
+                <p style="color:var(--muted);font-size:0.875rem;">Review your details and confirm your seller registration.</p>
+            </div>
+
+            <!-- User card -->
+            <div class="confirm-card" id="confirmCard">
+                <div class="confirm-avatar-placeholder" id="confirmAvatarPlaceholder">?</div>
+                <div class="confirm-info">
+                    <div class="confirm-name" id="confirmName">—</div>
+                    <div class="confirm-email" id="confirmEmail">—</div>
+                </div>
+                <div style="background:rgba(16,185,129,0.1);color:var(--success);padding:4px 10px;border-radius:50px;font-size:0.7rem;font-weight:700;">Verified</div>
+            </div>
+
+            <!-- Agreement checkboxes -->
+            <div class="check-group">
+                <input type="checkbox" id="agreeTerms">
+                <label for="agreeTerms">
+                    I agree to LuxeMart's <a href="faq.html">Seller Terms</a> and understand that
+                    <strong>a 5–12% commission</strong> applies per sale.
+                </label>
+            </div>
+
+            <div class="check-group">
+                <input type="checkbox" id="agreePayouts">
+                <label for="agreePayouts">
+                    I understand that payouts are processed every <strong>Friday via M-Pesa</strong>
+                    and I will provide my Safaricom number in my profile.
+                </label>
+            </div>
+
+            <div class="check-group">
+                <input type="checkbox" id="agreeQuality">
+                <label for="agreeQuality">
+                    I confirm that my products comply with LuxeMart's
+                    <a href="faq.html">quality standards</a> and are accurately described.
+                </label>
+            </div>
+
+            <button class="btn-become" id="confirmSellerBtn" disabled>
+                <i class="fas fa-store"></i> Activate Seller Account
+            </button>
+
+            <p style="text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--muted);">
+                Changed your mind? <a href="index.html" style="color:var(--secondary);font-weight:600;">Return to shop</a>
+            </p>
+        </div>
+
+        <!-- PANEL 3: Success -->
+        <div class="form-panel" id="panelSuccess">
+            <div class="success-wrap">
+                <div class="success-icon-wrap">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3>You're a Seller! 🎉</h3>
+                <p>
+                    Your seller account is active. Head to your dashboard to add
+                    your first product and start earning.
+                </p>
+                <a href="seller.html" class="btn-go-dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Go to Seller Dashboard
+                </a>
+                <br><br>
+                <a href="index.html" style="font-size:0.82rem;color:var(--muted);">
+                    Or continue browsing →
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="js/common.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    // ── THEME ─────────────────────────────────────────────────
+    const applyTheme = t => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if (i) i.className = `fas ${t === 'dark' ? 'fa-sun' : 'fa-moon'}`;
+    };
+    applyTheme(localStorage.getItem('theme') || 'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark')
+    );
+
+    // ── FLOATING DOTS ─────────────────────────────────────────
+    const dotsEl = document.getElementById('dotsBg');
+    if (dotsEl) {
+        for (let i = 0; i < 25; i++) {
+            const d = document.createElement('span');
+            d.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*6}s;animation-duration:${4+Math.random()*4}s;`;
+            dotsEl.appendChild(d);
+        }
+    }
+
+    // ── STEP MANAGEMENT ───────────────────────────────────────
+    function goToStep (num) {
+        document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-item').forEach((s, i) => {
+            s.classList.remove('active', 'done');
+            if (i + 1 < num) s.classList.add('done');
+            if (i + 1 === num) s.classList.add('active');
+        });
+        document.getElementById(`panel${['SignIn','Confirm','Success'][num-1]}`)?.classList.add('active');
+    }
+
+    // ── CHECK IF ALREADY LOGGED IN ────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+        const res  = await window.api?.('api/auth/me.php');
+        const user = res?.user;
+
+        if (user) {
+            if (user.role === 'seller' || user.role === 'admin') {
+                // Already a seller — skip straight to dashboard
+                window.location.href = 'seller.html';
+                return;
+            }
+            // Logged in as buyer — skip sign-in step
+            populateConfirmPanel(user);
+            goToStep(2);
+        }
+    });
+
+    // ── GOOGLE SIGN-IN FOR THIS PAGE ──────────────────────────
+    // Override the global callback to use seller registration flow
+    window.handleCredentialResponse = function (response) {
+        function decodeJWT (c) {
+            try {
+                const b64  = c.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+                return JSON.parse(decodeURIComponent(atob(b64).split('').map(x => '%' + ('00' + x.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            } catch { return null; }
+        }
+
+        const payload = decodeJWT(response.credential);
+        if (!payload) { window.showToast?.('Sign-in failed.', 'error'); return; }
+
+        // Login as buyer first, then upgrade to seller on confirm
+        handleSellerLogin({ name: payload.name, email: payload.email, picture: payload.picture });
+    };
+
+    async function handleSellerLogin (userData) {
+        const result = await window.api?.('api/auth/login.php', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+        });
+
+        if (!result?.success) {
+            window.showToast?.('Sign-in failed. Please try again.', 'error');
+            return;
+        }
+
+        const user = result.user;
+
+        if (user.role === 'seller' || user.role === 'admin') {
+            window.showToast?.('You already have a seller account!', 'info');
+            setTimeout(() => { window.location.href = 'seller.html'; }, 1200);
+            return;
+        }
+
+        populateConfirmPanel(user);
+        goToStep(2);
+    }
+
+    // Initialise Google Sign-In button
+    function initGoogleBtn () {
+        if (typeof google === 'undefined') {
+            setTimeout(initGoogleBtn, 300);
+            return;
+        }
+        try {
+            const CLIENT_ID = '459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com';
+            google.accounts.id.initialize({ client_id: CLIENT_ID, callback: window.handleCredentialResponse });
+            const container = document.getElementById('sellerGoogleBtnContainer');
+            if (container) {
+                google.accounts.id.renderButton(container, { theme:'outline', size:'large', width:300 });
+            }
+        } catch (err) {
+            console.warn('Google Sign-In init failed:', err);
+        }
+    }
+
+    initGoogleBtn();
+
+    // ── POPULATE CONFIRM PANEL ────────────────────────────────
+    function populateConfirmPanel (user) {
+        document.getElementById('confirmName').textContent  = user.name;
+        document.getElementById('confirmEmail').textContent = user.email;
+
+        const placeholder = document.getElementById('confirmAvatarPlaceholder');
+        if (user.picture) {
+            placeholder.outerHTML = `<img src="${user.picture}" alt="${user.name}" class="confirm-avatar" id="confirmAvatarPlaceholder">`;
+        } else {
+            placeholder.textContent = user.name?.[0]?.toUpperCase() || '?';
+        }
+    }
+
+    // ── CHECKBOX VALIDATION ───────────────────────────────────
+    const confirmBtn  = document.getElementById('confirmSellerBtn');
+    const checkboxes  = ['agreeTerms', 'agreePayouts', 'agreeQuality'];
+
+    function checkAllBoxes () {
+        const allChecked = checkboxes.every(id => document.getElementById(id)?.checked);
+        if (confirmBtn) confirmBtn.disabled = !allChecked;
+    }
+
+    checkboxes.forEach(id => {
+        document.getElementById(id)?.addEventListener('change', checkAllBoxes);
+    });
+
+    // ── CONFIRM: UPGRADE ROLE TO SELLER ──────────────────────
+    confirmBtn?.addEventListener('click', async () => {
+        confirmBtn.disabled  = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Activating...';
+
+        const result = await window.api?.('api/auth/set_role.php', {
+            method: 'POST',
+            body: JSON.stringify({ role: 'seller' }),
+        });
+
+        if (result?.success) {
+            goToStep(3);
+            window.showToast?.('Seller account activated! 🎉', 'success');
+        } else {
+            window.showToast?.(result?.message || 'Could not activate seller account.', 'error');
+            confirmBtn.disabled  = false;
+            confirmBtn.innerHTML = '<i class="fas fa-store"></i> Activate Seller Account';
+        }
+    });
+
+})();
+</script>
 </body>
 </html>
-
-```
-
-### 2. Create `js/seller-register.js` (New File)
-
-Next, create a corresponding JavaScript file to handle the logic for the new page. This script will initialize Google Sign-In and ensure anyone signing up here is assigned the 'seller' role.
-
-```diff
---- /dev/null
-+++ b/c:/file xampp/htdocs/LuxeMart/js/seller-register.js
-@@ -0,0 +1,55 @@
-+document.addEventListener('DOMContentLoaded', () => {
-+    // This script handles the dedicated seller registration page.
-+
-+    // 1. Load Google Script for this page specifically
-+    const script = document.createElement('script');
-+    script.src = "https://accounts.google.com/gsi/client";
-+    script.async = true;
-+    script.defer = true;
-+    document.body.appendChild(script);
-+
-+    // 2. Define a specific callback for seller registration
-+    window.handleSellerRegisterResponse = (response) => {
-+        // Decode JWT
-+        const base64Url = response.credential.split('.')[1];
-+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-+        const payload = JSON.parse(jsonPayload);
-+        
-+        // Call the global completeLogin function but force the role to 'seller'
-+        if (window.completeLogin) {
-+            window.completeLogin({ name: payload.name, email: payload.email, picture: payload.picture }, 'seller');
-+        }
-+    };
-+
-+    // 3. Initialize Google Sign-In when the script loads
-+    script.onload = () => {
-+        try {
-+            google.accounts.id.initialize({
-+                client_id: "459218839757-eo46dlmqm1jga6a62ct591b2fhfd8i7e.apps.googleusercontent.com", 
-+                callback: window.handleSellerRegisterResponse // Use our specific callback
-+            });
-+            const btnContainer = document.getElementById("sellerGoogleBtnContainer");
-+            if (btnContainer) {
-+                google.accounts.id.renderButton(
-+                    btnContainer,
-+                    { theme: "outline", size: "large", width: "300" } 
-+                );
-+            }
-+        } catch (e) {
-+            console.warn("Google Sign-In for seller page failed to load.", e);
-+        }
-+    };
-+
-+    // 4. Manual Seller Registration Handler
-+    const manualRegisterForm = document.getElementById('sellerManualRegisterForm');
-+    if (manualRegisterForm) {
-+        manualRegisterForm.addEventListener('submit', (e) => {
-+            e.preventDefault();
-+            const email = document.getElementById('sellerRegisterEmail').value;
-+            const name = email.split('@')[0];
-+            const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-+            
-+            // Call the global completeLogin function, forcing the role to 'seller'
-+            if (window.completeLogin) {
-+                window.completeLogin({ 
-+                    name: capitalizedName, 
-+                    email: email, 
-+                    picture: 'https://ui-avatars.com/api/?name=' + name + '&background=ff6b35&color=fff' 
-+                }, 'seller');
-+            }
-+        });
-+    }
-+});
-```
-
-### 3. Update `js/common.js`
-
-To allow the new `seller-register.js` script to work, we need to make a small modification to `common.js`. We'll expose the `completeLogin` function globally and allow it to accept a `forcedRole` parameter.
-
-```diff
---- a/c:/file xampp/htdocs/LuxeMart/js/common.js
-+++ b/c:/file xampp/htdocs/LuxeMart/js/common.js
-@@ -415,22 +415,29 @@
-         localStorage.setItem('usersDB', JSON.stringify(usersDB));
-     };
- 
--    function completeLogin(userData) {
--        // Get Selected Role
--        const roleInputs = document.querySelectorAll('input[name="accountRole"]');
--        let role = 'buyer';
--        roleInputs.forEach(r => { if(r.checked) role = r.value; });
--
--        // === INTELLIGENT ROLE DETECTION ===
--        const loginModal = document.getElementById('loginModal');
--        const isModalOpen = loginModal && loginModal.classList.contains('show');
--
--        // 1. If One Tap (Modal closed), try to find existing role from "Database"
--        if (!isModalOpen) {
--            const knownRole = getKnownRole(userData.email);
--            if (knownRole) role = knownRole;
-+    // Make completeLogin globally accessible for other scripts like seller-register.js
-+    window.completeLogin = function(userData, forcedRole = null) {
-+        let role;
-+
-+        if (forcedRole) {
-+            role = forcedRole;
-+        } else {
-+            // Get Selected Role from modal if it's open
-+            const roleInputs = document.querySelectorAll('input[name="accountRole"]');
-+            role = 'buyer'; // Default
-+            roleInputs.forEach(r => { if(r.checked) role = r.value; });
-+
-+            // === INTELLIGENT ROLE DETECTION for One Tap ===
-+            const loginModal = document.getElementById('loginModal');
-+            const isModalOpen = loginModal && loginModal.classList.contains('show');
-+
-+            // If One Tap (Modal closed), try to find existing role from "Database"
-+            if (!isModalOpen) {
-+                const knownRole = getKnownRole(userData.email);
-+                if (knownRole) role = knownRole;
-+            }
-         }
--
-+        
-         // Special check for hardcoded admin demo
-         if (userData.email.toLowerCase().includes('admin')) {
-             role = 'admin';
-@@ -442,7 +449,8 @@
-         saveKnownUser(user);
-         
-         updateAccountUI();
--        loginModal.classList.remove('show');
-+        const loginModal = document.getElementById('loginModal');
-+        if (loginModal) loginModal.classList.remove('show');
-         window.showToast(`Welcome back, ${user.name}! Signed in as ${role.toUpperCase()}.`, 'success');
- 
-         // Redirect Logic based on Role
-@@ -456,7 +464,7 @@
-                 if (window.location.href.includes('login.html')) window.location.href = 'index.html';
-             }
-         }, 1000);
--    }
-+    };
- 
-     script.onload = () => {
-         try {
-
-```
-
-### 4. Update Links in Footer
-
-Finally, let's update the "Sell on LuxeMart" links in your `index.html` and `product.html` footers to point to this new, user-friendly registration page.
-
-#### `index.html`
-```diff
---- a/c:/file xampp/htdocs/LuxeMart/index.html
-+++ b/c:/file xampp/htdocs/LuxeMart/index.html
-@@ -583,6 +583,7 @@
-                     <h3>Quick Links</h3>
-                     <ul>
-                         <li><a href="#">About Us</a></li>
-+                        <li><a href="seller-register.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
-                         <li><a href="#">Contact</a></li>
-                         <li><a href="refer.html">Refer a Friend</a></li>
-                         <li><a href="faq.html">FAQs</a></li>
-
-```
-
-#### `product.html`
-```diff
---- a/c:/file xampp/htdocs/LuxeMart/product.html
-+++ b/c:/file xampp/htdocs/LuxeMart/product.html
-@@ -139,7 +139,7 @@
-                         <li><a href="#">About Us</a></li>
-                         <li><a href="refer.html">Refer a Friend</a></li>
-                         <li><a href="#">Contact</a></li>
--                        <li><a href="seller.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
-+                        <li><a href="seller-register.html" style="color: var(--secondary); font-weight: 600;">Sell on LuxeMart</a></li>
-                         <li><a href="faq.html">FAQs</a></li>
-                         <li><a href="#">Shipping Info</a></li>
-                         <li><a href="#">Returns</a></li>
-
-```
-
-With these changes, you now have a dedicated page for seller registration that simplifies the process and automatically assigns the correct role, improving the overall user experience.
-
-<!--
-[PROMPT_SUGGESTION]How can I add a "My Products" view to the seller dashboard so they can see and edit their own listings?[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]Can you add a feature for buyers to leave reviews on products they have purchased?[/PROMPT_SUGGESTION]
--->
