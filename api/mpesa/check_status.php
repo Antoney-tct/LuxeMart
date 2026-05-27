@@ -1,18 +1,27 @@
 <?php
-session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
 $orderId = (int)($_GET['order_id'] ?? 0);
+
 if (!$orderId) {
-    echo json_encode(['status' => 'Unknown']);
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Order ID required.']);
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT status FROM orders WHERE id = ?");
+$stmt = $pdo->prepare("SELECT status, mpesa_receipt FROM orders WHERE id = ?");
 $stmt->execute([$orderId]);
 $order = $stmt->fetch();
 
+if (!$order) {
+    http_response_code(404);
+    echo json_encode(['success' => false, 'message' => 'Order not found.']);
+    exit;
+}
+
 echo json_encode([
-    'status' => $order['status'] ?? 'Unknown',
+    'success' => true,
+    'status'  => $order['status'],
+    'receipt' => $order['mpesa_receipt'],
 ]);

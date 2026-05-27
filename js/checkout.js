@@ -1,450 +1,376 @@
-// ============================================================
-//  LuxeMart — checkout.js (FULL REWRITE)
-//  Reads cart from server via getCart()
-//  Submits order to api/orders/create.php
-//  M-Pesa STK push via api/mpesa/stk_push.php
-// ============================================================
+/**
+ * LuxeMart — checkout.js
+ * Handles the checkout page: cart summary, form validation,
+ * discount codes, order submission, M-Pesa STK Push + polling.
+ */
 
-(function () {
-    'use strict';
+'use strict';
 
-    // ── DOM REFS ───────────────────────────────────────────
-    const checkoutForm    = document.getElementById('checkoutForm');
-    const checkoutItemsEl = document.getElementById('checkoutItems');
-    const checkoutTotalEl = document.getElementById('checkoutTotal');
-    const discountInput   = document.getElementById('discountCode');
-    const applyDiscountBtn= document.getElementById('applyDiscountBtn');
-    const clearCartBtn    = document.getElementById('clearCartBtn');
-    const paymentRadios   = document.querySelectorAll('input[name="paymentMethod"]');
-    const cardFields      = document.getElementById('cardPaymentFields');
-    const mpesaFields     = document.getElementById('mpesaPaymentFields');
-    const submitBtn       = checkoutForm?.querySelector('button[type="submit"]');
+document.addEventListener('DOMContentLoaded', async () => {
 
-    // ── STATE ──────────────────────────────────────────────
-    let cartItems       = [];
-    let subtotal        = 0;
-    let discountAmount  = 0;
-    let total           = 0;
-    let appliedCode     = null;
+    // ── STATE ─────────────────────────────────────────────────
+    let cartItems     = [];
+    let subtotal      = 0;
+    let discountAmt   = 0;
+    let shippingCost  = 0;
+    let activeMethod  = 'card';
+    let promoApplied  = false;
 
-    // ── INIT ───────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Redirect if not logged in
-        const user = window.getUser ? window.getUser() : null;
-        if (!user) {
-            window.showToast('Please log in to checkout.', 'info');
-            setTimeout(() => window.location.href = 'index.html', 1200);
-            return;
-        }
+    const fmt = n => `KSh ${Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
 
-        // Pre-fill billing fields from user session
-        const nameEl  = document.getElementById('billingName');
-        const emailEl = document.getElementById('billingEmail');
-        if (nameEl  && user.name)  nameEl.value  = user.name;
-        if (emailEl && user.email) emailEl.value = user.email;
-
-        // Load cart from server
-        await loadCart();
-
-        // Payment method toggle
-        paymentRadios.forEach(radio => {
-            radio.addEventListener('change', handlePaymentToggle);
-        });
-
-        // Set initial payment field visibility
-        handlePaymentToggle();
-
-        // Discount
-        applyDiscountBtn?.addEventListener('click', handleDiscount);
-        discountInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); handleDiscount(); }
-        });
-
-        // Clear cart
-        clearCartBtn?.addEventListener('click', handleClearCart);
-
-        // Form submit
-        checkoutForm?.addEventListener('submit', handleSubmit);
-    });
-
-    // ── LOAD CART ──────────────────────────────────────────
-    const loadCart = async () => {
-        // fetchCart is defined in cart.js and returns the server cart
+    // ── LOAD CART ─────────────────────────────────────────────
+    async function loadCart () {
         if (typeof window.fetchCart === 'function') {
             cartItems = await window.fetchCart();
         } else {
-            cartItems = window.getCart ? window.getCart() : [];
+            cartItems = window.getCart?.() || [];
         }
+
+        renderSummaryItems();
+        updateTotals();
+
+        // Disable checkout if cart is empty
+        if (!cartItems.length) {
+            document.getElementById('placeOrderBtn').disabled = true;
+        }
+    }
+
+    // ── SUMMARY ITEMS ─────────────────────────────────────────
+    function renderSummaryItems () {
+        const el = document.getElementById('summaryItems');
+        if (!el) return;
 
         if (!cartItems.length) {
-            renderEmptyCart();
+            el.innerHTML = `
+                <div style="text-align:center;padding:2rem;color:var(--muted);">
+                    <i class="fas fa-shopping-bag" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:0.75rem;"></i>
+                    <p style="font-weight:600;">Your cart is empty</p>
+                    <a href="shop.html" style="color:var(--secondary);font-weight:600;font-size:0.875rem;">Browse Products →</a>
+                </div>`;
             return;
         }
 
-        renderOrderSummary();
-    };
-
-    // ── RENDER EMPTY STATE ─────────────────────────────────
-    const renderEmptyCart = () => {
-        if (checkoutItemsEl) {
-            checkoutItemsEl.innerHTML = `
-                <div style="text-align:center;padding:2rem 0;color:var(--light-text);">
-                    <i class="fas fa-shopping-bag" style="font-size:2.5rem;display:block;margin-bottom:1rem;opacity:0.3;"></i>
-                    <p>Your cart is empty.</p>
-                    <a href="shop.html" class="btn-primary" style="display:inline-flex;margin-top:1rem;">
-                        Continue Shopping
-                    </a>
-                </div>`;
-        }
-        if (checkoutTotalEl) checkoutTotalEl.textContent = 'KSh 0.00';
-        if (submitBtn)       submitBtn.disabled = true;
-        if (clearCartBtn)    clearCartBtn.style.display = 'none';
-    };
-
-    // ── RENDER ORDER SUMMARY ───────────────────────────────
-    const renderOrderSummary = () => {
-        if (!checkoutItemsEl) return;
-
-        subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        recalcTotal();
-
-        checkoutItemsEl.innerHTML = cartItems.map(item => `
+        el.innerHTML = cartItems.map(item => `
             <div class="summary-item">
-                <img src="${item.img}"
-                     alt="${item.name}"
-                     class="summary-img"
-                     onerror="this.src='https://via.placeholder.com/60x60?text=?'">
-                <div class="summary-info">
-                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">
-                        ${item.name}
-                    </div>
-                    <div style="font-size:0.82rem;color:var(--light-text);">
-                        ${item.brand || ''}
-                    </div>
-                    <div style="font-size:0.85rem;margin-top:0.3rem;display:flex;align-items:center;gap:0.5rem;">
-                        <button class="checkout-qty-btn" data-id="${item.product_id}" data-action="decrease"
-                                style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;font-size:0.9rem;">
-                            −
-                        </button>
-                        <span style="font-weight:500;">${item.qty}</span>
-                        <button class="checkout-qty-btn" data-id="${item.product_id}" data-action="increase"
-                                style="width:22px;height:22px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;font-size:0.9rem;">
-                            +
-                        </button>
-                    </div>
+                <div class="summary-img-wrap">
+                    <img src="${item.img}" alt="${item.name}" class="summary-img"
+                         onerror="this.src='https://via.placeholder.com/56?text=?'">
+                    <span class="summary-qty-badge">${item.qty}</span>
                 </div>
-                <div style="font-weight:600;white-space:nowrap;font-size:0.95rem;">
-                    KSh ${(item.price * item.qty).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
+                <div style="flex:1;min-width:0;">
+                    <div class="summary-item-name">${item.name}</div>
+                    <div class="summary-item-brand">${item.brand || ''}</div>
                 </div>
+                <div class="summary-item-price">${fmt(item.price * item.qty)}</div>
             </div>
         `).join('');
+    }
 
-        // Qty buttons in summary
-        checkoutItemsEl.querySelectorAll('.checkout-qty-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id     = parseInt(btn.dataset.id);
-                const action = btn.dataset.action;
-                const delta  = action === 'increase' ? 1 : -1;
+    // ── TOTALS ────────────────────────────────────────────────
+    function updateTotals () {
+        subtotal = cartItems.reduce((s, i) => s + (i.price * i.qty), 0);
+        const total = Math.max(0, subtotal - discountAmt + shippingCost);
 
-                if (typeof window.updateCartQty === 'function') {
-                    await window.updateCartQty(id, delta);
-                }
+        document.getElementById('totalSubtotal').textContent = fmt(subtotal);
+        document.getElementById('totalGrand').textContent    = fmt(total);
 
-                // Refresh cart state after update
-                await loadCart();
+        const shipEl = document.getElementById('totalShipping');
+        if (shipEl) {
+            shipEl.textContent  = shippingCost > 0 ? fmt(shippingCost) : 'Free';
+            shipEl.style.color  = shippingCost > 0 ? 'var(--text)' : 'var(--success)';
+        }
 
-                // Reset any applied discount
-                if (appliedCode) {
-                    appliedCode   = null;
-                    discountAmount = 0;
-                    if (discountInput)    discountInput.value    = '';
-                    if (applyDiscountBtn) {
-                        applyDiscountBtn.textContent = 'Apply';
-                        applyDiscountBtn.disabled    = false;
-                    }
-                    if (discountInput) discountInput.disabled = false;
-                }
+        if (discountAmt > 0) {
+            const row = document.getElementById('discountRow');
+            const val = document.getElementById('totalDiscount');
+            if (row) row.style.display = 'flex';
+            if (val) val.textContent   = `− ${fmt(discountAmt)}`;
+        }
+    }
+
+    // ── PAYMENT TABS ─────────────────────────────────────────
+    document.querySelectorAll('.payment-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.payment-fields').forEach(f => f.classList.remove('active'));
+            tab.classList.add('active');
+            activeMethod = tab.dataset.method;
+            document.getElementById(`fields-${activeMethod}`)?.classList.add('active');
+        });
+    });
+
+    // ── SHIPPING METHOD ───────────────────────────────────────
+    document.querySelectorAll('input[name="shippingMethod"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            shippingCost = radio.value === 'express' ? 650 : 0;
+            updateTotals();
+
+            // Border highlight
+            document.querySelectorAll('input[name="shippingMethod"]').forEach(r => {
+                const label = r.closest('label');
+                if (label) label.style.borderColor = r.checked ? 'var(--secondary)' : 'var(--border)';
             });
         });
+    });
 
-        updateTotalsUI();
-    };
+    // ── CARD FORMATTING ───────────────────────────────────────
+    document.getElementById('cardNumber')?.addEventListener('input', e => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16)
+            .replace(/(.{4})/g, '$1 ').trim();
+    });
 
-    // ── TOTAL CALCULATION ──────────────────────────────────
-    const recalcTotal = () => {
-        total = Math.max(0, subtotal - discountAmount);
-    };
+    document.getElementById('cardExpiry')?.addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+        if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
+        e.target.value = v;
+    });
 
-    const updateTotalsUI = () => {
-        recalcTotal();
-        if (!checkoutTotalEl) return;
+    document.getElementById('cardCvv')?.addEventListener('input', e => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
 
-        if (discountAmount > 0) {
-            checkoutTotalEl.innerHTML = `
-                <span style="text-decoration:line-through;color:var(--light-text);font-size:0.9rem;margin-right:0.5rem;">
-                    KSh ${subtotal.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-                </span>
-                KSh ${total.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-                <small style="display:block;color:var(--success);font-size:0.8rem;margin-top:0.2rem;">
-                    You save KSh ${discountAmount.toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-                </small>`;
-        } else {
-            checkoutTotalEl.textContent =
-                `KSh ${total.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
-        }
-    };
+    // ── PRE-FILL USER INFO ────────────────────────────────────
+    const user = window.getUser?.();
+    if (user) {
+        const nameEl  = document.getElementById('billingName');
+        const emailEl = document.getElementById('billingEmail');
+        if (nameEl  && !nameEl.value)  nameEl.value  = user.name  || '';
+        if (emailEl && !emailEl.value) emailEl.value = user.email || '';
 
-    // ── PAYMENT TOGGLE ─────────────────────────────────────
-    const handlePaymentToggle = () => {
-        const selected = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card';
-        if (cardFields)  cardFields.style.display  = selected === 'card'  ? 'block' : 'none';
-        if (mpesaFields) mpesaFields.style.display = selected === 'mpesa' ? 'block' : 'none';
-    };
+        const greet = document.getElementById('userGreeting');
+        if (greet) greet.textContent = `👋 Hi, ${user.name?.split(' ')[0]}`;
+    }
 
-    // ── DISCOUNT CODE ──────────────────────────────────────
-    const handleDiscount = async () => {
-        const code = discountInput?.value.trim().toUpperCase();
-        if (!code) {
-            window.showToast('Enter a discount code first.', 'info');
-            return;
-        }
+    // ── DISCOUNT CODE ─────────────────────────────────────────
+    document.getElementById('applyDiscountBtn')?.addEventListener('click', applyDiscount);
+    document.getElementById('discountCode')?.addEventListener('keypress', e => {
+        if (e.key === 'Enter') applyDiscount();
+    });
 
-        applyDiscountBtn.textContent = 'Checking...';
-        applyDiscountBtn.disabled    = true;
+    async function applyDiscount () {
+        if (promoApplied) return;
 
-        const result = await window.api('api/discount/check.php', {
+        const input = document.getElementById('discountCode');
+        const btn   = document.getElementById('applyDiscountBtn');
+        const code  = input?.value.trim().toUpperCase();
+
+        if (!code) { window.showToast?.('Enter a discount code first.', 'info'); return; }
+
+        btn.disabled    = true;
+        btn.textContent = '...';
+
+        const result = await window.api?.('api/discount/check.php', {
             method: 'POST',
             body: JSON.stringify({ code, order_total: subtotal }),
         });
 
-        if (!result.success) {
-            window.showToast(result.message || 'Invalid code.', 'error');
-            applyDiscountBtn.textContent = 'Apply';
-            applyDiscountBtn.disabled    = false;
+        if (!result?.success) {
+            window.showToast?.(result?.message || 'Invalid code.', 'error');
+            btn.disabled    = false;
+            btn.textContent = 'Apply';
             return;
         }
 
-        appliedCode    = code;
-        discountAmount = result.amount_off;
-        if (discountInput) discountInput.disabled    = true;
-        applyDiscountBtn.textContent = '✓ Applied';
+        discountAmt  = result.amount_off;
+        promoApplied = true;
+        updateTotals();
 
-        window.showToast(
-            `Code "${code}" applied — KSh ${result.amount_off.toLocaleString()} off!`,
-            'success'
-        );
+        window.showToast?.(`"${code}" applied — ${fmt(discountAmt)} off!`, 'success');
 
-        updateTotalsUI();
-    };
+        if (input) input.disabled    = true;
+        btn.disabled    = true;
+        btn.textContent = '✓ Applied';
+        btn.style.background = 'var(--success)';
+    }
 
-    // ── CLEAR CART ─────────────────────────────────────────
-    const handleClearCart = async () => {
-        if (!confirm('Clear your entire cart?')) return;
-        if (typeof window.clearCart === 'function') await window.clearCart();
-        cartItems      = [];
-        discountAmount = 0;
-        appliedCode    = null;
-        renderEmptyCart();
-    };
+    // ── VALIDATION ────────────────────────────────────────────
+    function validate () {
+        // Clear previous errors
+        document.querySelectorAll('.field-error').forEach(el => el.remove());
+        document.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
 
-    // ── FORM VALIDATION ────────────────────────────────────
-    const validate = () => {
         let valid = true;
 
-        // Clear previous errors
-        checkoutForm.querySelectorAll('.field-error').forEach(el => el.remove());
-        checkoutForm.querySelectorAll('input.error, select.error').forEach(el => {
-            el.classList.remove('error');
-        });
+        const required = [
+            ['billingName',    'Full name is required.'],
+            ['billingEmail',   'Email address is required.'],
+            ['billingAddress', 'Street address is required.'],
+            ['billingCity',    'City is required.'],
+            ['billingZip',     'ZIP / postal code is required.'],
+        ];
 
-        const required = ['billingName', 'billingEmail', 'billingAddress', 'billingCity', 'billingZip'];
-        required.forEach(id => {
+        required.forEach(([id, msg]) => {
             const el = document.getElementById(id);
-            if (!el) return;
-            if (!el.value.trim()) {
-                markError(el, 'This field is required.');
-                valid = false;
-            }
+            if (!el?.value.trim()) { markError(el, msg); valid = false; }
         });
 
-        // Email format
         const emailEl = document.getElementById('billingEmail');
         if (emailEl?.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value)) {
-            markError(emailEl, 'Please enter a valid email address.');
+            markError(emailEl, 'Enter a valid email address.');
             valid = false;
         }
 
-        const method = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-
-        if (method === 'card') {
-            ['cardNumber', 'cardExpiry', 'cardCvv'].forEach(id => {
+        if (activeMethod === 'card') {
+            [
+                ['cardNumber', 'Card number is required.'],
+                ['cardName',   'Cardholder name is required.'],
+                ['cardExpiry', 'Expiry date is required.'],
+                ['cardCvv',    'CVV is required.'],
+            ].forEach(([id, msg]) => {
                 const el = document.getElementById(id);
-                if (el && !el.value.trim()) {
-                    markError(el, 'Required for card payment.');
-                    valid = false;
-                }
+                if (!el?.value.trim()) { markError(el, msg); valid = false; }
             });
         }
 
-        if (method === 'mpesa') {
+        if (activeMethod === 'mpesa') {
             const phone = document.getElementById('mpesaPhone');
             if (!phone?.value.trim()) {
-                markError(phone, 'Enter your M-Pesa phone number.');
-                valid = false;
+                markError(phone, 'Phone number is required.'); valid = false;
             } else if (!/^(254[71]\d{8}|0[71]\d{8})$/.test(phone.value.trim())) {
-                markError(phone, 'Enter a valid Kenyan number e.g. 0712345678.');
-                valid = false;
+                markError(phone, 'Enter a valid Kenyan number e.g. 0712345678.'); valid = false;
             }
+        }
+
+        if (!valid) {
+            document.querySelector('.form-control.error')?.scrollIntoView({ behavior:'smooth', block:'center' });
         }
 
         return valid;
-    };
+    }
 
-    const markError = (el, msg) => {
+    function markError (el, msg) {
+        if (!el) return;
         el.classList.add('error');
-        el.style.borderColor = '#ef4444';
         const err = document.createElement('div');
-        err.className   = 'field-error';
-        err.style.cssText = 'color:#ef4444;font-size:0.8rem;margin-top:0.25rem;';
-        err.textContent = msg;
-        el.parentNode.insertBefore(err, el.nextSibling);
+        err.className = 'field-error';
+        err.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+        el.parentNode?.appendChild(err);
+        el.addEventListener('input', () => { el.classList.remove('error'); err.remove(); }, { once: true });
+    }
 
-        // Auto-clear on input
-        el.addEventListener('input', () => {
-            el.classList.remove('error');
-            el.style.borderColor = '';
-            err.remove();
-        }, { once: true });
-    };
+    // ── PLACE ORDER ───────────────────────────────────────────
+    document.getElementById('placeOrderBtn')?.addEventListener('click', placeOrder);
 
-    // ── FORM SUBMIT ────────────────────────────────────────
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
+    async function placeOrder () {
         if (!cartItems.length) {
-            window.showToast('Your cart is empty.', 'info');
+            window.showToast?.('Your cart is empty.', 'info');
             return;
         }
 
-        if (!validate()) {
-            // Scroll to first error
-            checkoutForm.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
+        if (!validate()) return;
 
-        setLoading(true);
+        const btn = document.getElementById('placeOrderBtn');
+        btn.disabled  = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'card';
+        const shipping = document.querySelector('input[name="shippingMethod"]:checked')?.value || 'standard';
 
-        const orderPayload = {
+        const payload = {
             customer: {
                 name:    document.getElementById('billingName').value.trim(),
                 email:   document.getElementById('billingEmail').value.trim(),
+                phone:   document.getElementById('billingPhone')?.value.trim() || null,
                 address: document.getElementById('billingAddress').value.trim(),
                 city:    document.getElementById('billingCity').value.trim(),
                 zip:     document.getElementById('billingZip').value.trim(),
+                country: document.getElementById('billingCountry')?.value || 'Kenya',
             },
             items:           cartItems.map(i => ({ id: i.product_id, qty: i.qty })),
-            total:           total,
-            discount_amount: discountAmount,
-            paymentMethod,
+            shipping_method: shipping,
+            payment_method:  activeMethod,
+            discount_amount: discountAmt,
+            notes:           document.getElementById('orderNotes')?.value.trim() || '',
+            total:           Math.max(0, subtotal - discountAmt + shippingCost),
         };
 
-        // Create order in DB first
-        const orderResult = await window.api('api/orders/create.php', {
+        const result = await window.api?.('api/orders/create.php', {
             method: 'POST',
-            body: JSON.stringify(orderPayload),
+            body: JSON.stringify(payload),
         });
 
-        if (!orderResult.success) {
-            window.showToast(orderResult.message || 'Order failed. Please try again.', 'error');
-            setLoading(false);
+        if (!result?.success) {
+            window.showToast?.(result?.message || 'Order failed. Please try again.', 'error');
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-lock"></i> Place Order Securely';
             return;
         }
 
-        // Handle payment method
-        if (paymentMethod === 'mpesa') {
-            await handleMpesa(orderResult.order_db_id, orderResult.order_number);
+        if (activeMethod === 'mpesa') {
+            await handleMpesa(result.order_db_id, result.order_number);
         } else {
-            // Card / PayPal — order is already saved, redirect
-            window.showToast('Order placed successfully!', 'success');
-            setTimeout(() => {
-                window.location.href = `orders.html?new=${orderResult.order_number}`;
-            }, 1000);
+            await window.clearCart?.();
+            showSuccess(result.order_number);
         }
-    };
+    }
 
-    // ── MPESA FLOW ─────────────────────────────────────────
-    const handleMpesa = async (orderDbId, orderNumber) => {
+    // ── M-PESA FLOW ───────────────────────────────────────────
+    async function handleMpesa (orderId, orderNumber) {
+        const btn   = document.getElementById('placeOrderBtn');
         const phone = document.getElementById('mpesaPhone')?.value.trim();
 
-        window.showToast('Sending M-Pesa prompt to your phone...', 'info');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Awaiting M-Pesa PIN...';
+        window.showToast?.('STK Push sent. Enter your M-Pesa PIN.', 'info');
 
-        const result = await window.api('api/mpesa/stk_push.php', {
+        const pushRes = await window.api?.('api/mpesa/stk_push.php', {
             method: 'POST',
             body: JSON.stringify({
                 phone,
-                amount:   Math.ceil(total),
-                order_id: orderDbId,
+                amount:   Math.ceil(subtotal - discountAmt + shippingCost),
+                order_id: orderId,
             }),
         });
 
-        setLoading(false);
-
-        if (result.ResponseCode !== '0') {
-            window.showToast(
-                result.CustomerMessage || 'M-Pesa request failed. Try again.',
-                'error'
-            );
+        if (pushRes?.ResponseCode !== '0') {
+            window.showToast?.(pushRes?.CustomerMessage || 'M-Pesa request failed. Try again.', 'error');
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-lock"></i> Place Order Securely';
             return;
         }
 
-        window.showToast('Please enter your M-Pesa PIN on your phone.', 'success');
-
-        // Poll for payment confirmation
-        pollMpesaStatus(orderDbId, orderNumber);
-    };
-
-    // ── POLL MPESA STATUS ──────────────────────────────────
-    const pollMpesaStatus = (orderDbId, orderNumber) => {
+        // Poll every 5 seconds, up to 12 attempts (60 seconds total)
         let attempts = 0;
-        const maxAttempts = 12; // 60 seconds total
-
-        const timer = setInterval(async () => {
+        const poll   = setInterval(async () => {
             attempts++;
-            const result = await window.api(`api/mpesa/check_status.php?order_id=${orderDbId}`);
+            const status = await window.api?.(`api/mpesa/check_status.php?order_id=${orderId}`);
 
-            if (result.status === 'Paid') {
-                clearInterval(timer);
-                window.showToast('Payment confirmed! Redirecting...', 'success');
-                setTimeout(() => {
-                    window.location.href = `orders.html?new=${orderNumber}`;
-                }, 1200);
-            } else if (result.status === 'Failed' || attempts >= maxAttempts) {
-                clearInterval(timer);
-                window.showToast(
-                    attempts >= maxAttempts
-                        ? 'Payment timeout. Check your orders page.'
-                        : 'Payment was cancelled.',
-                    'error'
-                );
-                setTimeout(() => {
-                    window.location.href = `orders.html?new=${orderNumber}`;
-                }, 2000);
+            if (status?.status === 'Processing') {
+                // Still waiting for PIN
+                if (attempts >= 12) {
+                    clearInterval(poll);
+                    window.showToast?.('Payment timed out. Check your orders.', 'error');
+                    btn.disabled  = false;
+                    btn.innerHTML = '<i class="fas fa-lock"></i> Place Order Securely';
+                }
+                return;
+            }
+
+            clearInterval(poll);
+
+            if (status?.status === 'Shipped' || status?.status === 'Delivered' ||
+                (status?.status !== 'Cancelled')) {
+                // Anything other than cancelled means paid
+                await window.clearCart?.();
+                showSuccess(orderNumber);
+            } else {
+                window.showToast?.('Payment cancelled. Please try again.', 'error');
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-lock"></i> Place Order Securely';
             }
         }, 5000);
-    };
+    }
 
-    // ── LOADING STATE ──────────────────────────────────────
-    const setLoading = (loading) => {
-        if (!submitBtn) return;
-        if (loading) {
-            submitBtn.disabled   = true;
-            submitBtn.innerHTML  = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        } else {
-            submitBtn.disabled   = false;
-            submitBtn.innerHTML  = 'Place Order';
-        }
-    };
+    // ── SUCCESS OVERLAY ───────────────────────────────────────
+    function showSuccess (orderNumber) {
+        document.getElementById('successOrderNum').textContent = `#${orderNumber}`;
+        document.getElementById('successOverlay')?.classList.add('show');
+        document.body.style.overflow = 'hidden';
 
-})();
+        // Auto redirect after 8 seconds
+        setTimeout(() => {
+            window.location.href = `orders.html?new=${orderNumber}`;
+        }, 8000);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────
+    await loadCart();
+});

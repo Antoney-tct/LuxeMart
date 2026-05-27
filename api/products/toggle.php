@@ -1,32 +1,35 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Not logged in.']);
+if (empty($_SESSION['user_email']) || !in_array($_SESSION['role'], ['seller','admin'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
     exit;
 }
 
-$data      = json_decode(file_get_contents('php://input'), true);
-$id        = (int)($data['id']        ?? 0);
-$isActive  = (int)($data['is_active'] ?? 0);
-$userId    = $_SESSION['user_id'];
-$role      = $_SESSION['role'] ?? 'buyer';
+$data = json_decode(file_get_contents('php://input'), true);
+$id   = (int)($data['id'] ?? 0);
 
-$check = $role === 'admin'
-    ? $pdo->prepare("SELECT id FROM products WHERE id = ?")
-    : $pdo->prepare("SELECT id FROM products WHERE id = ? AND seller_id = ?");
-
-$check->execute($role === 'admin' ? [$id] : [$id, $userId]);
-
-if (!$check->fetch()) {
-    echo json_encode(['success' => false, 'message' => 'Product not found or access denied.']);
+if (!$id) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Product ID required.']);
     exit;
 }
 
-$pdo->prepare("UPDATE products SET is_active = ?, updated_at = NOW() WHERE id = ?")
-    ->execute([$isActive, $id]);
+// Ownership
+$stmt = $pdo->prepare("SELECT seller_email, is_active FROM products WHERE id = ?");
+$stmt->execute([$id]);
+$p = $stmt->fetch();
 
-echo json_encode(['success' => true]);
+if (!$p || ($_SESSION['role'] !== 'admin' && $p['seller_email'] !== $_SESSION['user_email'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Not found or unauthorized.']);
+    exit;
+}
+
+$newState = $p['is_active'] ? 0 : 1;
+$pdo->prepare("UPDATE products SET is_active = ? WHERE id = ?")->execute([$newState, $id]);
+
+echo json_encode(['success' => true, 'is_active' => (bool)$newState]);

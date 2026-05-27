@@ -7,1414 +7,600 @@
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
     <style>
-        /* ── RESET & BASE ─────────────────────────────── */
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-        :root {
-            --primary:    #1a1a1a;
-            --secondary:  #ff6b35;
-            --accent:     #f8f7f4;
-            --text:       #1a1a1a;
-            --light-text: #6b7280;
-            --white:      #ffffff;
-            --border:     #e5e7eb;
-            --success:    #10b981;
-            --danger:     #ef4444;
-            --warning:    #f59e0b;
-            --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
-            --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
-            --radius-sm:  8px;
-            --radius-md:  12px;
-            --radius-lg:  16px;
-            --sidebar-w:  260px;
-            --header-h:   64px;
-            --transition: all 0.2s ease;
-        }
-
-        body[data-theme="dark"] {
-            --primary:    #f9fafb;
-            --accent:     #1f2937;
-            --text:       #e5e7eb;
-            --light-text: #9ca3af;
-            --white:      #111827;
-            --border:     #374151;
-            --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
-            --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--accent);
-            color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        a { text-decoration:none; color:inherit; }
-        button { cursor:pointer; font-family:inherit; border:none; }
-        img { max-width:100%; display:block; }
-
-        /* ── LAYOUT ───────────────────────────────────── */
-        .seller-layout { display:flex; min-height:100vh; }
-
-        /* ── SIDEBAR ──────────────────────────────────── */
-        .sidebar {
-            width: var(--sidebar-w);
-            background: var(--white);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0;
-            height: 100vh;
-            z-index: 200;
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-logo img { width:36px; height:36px; }
-
-        .sidebar-logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .sidebar-logo .badge {
-            margin-left: auto;
-            background: var(--secondary);
-            color: white;
-            font-size: 0.62rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .sidebar-nav { flex:1; padding:1rem 0.75rem; }
-
-        .nav-label {
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--light-text);
-            padding: 0.75rem 0.75rem 0.35rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.65rem 0.875rem;
-            border-radius: var(--radius-sm);
-            color: var(--light-text);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: var(--transition);
-            margin-bottom: 2px;
-            cursor: pointer;
-            background: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .nav-item:hover { background:var(--accent); color:var(--text); }
-
-        .nav-item.active {
-            background: rgba(255,107,53,0.10);
-            color: var(--secondary);
-        }
-
-        .nav-item i { width:18px; text-align:center; font-size:0.9rem; }
-
-        .sidebar-footer {
-            padding: 1rem 0.75rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .sidebar-user {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: var(--radius-sm);
-            background: var(--accent);
-        }
-
-        .sidebar-user img {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .sidebar-user-name {
-            font-weight: 600;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .sidebar-user-role {
-            font-size: 0.72rem;
-            color: var(--secondary);
-            font-weight: 500;
-        }
-
-        /* ── MAIN CONTENT ─────────────────────────────── */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-w);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ── HEADER ───────────────────────────────────── */
-        .seller-header {
-            height: var(--header-h);
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            gap: 1rem;
-        }
-
-        .header-left { display:flex; align-items:center; gap:1rem; }
-
-        .sidebar-toggle {
-            display: none;
-            width: 36px; height: 36px;
-            border-radius: var(--radius-sm);
-            background: var(--accent);
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            color: var(--text);
-        }
-
-        .page-title { font-size:1.05rem; font-weight:600; }
-
-        .header-right { display:flex; align-items:center; gap:0.75rem; }
-
-        .header-btn {
-            width: 36px; height: 36px;
-            border-radius: var(--radius-sm);
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: var(--text);
-            transition: var(--transition);
-            border: 1px solid var(--border);
-        }
-
-        .header-btn:hover { background:var(--secondary); color:white; border-color:var(--secondary); }
-
-        /* ── PAGE CONTENT ─────────────────────────────── */
-        .page-content { flex:1; padding:1.5rem; }
-
-        /* ── SECTIONS ─────────────────────────────────── */
-        .section { display:none; }
-        .section.active { display:block; }
-
-        /* ── STATS ROW ────────────────────────────────── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.1rem 1.25rem;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-
-        .stat-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
-
-        .stat-icon {
-            width: 40px; height: 40px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            margin-bottom: 0.875rem;
-        }
-
-        .stat-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 0.2rem;
-        }
-
-        .stat-label { font-size:0.78rem; color:var(--light-text); font-weight:500; }
-
-        /* ── CARD ─────────────────────────────────────── */
-        .card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .card-title { font-weight:600; font-size:0.975rem; }
-
-        .card-body { padding:1.25rem; }
-
-        /* ── BUTTONS ──────────────────────────────────── */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 1.1rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .btn-primary { background:var(--secondary); color:white; }
-        .btn-primary:hover { background:#e55a2b; transform:translateY(-1px); }
-        .btn-success { background:var(--success); color:white; }
-        .btn-success:hover { background:#059669; }
-        .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
-        .btn-outline:hover { background:var(--accent); }
-        .btn-danger { background:var(--danger); color:white; }
-        .btn-danger:hover { background:#dc2626; }
-        .btn-sm { padding:0.35rem 0.75rem; font-size:0.78rem; }
-        .btn-icon { width:32px; height:32px; padding:0; justify-content:center; border-radius:var(--radius-sm); }
-        .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; }
-
-        /* ── TABLE ────────────────────────────────────── */
-        .table-wrapper { overflow-x:auto; }
-
-        table { width:100%; border-collapse:collapse; font-size:0.875rem; }
-
-        thead th {
-            background: var(--accent);
-            padding: 0.7rem 1rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--light-text);
-            white-space: nowrap;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody td {
-            padding: 0.875rem 1rem;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        tbody tr:last-child td { border-bottom:none; }
-        tbody tr:hover { background:var(--accent); }
-
-        /* ── BADGES ───────────────────────────────────── */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-active   { background:#d1fae5; color:#065f46; }
-        .badge-hidden   { background:#f3f4f6; color:#6b7280; }
-        .badge-sale     { background:#ffedd5; color:#9a3412; }
-        .badge-low      { background:#fef3c7; color:#92400e; }
-        .badge-out      { background:#fee2e2; color:#991b1b; }
-
-        /* ── FORM ─────────────────────────────────────── */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
-        .form-group { margin-bottom: 0; }
-
-        .form-label {
-            display: block;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--light-text);
-            margin-bottom: 0.4rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.625rem 0.875rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.9rem;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--white);
-            transition: var(--transition);
-            outline: none;
-        }
-
-        .form-control:focus {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
-        }
-
-        .form-control.error { border-color:var(--danger); }
-        .field-error { color:var(--danger); font-size:0.78rem; margin-top:0.3rem; }
-
-        textarea.form-control { resize:vertical; min-height:100px; }
-
-        select.form-control { cursor:pointer; }
-
-        /* ── IMAGE UPLOAD ─────────────────────────────── */
-        .image-upload-area {
-            border: 2px dashed var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            text-align: center;
-            background: var(--accent);
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .image-upload-area:hover,
-        .image-upload-area.dragover {
-            border-color: var(--secondary);
-            background: rgba(255,107,53,0.04);
-        }
-
-        .image-upload-area i {
-            font-size: 2rem;
-            color: var(--light-text);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .image-upload-area p {
-            font-size: 0.85rem;
-            color: var(--light-text);
-            margin-bottom: 0.5rem;
-        }
-
-        .image-upload-area small { font-size:0.75rem; color:var(--light-text); }
-
-        .image-preview-box {
-            width: 100%;
-            height: 200px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .image-preview-box img {
-            width: 100%; height: 100%;
-            object-fit: contain;
-        }
-
-        .image-preview-box .no-image {
-            color: var(--light-text);
-            font-size: 0.85rem;
-            text-align: center;
-        }
-
-        .image-preview-box .remove-image {
-            position: absolute;
-            top: 0.5rem; right: 0.5rem;
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background: rgba(239,68,68,0.9);
-            color: white;
-            font-size: 0.75rem;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .image-preview-box:hover .remove-image { display:flex; }
-
-        .url-or-upload {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .url-or-upload .form-control { flex:1; }
-
-        .url-divider {
-            font-size: 0.78rem;
-            color: var(--light-text);
-            white-space: nowrap;
-        }
-
-        /* ── TOGGLE SWITCH ────────────────────────────── */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 42px; height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0; height: 0;
-            position: absolute;
-        }
-
-        .toggle-track {
-            position: absolute;
-            inset: 0;
-            background: var(--border);
-            border-radius: 12px;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .toggle-track::after {
-            content: '';
-            position: absolute;
-            width: 18px; height: 18px;
-            top: 3px; left: 3px;
-            background: white;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-
-        .toggle-switch input:checked + .toggle-track { background:var(--secondary); }
-        .toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
-
-        .toggle-label { font-size:0.875rem; font-weight:500; cursor:pointer; }
-
-        /* ── MODAL ────────────────────────────────────── */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            z-index: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-            padding: 1rem;
-        }
-
-        .modal-overlay.show { opacity:1; visibility:visible; }
-
-        .modal {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 560px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: scale(0.95);
-            transition: var(--transition);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .modal-overlay.show .modal { transform:scale(1); }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: var(--white);
-            z-index: 1;
-        }
-
-        .modal-title { font-weight:700; font-size:1.05rem; }
-
-        .modal-close {
-            width: 32px; height: 32px;
-            border-radius: var(--radius-sm);
-            background: var(--accent);
-            font-size: 1.1rem;
-            color: var(--light-text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .modal-close:hover { background:var(--danger); color:white; }
-
-        .modal-body { padding:1.5rem; }
-
-        /* ── TOAST ────────────────────────────────────── */
-        .toast-container {
-            position: fixed;
-            bottom: 1.5rem; right: 1.5rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .toast {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 0.875rem 1.25rem;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 260px;
-            animation: toastIn 0.3s ease;
-            transition: opacity 0.3s;
-        }
-
-        .toast.success { border-left:4px solid var(--success); }
-        .toast.success i { color:var(--success); }
-        .toast.error   { border-left:4px solid var(--danger); }
-        .toast.error   i { color:var(--danger); }
-        .toast.info    { border-left:4px solid #3b82f6; }
-        .toast.info    i { color:#3b82f6; }
-
-        @keyframes toastIn {
-            from { transform:translateX(100%); opacity:0; }
-            to   { transform:translateX(0);    opacity:1; }
-        }
-
-        /* ── SKELETON ─────────────────────────────────── */
-        .skeleton {
-            background: linear-gradient(90deg, var(--accent) 25%, var(--border) 50%, var(--accent) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: var(--radius-sm);
-        }
-
-        @keyframes shimmer {
-            0%   { background-position:200% 0; }
-            100% { background-position:-200% 0; }
-        }
-
-        /* ── EMPTY STATE ──────────────────────────────── */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1.5rem;
-            color: var(--light-text);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        .empty-state h3 { color:var(--text); margin-bottom:0.5rem; font-size:1.1rem; }
-        .empty-state p  { margin-bottom:1.25rem; font-size:0.9rem; }
-
-        /* ── PRODUCT CARD GRID (mobile) ───────────────── */
-        .product-cards {
-            display: none;
-            gap: 1rem;
-        }
-
-        .product-card-item {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .product-card-img {
-            width: 100%; height: 160px;
-            object-fit: cover;
-        }
-
-        .product-card-body { padding:0.875rem; }
-
-        .product-card-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .product-card-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 0.75rem;
-        }
-
-        .product-card-price {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--secondary);
-        }
-
-        .product-card-actions { display:flex; gap:0.4rem; }
-
-        /* ── SIDEBAR OVERLAY ──────────────────────────── */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 199;
-        }
-
-        /* ── RESPONSIVE ───────────────────────────────── */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                box-shadow: var(--shadow-lg);
-            }
-
-            .sidebar.open { transform:translateX(0); }
-            .sidebar-overlay.show { display:block; }
-            .main-content { margin-left:0; }
-            .sidebar-toggle { display:flex; }
-
-            .stats-row { grid-template-columns:repeat(2,1fr); }
-
-            .form-grid { grid-template-columns:1fr; }
-
-            /* Show cards instead of table on mobile */
-            .table-wrapper table { display:none; }
-            .product-cards { display:grid; grid-template-columns:repeat(2,1fr); }
-
-            .page-content { padding:1rem; }
-        }
-
-        @media (max-width: 480px) {
-            .stats-row { grid-template-columns:1fr 1fr; }
-            .product-cards { grid-template-columns:1fr; }
-        }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+        --primary:#1a1a1a; --secondary:#ff6b35; --sec-dark:#e55a2b;
+        --accent:#f8f7f4;  --text:#1a1a1a;      --muted:#6b7280;
+        --white:#ffffff;   --border:#e5e7eb;     --success:#10b981;
+        --danger:#ef4444;  --warning:#f59e0b;
+        --shadow-sm:0 1px 4px rgba(0,0,0,0.07);
+        --shadow-md:0 4px 20px rgba(0,0,0,0.09);
+        --radius-sm:8px; --radius-md:14px; --radius-lg:20px;
+        --nav-h:68px; --sidebar-w:240px;
+        --ease:cubic-bezier(.4,0,.2,1); --dur:0.22s;
+    }
+
+    body[data-theme="dark"] {
+        --primary:#f9fafb; --accent:#1f2937; --text:#e5e7eb;
+        --muted:#9ca3af;   --white:#111827;  --border:#374151;
+    }
+
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--accent); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    button { cursor:pointer; font-family:inherit; border:none; }
+
+    /* ── HEADER ───────────────────────────────────────────── */
+    header {
+        position:fixed; top:0; left:0; width:100%;
+        height:var(--nav-h);
+        background:rgba(255,255,255,0.94);
+        backdrop-filter:blur(16px);
+        border-bottom:1px solid var(--border);
+        z-index:200;
+        box-shadow:var(--shadow-sm);
+    }
+    body[data-theme="dark"] header { background:rgba(17,24,39,0.94); }
+
+    .header-inner {
+        height:100%; max-width:100%; padding:0 1.5rem;
+        display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    }
+
+    .logo { display:flex; align-items:center; gap:0.6rem; }
+    .logo img { width:32px; height:32px; }
+    .logo-text { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; color:var(--text); }
+
+    .header-right { display:flex; align-items:center; gap:0.75rem; }
+
+    .nav-icon-btn {
+        width:36px; height:36px; border-radius:var(--radius-sm);
+        background:transparent; display:flex; align-items:center;
+        justify-content:center; font-size:0.9rem; color:var(--muted);
+        transition:all var(--dur) var(--ease);
+    }
+    .nav-icon-btn:hover { background:var(--accent); color:var(--text); }
+
+    .back-link {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        font-size:0.82rem; font-weight:600; color:var(--muted);
+        transition:color var(--dur) var(--ease);
+    }
+    .back-link:hover { color:var(--secondary); }
+
+    /* ── LAYOUT ───────────────────────────────────────────── */
+    .dashboard-layout {
+        display:grid;
+        grid-template-columns:var(--sidebar-w) 1fr;
+        min-height:100vh;
+        padding-top:var(--nav-h);
+    }
+
+    /* ── SIDEBAR ──────────────────────────────────────────── */
+    .sidebar {
+        position:fixed;
+        top:var(--nav-h); left:0;
+        width:var(--sidebar-w);
+        height:calc(100vh - var(--nav-h));
+        background:var(--white);
+        border-right:1px solid var(--border);
+        overflow-y:auto;
+        z-index:100;
+        padding:1.5rem 0;
+    }
+
+    .sidebar-section {
+        padding:0 0.75rem;
+        margin-bottom:1.5rem;
+    }
+
+    .sidebar-label {
+        font-size:0.65rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:1px; color:var(--muted); padding:0 0.5rem;
+        margin-bottom:0.5rem; display:block;
+    }
+
+    .sidebar-item {
+        display:flex; align-items:center; gap:0.75rem;
+        padding:0.65rem 0.875rem; border-radius:var(--radius-sm);
+        font-size:0.875rem; font-weight:500; color:var(--muted);
+        cursor:pointer; transition:all var(--dur) var(--ease);
+        margin-bottom:2px;
+    }
+
+    .sidebar-item:hover { background:var(--accent); color:var(--text); }
+    .sidebar-item.active { background:rgba(255,107,53,0.08); color:var(--secondary); font-weight:600; }
+    .sidebar-item i { width:16px; font-size:0.875rem; }
+
+    .sidebar-divider { height:1px; background:var(--border); margin:0.75rem 0.75rem; }
+
+    /* ── MAIN ─────────────────────────────────────────────── */
+    .main-content {
+        margin-left:var(--sidebar-w);
+        padding:2rem;
+        min-height:calc(100vh - var(--nav-h));
+    }
+
+    /* ── SECTION PANELS ───────────────────────────────────── */
+    .dash-section { display:none; }
+    .dash-section.active { display:block; }
+
+    /* ── STATS GRID ───────────────────────────────────────── */
+    #sellerStats {
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+        gap:1rem;
+        margin-bottom:2rem;
+    }
+
+    .stat-card {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        padding:1.25rem;
+        box-shadow:var(--shadow-sm);
+        border-left:4px solid var(--secondary);
+    }
+
+    /* ── FILTER TABS ──────────────────────────────────────── */
+    .filter-tabs {
+        display:flex; gap:0.4rem; flex-wrap:wrap;
+        margin-bottom:1.25rem;
+    }
+
+    .seller-filter-tab {
+        padding:0.4rem 0.875rem;
+        border-radius:50px;
+        font-size:0.78rem; font-weight:600;
+        border:1.5px solid var(--border);
+        background:var(--white); color:var(--muted);
+        transition:all var(--dur) var(--ease); cursor:pointer;
+    }
+
+    .seller-filter-tab:hover { border-color:var(--secondary); color:var(--secondary); }
+    .seller-filter-tab.active { background:var(--secondary); color:white; border-color:var(--secondary); }
+
+    /* ── TABLE ────────────────────────────────────────────── */
+    .table-wrapper {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        box-shadow:var(--shadow-sm);
+        overflow:hidden;
+        overflow-x:auto;
+    }
+
+    table { width:100%; border-collapse:collapse; }
+
+    th, td { padding:0.875rem 1rem; text-align:left; border-bottom:1px solid var(--border); }
+    th { background:var(--accent); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:rgba(248,247,244,0.6); }
+
+    .btn-sm {
+        padding:0.35rem 0.75rem; font-size:0.78rem; font-weight:700;
+        border-radius:6px; background:var(--primary); color:white;
+        border:none; cursor:pointer; transition:all var(--dur) var(--ease);
+        display:inline-flex; align-items:center; gap:0.3rem;
+    }
+    .btn-sm:hover { opacity:0.85; transform:translateY(-1px); }
+    .btn-sm.btn-danger { background:var(--danger); }
+
+    /* ── FORM CARD ────────────────────────────────────────── */
+    .form-card {
+        background:var(--white);
+        border:1px solid var(--border);
+        border-radius:var(--radius-md);
+        box-shadow:var(--shadow-sm);
+        padding:2rem;
+    }
+
+    .form-card h2 { font-family:'Playfair Display',serif; font-size:1.35rem; margin-bottom:0.375rem; }
+    .form-card > p { color:var(--muted); font-size:0.875rem; margin-bottom:1.75rem; }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .form-full  { grid-column:1/-1; }
+    .form-group { display:flex; flex-direction:column; gap:0.35rem; }
+
+    .form-label { font-size:0.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+    .form-control {
+        width:100%; padding:0.7rem 0.875rem;
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        font-size:0.9rem; font-family:inherit; color:var(--text);
+        background:var(--white); outline:none;
+        transition:all var(--dur) var(--ease);
+    }
+    .form-control:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(255,107,53,0.1); }
+    select.form-control { cursor:pointer; }
+    textarea.form-control { resize:vertical; min-height:110px; }
+
+    /* Image upload */
+    .image-upload-row {
+        display:flex; gap:0.875rem; align-items:center;
+        margin-bottom:0.75rem;
+    }
+
+    .upload-label {
+        display:inline-flex; align-items:center; gap:0.4rem;
+        padding:0.55rem 1rem;
+        background:var(--primary); color:white;
+        border-radius:var(--radius-sm);
+        font-size:0.82rem; font-weight:600;
+        cursor:pointer; transition:background var(--dur) var(--ease);
+    }
+    .upload-label:hover { background:var(--secondary); }
+
+    .image-preview {
+        width:100%; height:180px;
+        border:2px dashed var(--border);
+        border-radius:var(--radius-sm);
+        display:flex; align-items:center; justify-content:center;
+        overflow:hidden; background:var(--accent);
+        color:var(--muted); font-size:0.875rem;
+    }
+
+    .image-preview img { width:100%; height:100%; object-fit:contain; }
+
+    /* Submit */
+    .btn-submit {
+        padding:0.875rem 2rem;
+        background:var(--secondary); color:white;
+        border-radius:var(--radius-sm); font-size:0.95rem; font-weight:700;
+        display:inline-flex; align-items:center; gap:0.5rem;
+        transition:all var(--dur) var(--ease);
+        box-shadow:0 4px 14px rgba(255,107,53,0.3);
+    }
+    .btn-submit:hover { background:var(--sec-dark); transform:translateY(-1px); }
+    .btn-submit:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+    .btn-cancel-edit {
+        padding:0.875rem 1.5rem;
+        background:var(--white); color:var(--muted);
+        border:1.5px solid var(--border); border-radius:var(--radius-sm);
+        font-size:0.875rem; font-weight:600;
+        transition:all var(--dur) var(--ease);
+    }
+    .btn-cancel-edit:hover { border-color:var(--secondary); color:var(--secondary); }
+
+    /* Mobile cards */
+    #sellerMobileCards { display:none; }
+
+    /* Toast */
+    .toast-container { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:0.5rem; pointer-events:none; }
+    .toast { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.7rem 1.1rem; box-shadow:var(--shadow-md); display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; font-weight:500; min-width:220px; animation:toastIn 0.3s var(--ease); }
+    .toast.success { border-left:4px solid var(--success); }
+    .toast.success i { color:var(--success); }
+    .toast.error   { border-left:4px solid var(--danger); }
+    .toast.error   i { color:var(--danger); }
+    .toast.info    { border-left:4px solid #3b82f6; }
+    .toast.info    i { color:#3b82f6; }
+    @keyframes toastIn { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+    /* Responsive */
+    @media (max-width:900px) {
+        .dashboard-layout { grid-template-columns:1fr; }
+        .sidebar { display:none; }
+        .main-content { margin-left:0; padding:1.25rem; }
+        .form-grid { grid-template-columns:1fr; }
+        #sellerMobileCards { display:block; }
+        .table-wrapper table { display:none; }
+    }
+
+    @media (max-width:600px) {
+        .filter-tabs { gap:0.25rem; }
+        .seller-filter-tab { padding:0.3rem 0.7rem; font-size:0.72rem; }
+    }
     </style>
 </head>
 <body>
 
-<div class="seller-layout">
-
-    <!-- ── SIDEBAR ──────────────────────────────────────── -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header>
+    <div class="header-inner">
+        <a href="index.html" class="logo">
             <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-            <span class="sidebar-logo-text">LuxeMart</span>
-            <span class="badge">Seller</span>
+            <span class="logo-text">LuxeMart</span>
+        </a>
+        <div class="header-right">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Shop
+            </a>
+            <button class="nav-icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
         </div>
+    </div>
+</header>
 
-        <nav class="sidebar-nav">
-            <div class="nav-label">Dashboard</div>
+<!-- ── LAYOUT ─────────────────────────────────────────────── -->
+<div class="dashboard-layout">
 
-            <button class="nav-item active" data-section="products">
-                <i class="fas fa-box"></i>
-                My Products
-            </button>
-
-            <button class="nav-item" data-section="add">
-                <i class="fas fa-plus-circle"></i>
-                Add Product
-            </button>
-
-            <button class="nav-item" data-section="orders">
-                <i class="fas fa-shopping-bag"></i>
-                My Orders
-            </button>
-
-            <div class="nav-label" style="margin-top:0.5rem;">Account</div>
-
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-store"></i>
-                View Shop
-            </a>
-
-            <a href="seller-register.html" class="nav-item">
-                <i class="fas fa-user-circle"></i>
-                Profile
-            </a>
-
-            <button class="nav-item" id="themeToggleBtn">
-                <i class="fas fa-moon"></i>
-                Dark Mode
-            </button>
-
-            <button class="nav-item" id="logoutBtn" style="color:var(--danger);">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </button>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="sidebar-user">
-                <img src="https://ui-avatars.com/api/?name=Seller&background=ff6b35&color=fff"
-                     alt="Seller" id="sidebarAvatar">
-                <div>
-                    <div class="sidebar-user-name" id="sidebarName">Loading...</div>
-                    <div class="sidebar-user-role">Seller Account</div>
-                </div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <span class="sidebar-label">Dashboard</span>
+            <div class="sidebar-item active" data-section="overview">
+                <i class="fas fa-chart-bar"></i> Overview
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <span class="sidebar-label">Products</span>
+            <div class="sidebar-item" data-section="products">
+                <i class="fas fa-box"></i> My Products
+            </div>
+            <div class="sidebar-item" data-section="add">
+                <i class="fas fa-plus-circle"></i> Add Product
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <span class="sidebar-label">Sales</span>
+            <div class="sidebar-item" data-section="orders">
+                <i class="fas fa-shopping-bag"></i> My Orders
+            </div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section">
+            <div class="sidebar-item" onclick="window.location.href='index.html'">
+                <i class="fas fa-store"></i> View Shop
+            </div>
+            <div class="sidebar-item" id="logoutLink">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
             </div>
         </div>
     </aside>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Main -->
+    <main class="main-content">
 
-    <!-- ── MAIN ─────────────────────────────────────────── -->
-    <div class="main-content">
+        <!-- ── OVERVIEW ────────────────────────────────────── -->
+        <section class="dash-section active" id="section-overview">
+            <h1 style="font-family:'Playfair Display',serif;font-size:1.75rem;margin-bottom:0.375rem;">Seller Dashboard</h1>
+            <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.75rem;">Manage your products and track your sales.</p>
 
-        <header class="seller-header">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="page-title" id="pageTitle">My Products</div>
-            </div>
-            <div class="header-right">
-                <button class="btn btn-primary btn-sm" data-section="add">
-                    <i class="fas fa-plus"></i>
-                    <span class="hide-xs">Add Product</span>
-                </button>
-                <button class="header-btn" id="themeToggle" title="Toggle theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
-        </header>
-
-        <div class="page-content">
-
-            <!-- ── PRODUCTS SECTION ────────────────────── -->
-            <div class="section active" id="section-products">
-
-                <!-- Stats -->
-                <div class="stats-row" id="sellerStats">
-                    <div class="skeleton" style="height:100px;"></div>
-                    <div class="skeleton" style="height:100px;"></div>
-                    <div class="skeleton" style="height:100px;"></div>
-                    <div class="skeleton" style="height:100px;"></div>
+            <!-- Stats -->
+            <div id="sellerStats">
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:60%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:80%;border-radius:4px;"></div>
                 </div>
-
-                <!-- Products table -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Your Listings</div>
-                        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-                            <div style="display:flex;align-items:center;gap:0.5rem;
-                                        background:var(--accent);border:1px solid var(--border);
-                                        border-radius:var(--radius-sm);padding:0 0.75rem;height:34px;">
-                                <i class="fas fa-search" style="color:var(--light-text);font-size:0.8rem;"></i>
-                                <input type="text" id="productSearch"
-                                       placeholder="Search products..."
-                                       style="border:none;background:none;font-size:0.82rem;
-                                              color:var(--text);width:150px;outline:none;">
-                            </div>
-                            <button class="btn btn-primary btn-sm" data-section="add">
-                                <i class="fas fa-plus"></i> Add New
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Desktop table -->
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Product</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sellerProductsTableBody">
-                                <tr>
-                                    <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--light-text);">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading your products...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Mobile card view -->
-                    <div class="product-cards" id="productCardsMobile" style="padding:1rem;"></div>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:50%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:70%;border-radius:4px;"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:70%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:60%;border-radius:4px;"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="skeleton" style="height:36px;width:40%;margin-bottom:0.5rem;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:12px;width:75%;border-radius:4px;"></div>
                 </div>
             </div>
 
-            <!-- ── ADD / EDIT PRODUCT SECTION ─────────── -->
-            <div class="section" id="section-add">
-
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <div>
-                        <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.25rem;"
-                            id="formHeading">Add New Product</h2>
-                        <p style="color:var(--light-text);font-size:0.875rem;" id="formSubheading">
-                            Fill in the details to list your product on LuxeMart.
-                        </p>
-                    </div>
-                    <button class="btn btn-outline btn-sm" id="cancelFormBtn" style="display:none;">
-                        <i class="fas fa-times"></i> Cancel Edit
-                    </button>
+            <!-- Quick links -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                <div class="stat-card" style="border-left-color:var(--success);cursor:pointer;" onclick="switchSection('products')">
+                    <i class="fas fa-box" style="font-size:1.5rem;color:var(--success);margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">View My Products</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">Edit, toggle, or delete listings</div>
                 </div>
+                <div class="stat-card" style="border-left-color:#3b82f6;cursor:pointer;" onclick="switchSection('add')">
+                    <i class="fas fa-plus-circle" style="font-size:1.5rem;color:#3b82f6;margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">Add New Product</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">List a new item for sale</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#8b5cf6;cursor:pointer;" onclick="switchSection('orders')">
+                    <i class="fas fa-shopping-bag" style="font-size:1.5rem;color:#8b5cf6;margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700;margin-bottom:0.25rem;">My Orders</div>
+                    <div style="font-size:0.78rem;color:var(--muted);">Orders containing your products</div>
+                </div>
+            </div>
+        </section>
 
+        <!-- ── MY PRODUCTS ─────────────────────────────────── -->
+        <section class="dash-section" id="section-products">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
+                <div>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.25rem;">My Products</h2>
+                    <p style="color:var(--muted);font-size:0.875rem;">All your active and inactive listings.</p>
+                </div>
+                <button class="btn-sm" onclick="switchSection('add')" style="background:var(--secondary);">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="seller-filter-tab active" data-filter="all">All</button>
+                <button class="seller-filter-tab" data-filter="active">Active</button>
+                <button class="seller-filter-tab" data-filter="inactive">Inactive</button>
+                <button class="seller-filter-tab" data-filter="low">Low Stock</button>
+            </div>
+
+            <!-- Desktop table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">Image</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sellerProductsTableBody">
+                        <tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--muted);">Loading products...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile cards -->
+            <div id="sellerMobileCards"></div>
+        </section>
+
+        <!-- ── ADD / EDIT PRODUCT ──────────────────────────── -->
+        <section class="dash-section" id="section-add" style="max-width:720px;">
+            <div style="margin-bottom:1.75rem;">
+                <h2 id="formHeading" style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.25rem;">Add New Product</h2>
+                <p style="color:var(--muted);font-size:0.875rem;">Fill in the details to list your item on LuxeMart.</p>
+            </div>
+
+            <div class="form-card" id="addProductSection">
                 <form id="addProductForm">
-                    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:1.5rem;align-items:start;">
-
-                        <!-- Left column -->
-                        <div style="display:flex;flex-direction:column;gap:1.25rem;">
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-title">
-                                        <i class="fas fa-info-circle" style="color:var(--secondary);margin-right:6px;"></i>
-                                        Basic Information
-                                    </div>
-                                </div>
-                                <div class="card-body" style="display:flex;flex-direction:column;gap:1.1rem;">
-                                    <div class="form-group">
-                                        <label class="form-label">Product Name *</label>
-                                        <input type="text" id="pName" class="form-control"
-                                               placeholder="e.g. Men's Classic Leather Jacket" required>
-                                    </div>
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label class="form-label">Brand *</label>
-                                            <input type="text" id="pBrand" class="form-control"
-                                                   placeholder="e.g. Nike" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Category *</label>
-                                            <select id="pCategory" class="form-control" required>
-                                                <option value="">Select category</option>
-                                                <option value="fashion">Fashion</option>
-                                                <option value="electronics">Electronics</option>
-                                                <option value="home">Home & Living</option>
-                                                <option value="beauty">Beauty</option>
-                                                <option value="sports">Sports</option>
-                                                <option value="kids">Kids</option>
-                                                <option value="footwear">Footwear</option>
-                                                <option value="watches">Watches</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Description *</label>
-                                        <textarea id="pDesc" class="form-control"
-                                                  placeholder="Describe your product — materials, features, sizing..." required></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-title">
-                                        <i class="fas fa-tag" style="color:var(--secondary);margin-right:6px;"></i>
-                                        Pricing & Stock
-                                    </div>
-                                </div>
-                                <div class="card-body" style="display:flex;flex-direction:column;gap:1.1rem;">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label class="form-label">Price (KSh) *</label>
-                                            <input type="number" id="pPrice" class="form-control"
-                                                   placeholder="e.g. 2500" min="1" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Original Price (KSh)</label>
-                                            <input type="number" id="pOldPrice" class="form-control"
-                                                   placeholder="Leave blank if not on sale" min="0">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Stock Quantity *</label>
-                                        <input type="number" id="pStock" class="form-control"
-                                               placeholder="e.g. 50" min="0" value="10" required>
-                                    </div>
-                                    <div class="toggle-row">
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="pOnSale">
-                                            <span class="toggle-track"></span>
-                                        </label>
-                                        <label for="pOnSale" class="toggle-label">Mark as On Sale</label>
-                                    </div>
-                                </div>
-                            </div>
-
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Product Name *</label>
+                            <input type="text" id="pName" class="form-control" placeholder="e.g. Vintage Leather Jacket" required>
                         </div>
-
-                        <!-- Right column -->
-                        <div style="display:flex;flex-direction:column;gap:1.25rem;">
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-title">
-                                        <i class="fas fa-image" style="color:var(--secondary);margin-right:6px;"></i>
-                                        Product Image
-                                    </div>
-                                </div>
-                                <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
-
-                                    <!-- Preview -->
-                                    <div class="image-preview-box" id="imagePreview">
-                                        <div class="no-image">
-                                            <i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i>
-                                            No image selected
-                                        </div>
-                                        <button type="button" class="remove-image" id="removeImageBtn">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- URL input -->
-                                    <div class="form-group">
-                                        <label class="form-label">Image URL</label>
-                                        <input type="url" id="pImageUrl" class="form-control"
-                                               placeholder="https://example.com/image.jpg">
-                                    </div>
-
-                                    <div style="display:flex;align-items:center;gap:0.75rem;">
-                                        <div style="flex:1;height:1px;background:var(--border);"></div>
-                                        <span style="font-size:0.78rem;color:var(--light-text);">OR</span>
-                                        <div style="flex:1;height:1px;background:var(--border);"></div>
-                                    </div>
-
-                                    <!-- File upload -->
-                                    <div class="image-upload-area" id="uploadArea">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <p>Drag & drop or click to upload</p>
-                                        <small>JPG, PNG or WEBP — max 2MB</small>
-                                        <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp"
-                                               style="display:none;">
-                                    </div>
-
-                                </div>
+                        <div class="form-group">
+                            <label class="form-label">Brand *</label>
+                            <input type="text" id="pBrand" class="form-control" placeholder="e.g. UrbanEdge" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select id="pCategory" class="form-control" required>
+                                <option value="fashion">Fashion</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="home">Home & Living</option>
+                                <option value="beauty">Beauty</option>
+                                <option value="sports">Sports</option>
+                                <option value="kids">Kids</option>
+                                <option value="footwear">Footwear</option>
+                                <option value="watches">Watches</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price (KSh) *</label>
+                            <input type="number" id="pPrice" class="form-control" min="1" placeholder="e.g. 2500" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Quantity *</label>
+                            <input type="number" id="pStock" class="form-control" min="0" placeholder="e.g. 20" value="10" required>
+                        </div>
+                        <div class="form-group form-full">
+                            <label class="form-label">Description *</label>
+                            <textarea id="pDesc" class="form-control" placeholder="Describe your product — material, fit, features..." required></textarea>
+                        </div>
+                        <div class="form-group form-full">
+                            <label class="form-label">Product Image *</label>
+                            <div class="image-upload-row">
+                                <input type="url" id="pImageUrl" class="form-control" placeholder="Paste image URL..." style="flex:1;margin-bottom:0;">
+                                <span style="font-size:0.82rem;color:var(--muted);">or</span>
+                                <label for="pImageFile" class="upload-label">
+                                    <i class="fas fa-upload"></i> Upload
+                                </label>
+                                <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp" style="display:none;">
                             </div>
-
-                            <!-- Tips card -->
-                            <div class="card" style="border-color:rgba(255,107,53,0.2);background:rgba(255,107,53,0.03);">
-                                <div class="card-body" style="padding:1rem;">
-                                    <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.75rem;color:var(--secondary);">
-                                        <i class="fas fa-lightbulb" style="margin-right:6px;"></i> Listing Tips
-                                    </div>
-                                    <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;">
-                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
-                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
-                                            Use a clear, white-background image
-                                        </li>
-                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
-                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
-                                            Write a detailed description with sizing info
-                                        </li>
-                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
-                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
-                                            Set stock accurately to avoid overselling
-                                        </li>
-                                        <li style="font-size:0.8rem;color:var(--light-text);display:flex;gap:0.5rem;">
-                                            <i class="fas fa-check" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>
-                                            Add original price to show the discount
-                                        </li>
-                                    </ul>
-                                </div>
+                            <div class="image-preview" id="imagePreview">
+                                <span>No image selected</span>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- Submit -->
-                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;gap:0.75rem;">
-                        <button type="button" class="btn btn-outline" id="resetFormBtn">
-                            <i class="fas fa-undo"></i> Reset
-                        </button>
-                        <button type="submit" class="btn btn-primary" id="submitProductBtn">
+                    <div style="display:flex;gap:0.875rem;justify-content:flex-end;margin-top:1.5rem;flex-wrap:wrap;">
+                        <button type="button" class="btn-cancel-edit" id="cancelEditBtn">Cancel</button>
+                        <button type="submit" class="btn-submit" id="addProductSubmitBtn">
                             <i class="fas fa-plus"></i> List Product
                         </button>
                     </div>
                 </form>
             </div>
+        </section>
 
-            <!-- ── ORDERS SECTION ──────────────────────── -->
-            <div class="section" id="section-orders">
-                <div style="margin-bottom:1.5rem;">
-                    <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:0.25rem;">
-                        Orders for Your Products
-                    </h2>
-                    <p style="color:var(--light-text);font-size:0.875rem;">
-                        Orders placed by customers for your listings.
-                    </p>
-                </div>
-
-                <div class="card">
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Amount</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sellerOrdersTableBody">
-                                <tr>
-                                    <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--light-text);">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading orders...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <!-- ── MY ORDERS ───────────────────────────────────── -->
+        <section class="dash-section" id="section-orders">
+            <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.375rem;">My Orders</h2>
+            <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.5rem;">Orders that contain your products.</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sellerOrdersTableBody">
+                        <tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--muted);">Loading orders...</td></tr>
+                    </tbody>
+                </table>
             </div>
+        </section>
 
-        </div><!-- /page-content -->
-    </div><!-- /main-content -->
-</div><!-- /seller-layout -->
+    </main>
+</div>
 
-<!-- ── TOAST CONTAINER ────────────────────────────────── -->
 <div id="toastContainer" class="toast-container"></div>
 
-<!-- ── SCRIPTS ─────────────────────────────────────────── -->
+<script src="js/products.js"></script>
 <script src="js/common.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/seller.js"></script>
 <script>
-// ── SIDEBAR + NAVIGATION ────────────────────────────────
 (function () {
-    const sidebar   = document.getElementById('sidebar');
-    const overlay   = document.getElementById('sidebarOverlay');
-    const toggleBtn = document.getElementById('sidebarToggle');
-    const navItems  = document.querySelectorAll('.nav-item[data-section], .btn[data-section]');
-    const sections  = document.querySelectorAll('.section');
-    const pageTitle = document.getElementById('pageTitle');
-
-    const titles = {
-        products: 'My Products',
-        add:      'Add Product',
-        orders:   'My Orders',
-    };
-
-    window.switchSection = (target) => {
-        navItems.forEach(i => {
-            if (i.classList.contains('nav-item')) {
-                i.classList.toggle('active', i.dataset.section === target);
-            }
-        });
-        sections.forEach(s => s.classList.toggle('active', s.id === `section-${target}`));
-        if (pageTitle) pageTitle.textContent = titles[target] || target;
-        if (window.innerWidth <= 768) closeSidebar();
-
-        // Load orders when switching to orders tab
-        if (target === 'orders' && typeof window.loadSellerOrders === 'function') {
-            window.loadSellerOrders();
-        }
-    };
-
-    navItems.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (btn.dataset.section) window.switchSection(btn.dataset.section);
-        });
-    });
-
-    const openSidebar  = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
-    const closeSidebar = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
-
-    toggleBtn?.addEventListener('click', openSidebar);
-    overlay?.addEventListener('click', closeSidebar);
-
     // Theme
-    const applyTheme = (theme) => {
-        document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        ['#themeToggle i', '#themeToggleBtn i'].forEach(sel => {
-            const el = document.querySelector(sel);
-            if (el) el.className = `fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`;
-        });
+    const applyTheme = t => {
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('theme', t);
+        const i = document.querySelector('#themeToggle i');
+        if (i) i.className = `fas ${t === 'dark' ? 'fa-sun' : 'fa-moon'}`;
     };
     applyTheme(localStorage.getItem('theme') || 'light');
+    document.getElementById('themeToggle')?.addEventListener('click', () =>
+        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark')
+    );
 
-    document.getElementById('themeToggle')?.addEventListener('click', () => {
-        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
-    });
-    document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
-        applyTheme(localStorage.getItem('theme') === 'dark' ? 'light' : 'dark');
-    });
+    // Sidebar + section switching
+    window.switchSection = function (name) {
+        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(`section-${name}`)?.classList.add('active');
+        document.querySelector(`.sidebar-item[data-section="${name}"]`)?.classList.add('active');
+    };
 
-    // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        await window.api?.('api/auth/logout.php');
-        sessionStorage.clear();
-        window.location.href = 'index.html';
-    });
-
-    // Reset form button
-    document.getElementById('resetFormBtn')?.addEventListener('click', () => {
-        if (typeof window.resetSellerForm === 'function') window.resetSellerForm();
+    document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+        item.addEventListener('click', () => switchSection(item.dataset.section));
     });
 
-    // Cancel edit button
-    document.getElementById('cancelFormBtn')?.addEventListener('click', () => {
-        if (typeof window.resetSellerForm === 'function') window.resetSellerForm();
-        window.switchSection('products');
-    });
+    // Seller orders table (loaded separately)
+    async function loadSellerOrders () {
+        const tbody = document.getElementById('sellerOrdersTableBody');
+        if (!tbody) return;
 
-    // Product search
-    document.getElementById('productSearch')?.addEventListener('input', (e) => {
-        if (typeof window.filterSellerProducts === 'function') {
-            window.filterSellerProducts(e.target.value);
+        const res    = await window.api?.('api/orders/seller_orders.php');
+        const orders = res?.orders || [];
+
+        if (!orders.length) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted);">No orders yet.</td></tr>`;
+            return;
         }
-    });
 
-    // Image upload area drag & drop
-    const uploadArea  = document.getElementById('uploadArea');
-    const fileInput   = document.getElementById('pImageFile');
+        const statusColors = { Processing:'background:#dbeafe;color:#1d4ed8;', Shipped:'background:#fef3c7;color:#d97706;', Delivered:'background:#d1fae5;color:#065f46;', Cancelled:'background:#fee2e2;color:#991b1b;' };
+        const fmt = n => `KSh ${Number(n).toLocaleString('en-KE')}`;
 
-    uploadArea?.addEventListener('click', () => fileInput?.click());
-
-    uploadArea?.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-
-    uploadArea?.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea?.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file && fileInput) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
-            fileInput.dispatchEvent(new Event('change'));
-        }
-    });
-
-    // Remove image button
-    document.getElementById('removeImageBtn')?.addEventListener('click', () => {
-        const preview = document.getElementById('imagePreview');
-        if (preview) {
-            preview.innerHTML = `
-                <div class="no-image">
-                    <i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.3;"></i>
-                    No image selected
-                </div>
-                <button type="button" class="remove-image" id="removeImageBtn">
-                    <i class="fas fa-times"></i>
-                </button>`;
-        }
-        if (fileInput) fileInput.value = '';
-        const urlInput = document.getElementById('pImageUrl');
-        if (urlInput) urlInput.value = '';
-    });
-
-    // Update sidebar user info after session loads
-    setTimeout(() => {
-        const user = window.getUser?.();
-        if (!user) return;
-        const nameEl   = document.getElementById('sidebarName');
-        const avatarEl = document.getElementById('sidebarAvatar');
-        if (nameEl) nameEl.textContent = user.name;
-        if (avatarEl && user.picture) avatarEl.src = user.picture;
-    }, 800);
-
-})();
-
-// ── SELLER STATS RENDERER ───────────────────────────────
-window.renderSellerStats = (products) => {
-    const container = document.getElementById('sellerStats');
-    if (!container) return;
-
-    const total     = products.length;
-    const active    = products.filter(p => p.is_active).length;
-    const outOfStock= products.filter(p => p.stock === 0).length;
-    const revenue   = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-
-    const stats = [
-        { label:'Total Listings',  value: total,      icon:'fa-box',           color:'#3b82f6' },
-        { label:'Active',          value: active,     icon:'fa-check-circle',  color:'#10b981' },
-        { label:'Out of Stock',    value: outOfStock, icon:'fa-exclamation-circle', color:'#ef4444' },
-        { label:'Inventory Value', value:`KSh ${revenue.toLocaleString('en-KE')}`, icon:'fa-coins', color:'#f59e0b' },
-    ];
-
-    container.innerHTML = stats.map(s => `
-        <div class="stat-card">
-            <div class="stat-icon" style="background:${s.color}18;">
-                <i class="fas ${s.icon}" style="color:${s.color};"></i>
-            </div>
-            <div class="stat-value">${s.value}</div>
-            <div class="stat-label">${s.label}</div>
-        </div>
-    `).join('');
-};
-
-// ── MOBILE CARD VIEW RENDERER ───────────────────────────
-window.renderMobileCards = (products) => {
-    const container = document.getElementById('productCardsMobile');
-    if (!container) return;
-
-    if (!products.length) {
-        container.innerHTML = '';
-        return;
-    }
-
-    container.innerHTML = products.map(p => `
-        <div class="product-card-item">
-            <img src="${p.image_url}" alt="${p.name}" class="product-card-img"
-                 onerror="this.src='https://via.placeholder.com/300x160?text=${encodeURIComponent(p.name)}'">
-            <div class="product-card-body">
-                <div class="product-card-name">${p.name}</div>
-                <div style="font-size:0.78rem;color:var(--light-text);margin-bottom:0.5rem;text-transform:capitalize;">
-                    ${p.category} · Stock: ${p.stock}
-                </div>
-                <div class="product-card-meta">
-                    <div class="product-card-price">
-                        KSh ${Number(p.price).toLocaleString('en-KE')}
-                    </div>
-                    <div class="product-card-actions">
-                        <button class="btn btn-outline btn-icon edit-btn" data-id="${p.id}" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-icon delete-btn" data-id="${p.id}" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-
-    // Bind events for mobile cards — seller.js handles these
-    container.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (typeof window._sellerStartEdit === 'function') window._sellerStartEdit(parseInt(btn.dataset.id));
-        });
-    });
-    container.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (typeof window._sellerDelete === 'function') window._sellerDelete(parseInt(btn.dataset.id));
-        });
-    });
-};
-
-// ── SELLER ORDERS LOADER ────────────────────────────────
-window.loadSellerOrders = async () => {
-    const tbody = document.getElementById('sellerOrdersTableBody');
-    if (!tbody) return;
-
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--light-text);">
-        <i class="fas fa-spinner fa-spin"></i> Loading...
-    </td></tr>`;
-
-    const result = await window.api?.('api/orders/seller_orders.php');
-    if (!result?.success || !result.orders?.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;">
-            <div class="empty-state">
-                <i class="fas fa-shopping-bag"></i>
-                <h3>No orders yet</h3>
-                <p>Orders for your products will appear here.</p>
-            </div>
-        </td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = result.orders.map(o => {
-        const statusColors = {
-            processing: '#3b82f6',
-            shipped:    '#f59e0b',
-            delivered:  '#10b981',
-            cancelled:  '#ef4444',
-        };
-        const color = statusColors[o.status?.toLowerCase()] || '#6b7280';
-        const date  = new Date(o.created_at).toLocaleDateString('en-KE', {
-            year:'numeric', month:'short', day:'numeric',
-        });
-
-        return `
+        tbody.innerHTML = orders.map(o => `
             <tr>
-                <td style="font-weight:600;font-size:0.82rem;">#${o.order_number}</td>
+                <td style="font-family:monospace;font-weight:600;font-size:0.82rem;">${o.order_number}</td>
                 <td>
-                    <div style="font-weight:500;font-size:0.875rem;">${o.customer_name}</div>
-                    <div style="font-size:0.78rem;color:var(--light-text);">${o.customer_email}</div>
+                    <div style="font-weight:600;font-size:0.875rem;">${o.customer_name}</div>
+                    <div style="font-size:0.72rem;color:var(--muted);">${o.customer_email}</div>
                 </td>
-                <td style="font-size:0.85rem;">${o.product_name || '—'}</td>
-                <td style="font-weight:600;">${o.qty || '—'}</td>
-                <td style="font-weight:600;">
-                    KSh ${Number(o.item_total || o.total).toLocaleString('en-KE', { minimumFractionDigits:2 })}
-                </td>
-                <td style="font-size:0.82rem;color:var(--light-text);">${date}</td>
-                <td>
-                    <span style="padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;
-                                 background:${color}18;color:${color};">
-                        ${o.status}
-                    </span>
-                </td>
-            </tr>`;
-    }).join('');
-};
+                <td style="font-size:0.82rem;">${(o.items||[]).map(i => `${i.name} ×${i.qty}`).join('<br>')}</td>
+                <td style="font-weight:700;">${fmt(o.total)}</td>
+                <td><span style="${statusColors[o.status]||''}padding:2px 10px;border-radius:50px;font-size:0.72rem;font-weight:700;">${o.status}</span></td>
+                <td style="font-size:0.82rem;color:var(--muted);">${o.date}</td>
+            </tr>
+        `).join('');
+    }
+
+    document.querySelector('.sidebar-item[data-section="orders"]')?.addEventListener('click', loadSellerOrders);
+})();
 </script>
-<script src="js/seller.js"></script>
 </body>
 </html>

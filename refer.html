@@ -3,82 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Refer a Friend - LuxeMart</title>
+    <title>Refer a Friend — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <style>
+    :root{--secondary:#ff6b35;--nav-h:68px;}
+    .refer-wrap{margin-top:var(--nav-h);padding:0 0 5rem;}
+    .refer-hero{background:linear-gradient(135deg,#1a1a1a 0%,#2d1200 50%,#1a1a1a 100%);padding:3.5rem 0;text-align:center;position:relative;overflow:hidden;}
+    .refer-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(255,107,53,0.15) 0%,transparent 65%);}
+    .refer-hero-inner{position:relative;z-index:1;}
+    .refer-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,2.8rem);color:white;margin-bottom:.625rem;}
+    .refer-hero p{color:rgba(255,255,255,0.65);font-size:.95rem;max-width:500px;margin:0 auto;}
+    .container{width:100%;max-width:900px;margin:0 auto;padding:0 1.25rem;}
+    .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin:3rem 0;}
+    .step-card{background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:16px;padding:2rem 1.5rem;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:all .22s;}
+    .step-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.1);}
+    .step-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--secondary),#e55a2b);color:white;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;margin:0 auto 1rem;}
+    .step-card h3{font-weight:700;font-size:1rem;margin-bottom:.5rem;}
+    .step-card p{font-size:.82rem;color:var(--muted,#6b7280);line-height:1.6;}
+    .refer-action{background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:20px;padding:2.5rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.09);margin-bottom:3rem;}
+    .refer-action h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:.5rem;}
+    .refer-action p{color:var(--muted,#6b7280);font-size:.875rem;margin-bottom:1.5rem;}
+    .refer-link-box{display:flex;max-width:500px;margin:0 auto 1rem;border:2px solid var(--border,#e5e7eb);border-radius:50px;overflow:hidden;background:var(--accent,#f8f7f4);}
+    .refer-link-input{flex:1;border:none;background:transparent;padding:.875rem 1.25rem;font-size:.875rem;color:var(--text,#1a1a1a);outline:none;font-family:inherit;}
+    .refer-copy-btn{padding:.875rem 1.5rem;background:var(--secondary);color:white;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:background .2s;flex-shrink:0;}
+    .refer-copy-btn:hover{background:#e55a2b;}
+    .share-options{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;margin-top:1rem;}
+    .share-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:50px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;border:none;text-decoration:none;}
+    .share-wa{background:#25d366;color:white;}
+    .share-tw{background:#1da1f2;color:white;}
+    .share-fb{background:#1877f2;color:white;}
+    .share-pill:hover{opacity:.85;transform:translateY(-1px);}
+    .rewards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2rem;}
+    .reward-card{background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:1.5rem;text-align:center;border-top:4px solid var(--secondary);}
+    .reward-card .reward-amt{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--secondary);margin-bottom:.25rem;}
+    .reward-card p{font-size:.78rem;color:var(--muted,#6b7280);}
+    .section-label{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,107,53,0.08);color:var(--secondary);padding:.25rem .75rem;border-radius:50px;font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:.875rem;}
+    .section-title{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:.5rem;}
+    .section-sub{color:var(--muted,#6b7280);font-size:.875rem;margin-bottom:2rem;}
+    @media(max-width:768px){.steps-grid{grid-template-columns:1fr;}.nav-desktop{display:none!important;}.mobile-menu-toggle{display:block!important;}}
+    </style>
 </head>
 <body>
-    <header>
-        <div class="container header-inner">
-            <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart" style="height: 40px; width: auto;">
-                <span style="font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #333;">LuxeMart</span>
-            </div>
+<header>
+    <div class="container" style="max-width:1400px;">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart"><span>LuxeMart</span></a>
             <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
+                <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="about.html">About</a><a href="contact.html">Contact</a>
             </nav>
+            <div class="nav-actions">
+                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
+                <a href="wishlist.html" class="icon-btn"><i class="fas fa-heart"></i><span class="cart-count" id="wishlistCount">0</span></a>
+                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
+                <div class="account-dropdown">
+                    <button class="icon-btn"><i class="fas fa-user"></i></button>
+                    <div class="account-dropdown-menu">
+                        <a href="#" id="accountLink">My Account</a><a href="orders.html">My Orders</a>
+                        <a href="seller-register.html">Sell on LuxeMart</a><a href="admin.html">Admin Dashboard</a>
+                        <a href="#" id="logoutLink">Logout</a>
+                    </div>
+                </div>
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-toggle" style="display:none;"><i class="fas fa-bars"></i></button>
+            </div>
         </div>
-    </header>
+    </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="closeMenu"><i class="fas fa-times"></i></button>
+    <ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="contact.html">Contact</a></li></ul>
+</div>
+<div class="modal-overlay" id="searchModal">
+    <div class="modal"><div class="modal-header"><h3 class="modal-title">Search</h3><button class="modal-close" id="closeSearch">×</button></div>
+    <div class="modal-body"><input type="text" id="searchInput" placeholder="Search products…"><div id="searchSuggestions" class="search-suggestions"></div></div></div>
+</div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header"><h3 class="cart-title">Cart</h3><button class="modal-close" id="closeCart">×</button></div>
+    <div id="cartItems"></div>
+    <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+    <div class="cart-actions"><a href="cart.html" class="btn-primary">View Cart</a></div>
+</div>
 
-    <main class="page-content">
+<div class="refer-wrap">
+    <div class="refer-hero">
+        <div class="container refer-hero-inner">
+            <h1>Give KSh 1,000 — Get KSh 1,000</h1>
+            <p>Share LuxeMart with friends. When they place their first order, you both earn a KSh 1,000 shopping credit.</p>
+        </div>
+    </div>
+
+    <main>
         <div class="container">
-            <div class="referral-container">
-                <div class="referral-header">
-                    <h1>Give KSh 1,000, Get KSh 1,000</h1>
-                    <p>Share your love for LuxeMart with friends. When they make their first purchase, you both get a KSh 1,000 credit!</p>
-                </div>
 
-                <div class="referral-steps">
-                    <div class="step">
-                        <div class="step-icon"><i class="fas fa-share-alt"></i></div>
-                        <h3>1. Share Your Link</h3>
-                        <p>Copy your unique link and send it to your friends.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-icon"><i class="fas fa-shopping-bag"></i></div>
-                        <h3>2. Friend Shops</h3>
-                        <p>Your friend gets KSh 1,000 off their first order.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-icon"><i class="fas fa-gift"></i></div>
-                        <h3>3. You Get Rewarded</h3>
-                        <p>We'll send you a KSh 1,000 credit for your next purchase.</p>
-                    </div>
-                </div>
+            <!-- How it works -->
+            <div style="margin-top:3rem;text-align:center;">
+                <div class="section-label"><i class="fas fa-question-circle"></i> How It Works</div>
+                <h2 class="section-title">Three Simple Steps</h2>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card"><div class="step-num"><i class="fas fa-share-alt"></i></div><h3>Share Your Link</h3><p>Copy your unique referral link and send it to friends via WhatsApp, email, or any platform.</p></div>
+                <div class="step-card"><div class="step-num"><i class="fas fa-shopping-bag"></i></div><h3>Friend Shops</h3><p>Your friend signs up and places their first order on LuxeMart. They get KSh 1,000 off automatically.</p></div>
+                <div class="step-card"><div class="step-num"><i class="fas fa-gift"></i></div><h3>You Get Rewarded</h3><p>Once their order ships, KSh 1,000 credit is added to your account for your next purchase.</p></div>
+            </div>
 
-                <div class="referral-action">
-                    <h3>Your Unique Referral Link</h3>
-                    <div class="referral-link-box">
-                        <input type="text" id="referralLink" value="https://luxemart.co.ke/referral?id=USER123" readonly>
-                        <button id="copyLinkBtn" class="btn-primary">Copy Link</button>
-                    </div>
+            <!-- Referral action -->
+            <div class="refer-action">
+                <h2>Your Referral Link</h2>
+                <p>Share this link with friends and start earning.</p>
+                <div class="refer-link-box">
+                    <input type="text" class="refer-link-input" id="referralLink" value="https://luxemart.co.ke/ref?id=USER123" readonly>
+                    <button class="refer-copy-btn" id="copyBtn"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <div class="share-options">
+                    <a id="waShare" href="#" class="share-pill share-wa" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <a id="twShare" href="#" class="share-pill share-tw" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a id="fbShare" href="#" class="share-pill share-fb" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
                 </div>
             </div>
+
+            <!-- Rewards -->
+            <div style="text-align:center;margin-bottom:1.5rem;">
+                <div class="section-label"><i class="fas fa-star"></i> Your Rewards</div>
+                <h2 class="section-title">Track Your Earnings</h2>
+                <p class="section-sub">Sign in to see how many referrals you've made and your total credits earned.</p>
+            </div>
+            <div class="rewards-grid">
+                <div class="reward-card"><div class="reward-amt" id="totalRefs">0</div><p>Friends Referred</p></div>
+                <div class="reward-card"><div class="reward-amt" id="totalCredits">KSh 0</div><p>Credits Earned</p></div>
+                <div class="reward-card"><div class="reward-amt" id="pendingCredits">KSh 0</div><p>Pending Credits</p></div>
+            </div>
+
+            <div style="text-align:center;margin-top:3rem;">
+                <a href="shop.html" class="btn-primary" style="display:inline-flex;">
+                    <i class="fas fa-shopping-bag"></i> Shop Now &amp; Earn
+                </a>
+            </div>
+
         </div>
     </main>
+</div>
 
-    <footer>
-        <div class="container"><div class="footer-bottom"><p>&copy; 2025 LuxeMart. All rights reserved.</p></div></div>
-    </footer>
+<div id="toastContainer" class="toast-container"></div>
+<script src="js/products.js"></script>
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+    // Build referral link with user ID if logged in
+    const user = window.getUser?.();
+    const userId = user?.email ? btoa(user.email).slice(0,8) : 'GUEST';
+    const refLink = `${window.location.origin}/LuxeMart/index.html?ref=${userId}`;
 
-    <script src="js/common.js"></script>
-    <script>
-        document.getElementById('copyLinkBtn')?.addEventListener('click', (e) => {
-            const linkInput = document.getElementById('referralLink');
-            linkInput.select();
-            document.execCommand('copy');
-            e.target.textContent = 'Copied!';
-            setTimeout(() => {
-                e.target.textContent = 'Copy Link';
-            }, 2000);
+    const linkInput = document.getElementById('referralLink');
+    if(linkInput) linkInput.value = refLink;
+
+    // Share links
+    const enc = encodeURIComponent;
+    const msg = enc('Join me on LuxeMart — East Africa\'s premium marketplace! Use my link and get KSh 1,000 off your first order: ');
+    document.getElementById('waShare')?.setAttribute('href', `https://wa.me/?text=${msg}${enc(refLink)}`);
+    document.getElementById('twShare')?.setAttribute('href', `https://twitter.com/intent/tweet?text=${msg}&url=${enc(refLink)}`);
+    document.getElementById('fbShare')?.setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${enc(refLink)}`);
+
+    // Copy button
+    document.getElementById('copyBtn')?.addEventListener('click',()=>{
+        navigator.clipboard.writeText(linkInput?.value || refLink).then(()=>{
+            window.showToast('Referral link copied!','success');
+            const btn = document.getElementById('copyBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML='<i class="fas fa-check"></i> Copied!';
+            setTimeout(()=>{ btn.innerHTML=orig; },2000);
+        }).catch(()=>{
+            if(linkInput){linkInput.select();document.execCommand('copy');}
+            window.showToast('Link copied!','success');
         });
-    </script>
+    });
+
+    // Show demo stats if logged in
+    if(user){
+        document.getElementById('totalRefs').textContent = '3';
+        document.getElementById('totalCredits').textContent = 'KSh 2,000';
+        document.getElementById('pendingCredits').textContent = 'KSh 1,000';
+    }
+});
+</script>
 </body>
 </html>

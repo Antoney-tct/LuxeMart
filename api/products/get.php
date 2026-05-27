@@ -1,93 +1,133 @@
 <?php
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
+// ── PARAMS ───────────────────────────────────────────────────
 $category  = $_GET['category']  ?? 'all';
-$search    = $_GET['search']    ?? '';
+$search    = trim($_GET['search'] ?? '');
 $sort      = $_GET['sort']      ?? 'popularity';
+$brand     = $_GET['brand']     ?? 'all';
+$minPrice  = isset($_GET['min_price']) ? (float)$_GET['min_price'] : null;
+$maxPrice  = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
+$minRating = isset($_GET['min_rating']) ? (float)$_GET['min_rating'] : null;
+$inStock   = isset($_GET['in_stock'])  && $_GET['in_stock'] === 'true';
+$onSale    = isset($_GET['on_sale'])   && $_GET['on_sale']  === 'true';
 $page      = max(1, (int)($_GET['page']  ?? 1));
 $limit     = min(48, max(1, (int)($_GET['limit'] ?? 24)));
 $offset    = ($page - 1) * $limit;
 
-$where  = ["p.is_active = 1"];
+// ── BUILD WHERE ───────────────────────────────────────────────
+$where  = ['p.is_active = 1'];
 $params = [];
 
 if ($category !== 'all') {
-    $where[]  = "p.category = ?";
-    $params[] = $category;
+    $where[]       = 'p.category = :category';
+    $params[':category'] = $category;
 }
 
-if ($search) {
-    $where[]  = "(p.name LIKE ? OR p.brand LIKE ? OR p.category LIKE ?)";
-    $like     = "%{$search}%";
-    $params   = array_merge($params, [$like, $like, $like]);
+if ($search !== '') {
+    $like = '%' . $search . '%';
+    $where[]         = '(p.name LIKE :s1 OR p.brand LIKE :s2 OR p.description LIKE :s3)';
+    $params[':s1']   = $like;
+    $params[':s2']   = $like;
+    $params[':s3']   = $like;
 }
 
-if (isset($_GET['on_sale']) && $_GET['on_sale'] === 'true') {
-    $where[] = "p.on_sale = 1";
+if ($brand !== 'all') {
+    $where[]        = 'p.brand = :brand';
+    $params[':brand'] = $brand;
 }
 
-if (isset($_GET['min_price']) && is_numeric($_GET['min_price'])) {
-    $where[]  = "p.price >= ?";
-    $params[] = (float)$_GET['min_price'];
+if ($minPrice !== null) {
+    $where[]           = 'p.price >= :min_price';
+    $params[':min_price'] = $minPrice;
 }
 
-if (isset($_GET['max_price']) && is_numeric($_GET['max_price'])) {
-    $where[]  = "p.price <= ?";
-    $params[] = (float)$_GET['max_price'];
+if ($maxPrice !== null) {
+    $where[]           = 'p.price <= :max_price';
+    $params[':max_price'] = $maxPrice;
 }
 
-if (isset($_GET['min_rating']) && is_numeric($_GET['min_rating'])) {
-    $where[]  = "p.rating >= ?";
-    $params[] = (float)$_GET['min_rating'];
+if ($minRating !== null) {
+    $where[]              = 'p.rating >= :min_rating';
+    $params[':min_rating'] = $minRating;
 }
 
-$orderBy = match($sort) {
+if ($inStock) {
+    $where[] = 'p.stock > 0';
+}
+
+if ($onSale) {
+    $where[] = 'p.original_price IS NOT NULL';
+}
+
+$whereSQL = implode(' AND ', $where);
+
+// ── SORT ─────────────────────────────────────────────────────
+$orderMap = [
+    'popularity' => 'p.reviews_count DESC',
+    'newest'     => 'p.created_at DESC',
     'price-asc'  => 'p.price ASC',
     'price-desc' => 'p.price DESC',
     'rating'     => 'p.rating DESC',
-    'newest'     => 'p.created_at DESC',
-    default      => 'p.review_count DESC',
-};
+];
 
-$whereSQL = 'WHERE ' . implode(' AND ', $where);
+$orderSQL = $orderMap[$sort] ?? 'p.reviews_count DESC';
 
-// Total count
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM products p {$whereSQL}");
+// ── COUNT ─────────────────────────────────────────────────────
+$countStmt = $pdo->prepare("SELECT COUNT(*) FROM products p WHERE $whereSQL");
 $countStmt->execute($params);
 $total = (int)$countStmt->fetchColumn();
 
-// Fetch page
-$stmt = $pdo->prepare("
+// ── FETCH ─────────────────────────────────────────────────────
+$sql = "
     SELECT
-        p.id, p.name, p.brand, p.description AS `desc`,
-        p.price, p.old_price AS oldPrice,
-        p.image_url AS img, p.category,
-        p.stock, p.rating, p.review_count AS reviews,
-        p.badge, p.on_sale AS onSale,
-        u.name AS seller_name
+        p.id,
+        p.name,
+        p.brand,
+        p.description AS `desc`,
+        p.price,
+        p.original_price AS oldPrice,
+        p.image_url AS img,
+        p.category,
+        p.seller_email AS sellerEmail,
+        p.stock,
+        p.rating,
+        p.reviews_count AS reviews,
+        p.badge,
+        p.is_active AS inStock,
+        p.colors,
+        p.sizes,
+        p.created_at
     FROM products p
-    LEFT JOIN users u ON u.id = p.seller_id
-    {$whereSQL}
-    ORDER BY {$orderBy}
-    LIMIT {$limit} OFFSET {$offset}
-");
-$stmt->execute($params);
+    WHERE $whereSQL
+    ORDER BY $orderSQL
+    LIMIT :limit OFFSET :offset
+";
+
+$stmt = $pdo->prepare($sql);
+foreach ($params as $k => $v) {
+    $stmt->bindValue($k, $v);
+}
+$stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $products = $stmt->fetchAll();
 
-// Cast types for JS
+// ── NORMALISE ─────────────────────────────────────────────────
 foreach ($products as &$p) {
-    $p['id']       = (int)$p['id'];
-    $p['price']    = (float)$p['price'];
+    $p['id']      = (int)$p['id'];
+    $p['price']   = (float)$p['price'];
     $p['oldPrice'] = $p['oldPrice'] ? (float)$p['oldPrice'] : null;
-    $p['stock']    = (int)$p['stock'];
-    $p['rating']   = (float)$p['rating'];
-    $p['reviews']  = (int)$p['reviews'];
-    $p['onSale']   = (bool)$p['onSale'];
-    $p['inStock']  = $p['stock'] > 0;
-    $p['colors']   = [];
-    $p['sizes']    = [];
+    $p['stock']   = (int)$p['stock'];
+    $p['rating']  = (float)$p['rating'];
+    $p['reviews'] = (int)$p['reviews'];
+    $p['inStock'] = $p['stock'] > 0;
+    $p['onSale']  = $p['oldPrice'] !== null;
+    $p['colors']  = $p['colors']  ? json_decode($p['colors'])  : [];
+    $p['sizes']   = $p['sizes']   ? json_decode($p['sizes'])   : [];
 }
+unset($p);
 
 echo json_encode([
     'success'        => true,

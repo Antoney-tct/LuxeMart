@@ -1,41 +1,45 @@
 <?php
+// ── delete.php ────────────────────────────────────────────────
 session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Not logged in.']);
+if (empty($_SESSION['user_email']) || !in_array($_SESSION['role'], ['seller','admin'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
     exit;
 }
 
-$data   = json_decode(file_get_contents('php://input'), true);
-$id     = (int)($data['id'] ?? 0);
-$userId = $_SESSION['user_id'];
-$role   = $_SESSION['role'] ?? 'buyer';
+$data = json_decode(file_get_contents('php://input'), true);
+$id   = (int)($data['id'] ?? 0);
 
 if (!$id) {
-    echo json_encode(['success' => false, 'message' => 'Invalid product ID.']);
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Product ID required.']);
     exit;
 }
 
-// Verify ownership
-$check = $role === 'admin'
-    ? $pdo->prepare("SELECT id, image_url FROM products WHERE id = ?")
-    : $pdo->prepare("SELECT id, image_url FROM products WHERE id = ? AND seller_id = ?");
+// Ownership / existence check
+$stmt = $pdo->prepare("SELECT seller_email, image_url FROM products WHERE id = ?");
+$stmt->execute([$id]);
+$p = $stmt->fetch();
 
-$check->execute($role === 'admin' ? [$id] : [$id, $userId]);
-$product = $check->fetch();
-
-if (!$product) {
-    echo json_encode(['success' => false, 'message' => 'Product not found or access denied.']);
+if (!$p) {
+    http_response_code(404);
+    echo json_encode(['success' => false, 'message' => 'Product not found.']);
     exit;
 }
 
-// Delete uploaded image file if it exists
-if (!empty($product['image_url']) && str_starts_with($product['image_url'], 'uploads/')) {
-    $path = __DIR__ . '/../../' . $product['image_url'];
-    if (file_exists($path)) unlink($path);
+if ($_SESSION['role'] !== 'admin' && $p['seller_email'] !== $_SESSION['user_email']) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'You do not own this product.']);
+    exit;
+}
+
+// Remove uploaded image
+if ($p['image_url'] && strpos($p['image_url'], 'uploads/') === 0) {
+    $path = __DIR__ . '/../../' . $p['image_url'];
+    if (file_exists($path)) @unlink($path);
 }
 
 $pdo->prepare("DELETE FROM products WHERE id = ?")->execute([$id]);

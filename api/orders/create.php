@@ -1,64 +1,146 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Not logged in.']);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
     exit;
 }
 
-$data       = json_decode(file_get_contents('php://input'), true);
-$action     = $data['action']     ?? '';   // 'add' | 'remove' | 'set'
-$product_id = (int)($data['product_id'] ?? 0);
-$qty        = (int)($data['qty']        ?? 1);
-$user_id    = $_SESSION['user_id'];
+$data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-if (!$product_id) {
+// ── VALIDATE ──────────────────────────────────────────────────
+$required = ['customer', 'items', 'total', 'paymentMethod'];
+foreach ($required as $field) {
+    if (empty($data[$field])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => "Missing: $field"]);
+        exit;
+    }
+}
+
+$c       = $data['customer'];
+$items   = $data['items'];
+$total   = (float)$data['total'];
+$method  = $data['paymentMethod'];
+$ship    = $data['shipping_method'] ?? 'standard';
+$discount = (float)($data['discount_amount'] ?? 0);
+$notes   = trim($data['notes'] ?? '');
+$shipping = ($ship === 'express') ? 650 : 0;
+
+if (empty($c['name']) || empty($c['email']) || empty($c['address']) || empty($c['city'])) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Invalid product.']);
+    echo json_encode(['success' => false, 'message' => 'Incomplete customer details.']);
     exit;
 }
 
-try {
-    switch ($action) {
-        case 'add':
-            $pdo->prepare("
-                INSERT INTO cart_items (user_id, product_id, qty)
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at = CURRENT_TIMESTAMP
-            ")->execute([$user_id, $product_id, $qty]);
-            break;
+if (empty($items) || !is_array($items)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Order must have at least one item.']);
+    exit;
+}
 
-        case 'set':
-            if ($qty <= 0) {
-                $pdo->prepare("DELETE FROM cart_items WHERE user_id = ? AND product_id = ?")->execute([$user_id, $product_id]);
-            } else {
-                $pdo->prepare("
-                    INSERT INTO cart_items (user_id, product_id, qty)
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE qty = VALUES(qty), updated_at = CURRENT_TIMESTAMP
-                ")->execute([$user_id, $product_id, $qty]);
-            }
-            break;
+// ── STOCK CHECK + FETCH PRODUCT DETAILS ──────────────────────
+$productDetails = [];
+foreach ($items as $item) {
+    $pid = (int)($item['id'] ?? 0);
+    $qty = (int)($item['qty'] ?? 1);
 
-        case 'remove':
-            $pdo->prepare("DELETE FROM cart_items WHERE user_id = ? AND product_id = ?")->execute([$user_id, $product_id]);
-            break;
+    $stmt = $pdo->prepare("SELECT id, name, image_url, price, stock FROM products WHERE id = ? AND is_active = 1 FOR UPDATE");
+    $stmt->execute([$pid]);
+    $p = $stmt->fetch();
 
-        case 'clear':
-            $pdo->prepare("DELETE FROM cart_items WHERE user_id = ?")->execute([$user_id]);
-            break;
-
-        default:
-            echo json_encode(['success' => false, 'message' => 'Unknown action.']);
-            exit;
+    if (!$p) {
+        echo json_encode(['success' => false, 'message' => "Product #$pid not found or unavailable."]);
+        exit;
     }
 
-    echo json_encode(['success' => true]);
+    if ($p['stock'] < $qty) {
+        echo json_encode(['success' => false, 'message' => "Insufficient stock for: {$p['name']}"]);
+        exit;
+    }
 
-} catch (PDOException $e) {
+    $productDetails[$pid] = ['product' => $p, 'qty' => $qty];
+}
+
+// ── TRANSACTION ───────────────────────────────────────────────
+try {
+    $pdo->beginTransaction();
+
+    // Generate unique order number
+    $orderNumber = 'LUX-' . strtoupper(substr(uniqid(), -6)) . '-' . date('Ymd');
+
+    // Calculate subtotal from actual product prices (don't trust client)
+    $subtotal = array_reduce($productDetails, function ($carry, $item) {
+        return $carry + ($item['product']['price'] * $item['qty']);
+    }, 0.0);
+
+    $verifiedTotal = round($subtotal - $discount + $shipping, 2);
+
+    $pdo->prepare("
+        INSERT INTO orders
+            (order_number, user_email, customer_name, customer_email, customer_phone,
+             address, city, zip, country, shipping_method, payment_method,
+             subtotal, discount_amount, shipping_cost, total, notes)
+        VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ")->execute([
+        $orderNumber,
+        $_SESSION['user_email'] ?? null,
+        $c['name'],
+        $c['email'],
+        $c['phone'] ?? null,
+        $c['address'],
+        $c['city'],
+        $c['zip'] ?? '',
+        $c['country'] ?? 'Kenya',
+        $ship,
+        $method,
+        $subtotal,
+        $discount,
+        $shipping,
+        $verifiedTotal,
+        $notes,
+    ]);
+
+    $orderId = (int)$pdo->lastInsertId();
+
+    // Insert order items + decrement stock
+    $itemStmt = $pdo->prepare("
+        INSERT INTO order_items (order_id, product_id, product_name, product_img, unit_price, qty)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+
+    $stockStmt = $pdo->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+
+    foreach ($productDetails as $pid => $entry) {
+        $p   = $entry['product'];
+        $qty = $entry['qty'];
+
+        $itemStmt->execute([$orderId, $pid, $p['name'], $p['image_url'], $p['price'], $qty]);
+        $stockStmt->execute([$qty, $pid]);
+    }
+
+    // Clear server cart for logged-in users
+    if (!empty($_SESSION['user_email'])) {
+        $pdo->prepare("DELETE FROM cart_items WHERE user_email = ?")
+            ->execute([$_SESSION['user_email']]);
+    }
+
+    $pdo->commit();
+
+    echo json_encode([
+        'success'      => true,
+        'order_number' => $orderNumber,
+        'order_db_id'  => $orderId,
+        'total'        => $verifiedTotal,
+    ]);
+
+} catch (Exception $e) {
+    $pdo->rollBack();
+    error_log('Order create error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Cart update failed.']);
+    echo json_encode(['success' => false, 'message' => 'Order could not be placed. Please try again.']);
 }

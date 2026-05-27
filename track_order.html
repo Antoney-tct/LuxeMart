@@ -3,333 +3,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuxeMart - Track Your Order</title>
+    <title>Track Your Order — LuxeMart</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081559.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <style>
-        .track-order-container {
-            max-width: 800px;
-            margin: 4rem auto;
-            padding: 2rem;
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-        }
-        .track-order-container h1 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: var(--text);
-        }
-        .track-form {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .track-form input[type="text"] {
-            flex-grow: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 1rem;
-            background: var(--input-bg);
-            color: var(--text);
-        }
-        .track-form button {
-            padding: 0.75rem 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
-        .track-form button:hover {
-            background: var(--primary-hover);
-        }
-        #orderResults {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg);
-        }
-        .order-detail-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px dashed var(--border);
-        }
-        .order-detail-item:last-child {
-            border-bottom: none;
-        }
-        .order-detail-item strong {
-            color: var(--text);
-        }
-        .order-detail-item span {
-            color: var(--light-text);
-        }
-        .order-items-list {
-            margin-top: 1rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-        }
-        .order-items-list h3 {
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px dotted var(--border);
-            font-size: 0.9rem;
-        }
-        .order-item:last-child {
-            border-bottom: none;
-        }
-        .order-item-name {
-            flex-grow: 1;
-            color: var(--text);
-        }
-        .order-item-qty-price {
-            color: var(--light-text);
-            white-space: nowrap;
-        }
-        .status-pill {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        /* Example status styling - ensure these match your database status values */
-        .status-Processing { background: #fffbe6; color: #a16207; } /* Amber */
-        .status-Paid { background: #dcfce7; color: #166534; } /* Green */
-        .status-Failed { background: #fee2e2; color: #991b1b; } /* Red */
-        .status-Shipped { background: #e0f2fe; color: #0369a1; } /* Blue */
-        .status-Delivered { background: #dcfce7; color: #166534; } /* Green */
-        .status-Cancelled { background: #fee2e2; color: #991b1b; } /* Red */
-        .error-message {
-            color: #ef4444;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
+    :root{--secondary:#ff6b35;--nav-h:68px;--success:#10b981;--danger:#ef4444;}
+    .track-wrap{margin-top:var(--nav-h);padding:0 0 5rem;}
+    .track-hero{background:linear-gradient(135deg,#0f172a 0%,#1a1a1a 100%);padding:3rem 0;text-align:center;position:relative;overflow:hidden;}
+    .track-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(255,107,53,0.12) 0%,transparent 65%);}
+    .track-hero-inner{position:relative;z-index:1;}
+    .track-hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);color:white;margin-bottom:.5rem;}
+    .track-hero p{color:rgba(255,255,255,0.6);font-size:.9rem;}
+    .container{width:100%;max-width:780px;margin:0 auto;padding:0 1.25rem;}
+    .search-card{background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:20px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,0.09);margin:2.5rem auto;}
+    .search-card h2{font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:.375rem;}
+    .search-card p{color:var(--muted,#6b7280);font-size:.875rem;margin-bottom:1.25rem;}
+    .track-form{display:flex;gap:.625rem;}
+    .track-input{flex:1;padding:.8rem 1rem;border:2px solid var(--border,#e5e7eb);border-radius:10px;font-size:.9rem;font-family:inherit;color:var(--text,#1a1a1a);background:var(--white,#fff);outline:none;transition:border-color .2s;}
+    .track-input:focus{border-color:var(--secondary);}
+    .track-btn{padding:.8rem 1.5rem;background:var(--secondary);color:white;border:none;border-radius:10px;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:.4rem;}
+    .track-btn:hover{background:#e55a2b;transform:translateY(-1px);}
+    .track-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    /* Result card */
+    .result-card{background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.09);margin-bottom:2rem;display:none;}
+    .result-card.show{display:block;animation:fadeIn .4s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    .result-header{padding:1.25rem 1.5rem;background:var(--accent,#f8f7f4);border-bottom:1px solid var(--border,#e5e7eb);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;}
+    .order-number-big{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;}
+    .status-pill{display:inline-flex;align-items:center;gap:.35rem;padding:4px 12px;border-radius:50px;font-size:.72rem;font-weight:700;}
+    .status-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+    .status-Processing{background:#dbeafe;color:#1d4ed8;}
+    .status-Shipped   {background:#fef3c7;color:#d97706;}
+    .status-Delivered {background:#d1fae5;color:#065f46;}
+    .status-Cancelled {background:#fee2e2;color:#991b1b;}
+    /* Tracking steps */
+    .track-steps-wrap{padding:1.5rem;}
+    .track-steps{display:flex;align-items:flex-start;position:relative;margin-bottom:1.5rem;}
+    .track-line-bg{position:absolute;top:16px;left:16px;right:16px;height:2px;background:var(--border,#e5e7eb);z-index:0;}
+    .track-line-fill{position:absolute;top:16px;left:16px;height:2px;background:linear-gradient(90deg,var(--success),#34d399);z-index:1;transition:width .6s ease;}
+    .track-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;position:relative;z-index:2;}
+    .track-icon{width:32px;height:32px;border-radius:50%;background:var(--border,#e5e7eb);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--muted,#6b7280);border:3px solid var(--white,#fff);transition:all .4s;}
+    .track-step.done   .track-icon{background:var(--success);color:white;}
+    .track-step.active .track-icon{background:var(--secondary);color:white;box-shadow:0 0 0 4px rgba(255,107,53,0.2);}
+    .track-lbl{font-size:.68rem;font-weight:600;color:var(--muted,#6b7280);text-align:center;}
+    .track-step.done .track-lbl,.track-step.active .track-lbl{color:var(--text,#1a1a1a);font-weight:700;}
+    .cancelled-notice{display:flex;align-items:center;gap:.625rem;padding:.875rem 1rem;background:#fee2e2;border-radius:10px;color:#991b1b;font-weight:600;font-size:.875rem;}
+    /* Order details grid */
+    .details-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 1.5rem 1.5rem;}
+    .detail-block label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted,#6b7280);display:block;margin-bottom:.2rem;}
+    .detail-block span{font-weight:600;font-size:.875rem;}
+    /* Items */
+    .items-section{padding:0 1.5rem 1.5rem;border-top:1px solid var(--border,#e5e7eb);margin-top:.5rem;padding-top:1.25rem;}
+    .items-section h4{font-weight:700;margin-bottom:.875rem;font-size:.9rem;}
+    .order-item-row{display:flex;align-items:center;gap:.875rem;padding:.625rem 0;border-bottom:1px solid var(--border,#e5e7eb);}
+    .order-item-row:last-child{border-bottom:none;}
+    .order-item-img{width:50px;height:50px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border,#e5e7eb);}
+    .order-item-info{flex:1;min-width:0;}
+    .order-item-name{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .order-item-meta{font-size:.75rem;color:var(--muted,#6b7280);}
+    .order-item-price{font-weight:700;font-size:.875rem;white-space:nowrap;}
+    /* Total row */
+    .total-row{display:flex;justify-content:space-between;padding:1rem 1.5rem;background:var(--accent,#f8f7f4);border-top:2px solid var(--border,#e5e7eb);font-weight:800;font-size:1rem;}
+    /* Error / not found */
+    .track-error{text-align:center;padding:2rem;color:var(--danger);}
+    .skeleton{background:linear-gradient(90deg,var(--accent,#f8f7f4) 25%,var(--border,#e5e7eb) 50%,var(--accent,#f8f7f4) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;}
+    @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+    .recent-section{margin-top:2rem;}
+    .recent-section h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:1rem;}
+    @media(max-width:768px){.nav-desktop{display:none!important;}.mobile-menu-toggle{display:block!important;}.details-grid{grid-template-columns:1fr;}.track-form{flex-direction:column;}.track-lbl{display:none;}}
     </style>
 </head>
 <body>
-    <!-- Header (copied from index.html for consistency) -->
-    <header>
-        <div class="container header-inner">
-            <div class="logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart">
-                <span>LuxeMart</span>
-            </div>
-            
+<header>
+    <div class="container" style="max-width:1400px;">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="LuxeMart"><span>LuxeMart</span></a>
             <nav class="nav-desktop">
-                <a href="index.html">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="categories.html">Categories</a>
-                <a href="sale.html">Sale</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
+                <a href="index.html">Home</a><a href="shop.html">Shop</a>
+                <a href="orders.html">My Orders</a><a href="contact.html">Contact</a>
             </nav>
-            
             <div class="nav-actions">
-                <button class="icon-btn" id="searchBtn" aria-label="Search">
-                    <i class="fas fa-search"></i>
-                </button>
-                <a href="wishlist.html" class="icon-btn" id="wishlistNavBtn" aria-label="My Wishlist">
-                    <i class="fas fa-heart"></i>
-                    <span class="cart-count" id="wishlistCount">0</span>
-                </a>
-                <button class="icon-btn" id="cartBtn" aria-label="Shopping Cart">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </button>
+                <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
+                <a href="wishlist.html" class="icon-btn"><i class="fas fa-heart"></i><span class="cart-count" id="wishlistCount">0</span></a>
+                <button class="icon-btn" id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></button>
                 <div class="account-dropdown">
-                    <button class="icon-btn" aria-label="My Account"><i class="fas fa-user"></i></button>
+                    <button class="icon-btn"><i class="fas fa-user"></i></button>
                     <div class="account-dropdown-menu">
-                        <a href="#" id="accountLink">My Account</a>
-                        <a href="seller.html">My Shop</a>
+                        <a href="#" id="accountLink">My Account</a><a href="orders.html">My Orders</a>
+                        <a href="seller-register.html">Sell on LuxeMart</a><a href="admin.html">Admin Dashboard</a>
                         <a href="#" id="logoutLink">Logout</a>
                     </div>
                 </div>
-                <button class="mobile-menu-toggle" aria-label="Open Menu" aria-expanded="false">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <button class="icon-btn" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-toggle" style="display:none;"><i class="fas fa-bars"></i></button>
             </div>
         </div>
-    </header>
+    </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="closeMenu"><i class="fas fa-times"></i></button>
+    <ul><li><a href="index.html">Home</a></li><li><a href="shop.html">Shop</a></li><li><a href="orders.html">My Orders</a></li><li><a href="contact.html">Contact</a></li></ul>
+</div>
+<div class="modal-overlay" id="searchModal">
+    <div class="modal"><div class="modal-header"><h3 class="modal-title">Search</h3><button class="modal-close" id="closeSearch">×</button></div>
+    <div class="modal-body"><input type="text" id="searchInput" placeholder="Search products…"><div id="searchSuggestions" class="search-suggestions"></div></div></div>
+</div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header"><h3 class="cart-title">Cart</h3><button class="modal-close" id="closeCart">×</button></div>
+    <div id="cartItems"></div>
+    <div class="cart-total">Total: <span id="cartTotal">KSh 0.00</span></div>
+    <div class="cart-actions"><a href="cart.html" class="btn-primary">View Cart</a></div>
+</div>
+
+<div class="track-wrap">
+    <div class="track-hero">
+        <div class="container track-hero-inner">
+            <h1><i class="fas fa-map-marker-alt" style="color:var(--secondary);margin-right:.5rem;"></i>Track Your Order</h1>
+            <p>Enter your order number to see real-time delivery status.</p>
+        </div>
+    </div>
 
     <main>
-        <div class="track-order-container">
-            <h1>Track Your Order</h1>
-            <form id="trackOrderForm" class="track-form">
-                <input type="text" id="orderNumberInput" placeholder="Enter your Order Number (e.g., ORD-123456)" required>
-                <button type="submit" id="trackOrderBtn">Track Order</button>
-            </form>
-            <div id="orderResults">
-                <p style="text-align: center; color: var(--light-text);">Enter an order number above to see its status.</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer (copied from index.html for consistency) -->
-    <footer>
         <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>LuxeMart</h3>
-                    <p>Your premium destination for fashion, electronics, home goods, and more. Shop with confidence.</p>
-                    <div class="social-links">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    </div>
+
+            <!-- Search form -->
+            <div class="search-card">
+                <h2>Find Your Order</h2>
+                <p>Your order number starts with <strong>LUX-</strong> and can be found in your confirmation email or on the <a href="orders.html" style="color:var(--secondary);font-weight:600;">Orders page</a>.</p>
+                <div class="track-form">
+                    <input type="text" id="orderInput" class="track-input" placeholder="e.g. LUX-ABC123-20250510" autocomplete="off">
+                    <button class="track-btn" id="trackBtn"><i class="fas fa-search"></i> Track</button>
                 </div>
-                <div class="footer-col">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="seller-register.html">Sell on LuxeMart</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="refer.html">Refer a Friend</a></li>
-                        <li><a href="faq.html">FAQs</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">Returns</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Categories</h3>
-                    <ul>
-                        <li><a href="#">Fashion</a></li>
-                        <li><a href="#">Electronics</a></li>
-                        <li><a href="#">Home & Living</a></li>
-                        <li><a href="#">Beauty</a></li>
-                        <li><a href="#">Sports</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Payment Methods</h3>
-                    <p>We accept all major payment methods</p>
-                    <div class="payment-methods">
-                        <img src="https://cdn-icons-png.flaticon.com/512/888/888870.png" alt="Visa">
-                        <img src="https://cdn-icons-png.flaticon.com/512/888/888859.png" alt="Mastercard">
-                        <img src="https://cdn-icons-png.flaticon.com/512/888/888857.png" alt="PayPal">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="Apple Pay">
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 LuxeMart. All rights reserved.</p>
-                <p>
-                    <a href="#">Privacy Policy</a> • 
-                    <a href="#">Terms of Service</a>
+                <p style="font-size:.75rem;color:var(--muted,#6b7280);margin-top:.75rem;">
+                    <i class="fas fa-lock" style="color:var(--success);"></i>
+                    Your order information is private and secure.
                 </p>
             </div>
+
+            <!-- Result card -->
+            <div class="result-card" id="resultCard">
+
+                <div class="result-header">
+                    <div>
+                        <div style="font-size:.72rem;color:var(--muted,#6b7280);font-weight:600;text-transform:uppercase;margin-bottom:.2rem;">Order Number</div>
+                        <div class="order-number-big" id="resOrderNum">—</div>
+                    </div>
+                    <div id="resStatusBadge"></div>
+                </div>
+
+                <!-- Tracking bar -->
+                <div class="track-steps-wrap" id="trackStepsWrap"></div>
+
+                <!-- Details -->
+                <div class="details-grid">
+                    <div class="detail-block"><label>Customer</label><span id="resName">—</span></div>
+                    <div class="detail-block"><label>Email</label><span id="resEmail">—</span></div>
+                    <div class="detail-block"><label>Delivery Address</label><span id="resAddress">—</span></div>
+                    <div class="detail-block"><label>Payment Method</label><span id="resPayment">—</span></div>
+                    <div class="detail-block"><label>Order Date</label><span id="resDate">—</span></div>
+                    <div class="detail-block"><label>Shipping</label><span id="resShipping">—</span></div>
+                </div>
+
+                <!-- Items -->
+                <div class="items-section">
+                    <h4>Items Ordered</h4>
+                    <div id="resItems"></div>
+                </div>
+
+                <!-- Total -->
+                <div class="total-row">
+                    <span>Order Total</span>
+                    <span id="resTotal">KSh 0.00</span>
+                </div>
+
+            </div>
+
+            <!-- Recent orders shortcut (logged in) -->
+            <div class="recent-section" id="recentSection" style="display:none;">
+                <h3>Your Recent Orders</h3>
+                <div id="recentList"></div>
+            </div>
+
+            <!-- CTA if not logged in -->
+            <div id="loginCta" style="display:none;text-align:center;padding:2rem;background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:16px;">
+                <i class="fas fa-sign-in-alt" style="font-size:2rem;color:var(--secondary);display:block;margin-bottom:1rem;"></i>
+                <h3 style="margin-bottom:.5rem;">Sign In for Full Order History</h3>
+                <p style="color:var(--muted,#6b7280);font-size:.875rem;margin-bottom:1.25rem;">Sign in with Google to instantly see all your orders without entering an order number each time.</p>
+                <button onclick="document.getElementById('loginModal')?.classList.add('show')" class="btn-primary" style="display:inline-flex;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
+
         </div>
-    </footer>
+    </main>
+</div>
 
-    <script src="js/common.js"></script> <!-- Assuming common.js has showToast -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const trackOrderForm = document.getElementById('trackOrderForm');
-            const orderNumberInput = document.getElementById('orderNumberInput');
-            const orderResultsDiv = document.getElementById('orderResults');
-            const trackOrderBtn = document.getElementById('trackOrderBtn');
+<div id="toastContainer" class="toast-container"></div>
+<script src="js/products.js"></script>
+<script src="js/common.js"></script>
+<script src="js/cart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const fmt = n => `KSh ${Number(n).toLocaleString('en-KE', {minimumFractionDigits:2})}`;
 
-            trackOrderForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const orderNumber = orderNumberInput.value.trim();
+    // Check URL for pre-filled order number
+    const params = new URLSearchParams(window.location.search);
+    const preOrder = params.get('order');
+    if (preOrder) {
+        document.getElementById('orderInput').value = preOrder;
+        setTimeout(() => document.getElementById('trackBtn')?.click(), 300);
+    }
 
-                if (!orderNumber) {
-                    orderResultsDiv.innerHTML = '<p class="error-message">Please enter an order number.</p>';
-                    return;
-                }
+    // Show recent orders if logged in
+    const user = window.getUser?.();
+    if (user) {
+        document.getElementById('loginCta').style.display = 'none';
+        await loadRecentOrders();
+    } else {
+        setTimeout(() => {
+            if (!window.getUser?.()) document.getElementById('loginCta').style.display = 'block';
+        }, 1500);
+    }
 
-                trackOrderBtn.disabled = true;
-                trackOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tracking...';
-                orderResultsDiv.innerHTML = '<p style="text-align: center; color: var(--light-text);">Searching for order...</p>';
+    async function loadRecentOrders() {
+        const res = await window.api?.('api/orders/get.php');
+        const orders = (res?.orders || []).slice(0, 3);
+        if (!orders.length) return;
 
-                try {
-                    const response = await fetch(`api/track_order.php?order_number=${encodeURIComponent(orderNumber)}`);
-                    const result = await response.json();
+        const section = document.getElementById('recentSection');
+        const list    = document.getElementById('recentList');
+        section.style.display = 'block';
 
-                    if (result.success) {
-                        renderOrderDetails(result.order);
-                        if (window.showToast) window.showToast('Order found!', 'success');
-                    } else {
-                        orderResultsDiv.innerHTML = `<p class="error-message">${result.message || 'Order not found.'}</p>`;
-                        if (window.showToast) window.showToast(result.message || 'Order not found.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error tracking order:', error);
-                    orderResultsDiv.innerHTML = '<p class="error-message">An error occurred while tracking your order. Please try again.</p>';
-                    if (window.showToast) window.showToast('An error occurred. Please try again.', 'error');
-                } finally {
-                    trackOrderBtn.disabled = false;
-                    trackOrderBtn.innerHTML = 'Track Order';
-                }
-            });
+        const statusColors = {Processing:'background:#dbeafe;color:#1d4ed8;',Shipped:'background:#fef3c7;color:#d97706;',Delivered:'background:#d1fae5;color:#065f46;',Cancelled:'background:#fee2e2;color:#991b1b;'};
 
-            function renderOrderDetails(order) {
-                let itemsHtml = '';
-                if (order.items && order.items.length > 0) {
-                    itemsHtml = `
-                        <div class="order-items-list">
-                            <h3>Order Items:</h3>
-                            ${order.items.map(item => `
-                                <div class="order-item">
-                                    <span class="order-item-name">${item.product_name}</span>
-                                    <span class="order-item-qty-price">${item.quantity} x KSh ${parseFloat(item.price).toFixed(2)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                } else {
-                    itemsHtml = '<p style="font-size: 0.9rem; color: var(--light-text);">No items found for this order.</p>';
-                }
+        list.innerHTML = orders.map(o => `
+            <div style="background:var(--white,#fff);border:1px solid var(--border,#e5e7eb);border-radius:12px;padding:1rem 1.25rem;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;cursor:pointer;transition:box-shadow .2s;"
+                 onclick="document.getElementById('orderInput').value='${o.order_number}';document.getElementById('trackBtn').click();"
+                 onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+                <div>
+                    <div style="font-weight:700;font-size:.875rem;">${o.order_number}</div>
+                    <div style="font-size:.75rem;color:var(--muted,#6b7280);">${o.date} · ${fmt(o.total)}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <span style="${statusColors[o.status]||''}padding:3px 10px;border-radius:50px;font-size:.7rem;font-weight:700;">${o.status}</span>
+                    <i class="fas fa-chevron-right" style="color:var(--muted,#6b7280);font-size:.75rem;"></i>
+                </div>
+            </div>`).join('');
+    }
 
-                // Replace spaces in status for CSS class compatibility
-                const statusClass = `status-${order.status.replace(/\s/g, '')}`; 
-                
-                orderResultsDiv.innerHTML = `
-                    <h2>Order Details for <span style="color: var(--primary);">${order.order_number}</span></h2>
-                    <div class="order-detail-item">
-                        <strong>Status:</strong>
-                        <span><span class="status-pill ${statusClass}">${order.status}</span></span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Order Date:</strong>
-                        <span>${new Date(order.created_at).toLocaleDateString()}</span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Customer Name:</strong>
-                        <span>${order.customer_name}</span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Customer Email:</strong>
-                        <span>${order.customer_email}</span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Shipping Address:</strong>
-                        <span>${order.address}, ${order.city}, ${order.zip}</span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Payment Method:</strong>
-                        <span>${order.payment_method}</span>
-                    </div>
-                    <div class="order-detail-item">
-                        <strong>Total Amount:</strong>
-                        <span>KSh ${parseFloat(order.total).toFixed(2)}</span>
-                    </div>
-                    ${itemsHtml}
-                `;
+    // Track button
+    document.getElementById('trackBtn')?.addEventListener('click', async () => {
+        const num = document.getElementById('orderInput')?.value.trim().toUpperCase();
+        if (!num) { window.showToast?.('Please enter an order number.', 'info'); return; }
+
+        const btn = document.getElementById('trackBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tracking…';
+
+        try {
+            const res = await window.api?.(`api/orders/get.php`);
+            const order = (res?.orders || []).find(o => o.order_number.toUpperCase() === num);
+
+            if (!order) {
+                window.showToast?.('Order not found. Please check the number and try again.', 'error');
+                document.getElementById('resultCard').classList.remove('show');
+                return;
             }
-        });
-    </script>
+
+            renderResult(order);
+            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+            window.showToast?.('Could not fetch order. Please try again.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search"></i> Track';
+        }
+    });
+
+    document.getElementById('orderInput')?.addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('trackBtn')?.click();
+    });
+
+    function renderResult(order) {
+        const card = document.getElementById('resultCard');
+        card.classList.add('show');
+
+        // Header
+        document.getElementById('resOrderNum').textContent = order.order_number;
+        document.getElementById('resStatusBadge').innerHTML =
+            `<span class="status-pill status-${order.status}">${order.status}</span>`;
+
+        // Tracking bar
+        renderTrackingBar(order.status);
+
+        // Details
+        document.getElementById('resName').textContent    = order.customer_name  || '—';
+        document.getElementById('resEmail').textContent   = order.customer_email || '—';
+        document.getElementById('resAddress').textContent = `${order.address}, ${order.city}`;
+        document.getElementById('resPayment').textContent = (order.payment_method || '—').toUpperCase();
+        document.getElementById('resDate').textContent    = order.date || '—';
+        document.getElementById('resShipping').textContent = order.shipping_method === 'express' ? 'Express (1-2 days)' : 'Standard (3-5 days)';
+
+        // Items
+        const itemsEl = document.getElementById('resItems');
+        const items   = order.items || [];
+        if (items.length) {
+            itemsEl.innerHTML = items.map(i => `
+                <div class="order-item-row">
+                    <img src="${i.img||'https://via.placeholder.com/50?text=?'}" alt="${i.name}" class="order-item-img"
+                         onerror="this.src='https://via.placeholder.com/50?text=?'">
+                    <div class="order-item-info">
+                        <div class="order-item-name">${i.name}</div>
+                        <div class="order-item-meta">Qty: ${i.qty}</div>
+                    </div>
+                    <div class="order-item-price">${fmt(i.price * i.qty)}</div>
+                </div>`).join('');
+        } else {
+            itemsEl.innerHTML = '<p style="color:var(--muted,#6b7280);font-size:.875rem;">No item details available.</p>';
+        }
+
+        document.getElementById('resTotal').textContent = fmt(order.total);
+    }
+
+    function renderTrackingBar(status) {
+        const wrap = document.getElementById('trackStepsWrap');
+        if (!wrap) return;
+
+        if (status === 'Cancelled') {
+            wrap.innerHTML = `<div class="cancelled-notice"><i class="fas fa-ban"></i>This order has been cancelled.</div>`;
+            return;
+        }
+
+        const steps = [
+            { key: 'Processing', label: 'Order Placed',  icon: 'fa-clipboard-check' },
+            { key: 'Shipped',    label: 'Shipped',        icon: 'fa-truck' },
+            { key: 'Delivered',  label: 'Delivered',      icon: 'fa-check-circle' },
+        ];
+
+        const cur  = steps.findIndex(s => s.key === status);
+        const pct  = cur < 0 ? 0 : Math.round((cur / (steps.length - 1)) * 100);
+
+        wrap.innerHTML = `
+            <div class="track-steps">
+                <div class="track-line-bg"></div>
+                <div class="track-line-fill" style="width:${pct}%"></div>
+                ${steps.map((s, i) => `
+                    <div class="track-step ${i < cur ? 'done' : i === cur ? 'active' : ''}">
+                        <div class="track-icon"><i class="fas ${s.icon}"></i></div>
+                        <div class="track-lbl">${s.label}</div>
+                    </div>`).join('')}
+            </div>
+            ${status === 'Shipped' ? '<p style="text-align:center;font-size:.78rem;color:var(--muted,#6b7280);margin-top:-.5rem;padding-bottom:.5rem;"><i class="fas fa-info-circle"></i> Your order is on its way! Expected delivery in 1–3 business days.</p>' : ''}
+            ${status === 'Delivered' ? '<p style="text-align:center;font-size:.78rem;color:var(--success);margin-top:-.5rem;padding-bottom:.5rem;font-weight:600;"><i class="fas fa-check-circle"></i> Your order has been delivered. Enjoy!</p>' : ''}
+        `;
+    }
+});
+</script>
 </body>
 </html>

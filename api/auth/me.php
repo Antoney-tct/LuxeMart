@@ -2,17 +2,22 @@
 session_start();
 header('Content-Type: application/json');
 
-if (empty($_SESSION['user_id'])) {
-    echo json_encode(['logged_in' => false]);
+require_once __DIR__ . '/../../db.php';
+
+if (empty($_SESSION['user_email'])) {
+    echo json_encode(['success' => false, 'user' => null]);
     exit;
 }
 
-echo json_encode([
-    'logged_in' => true,
-    'user' => [
-        'id'      => $_SESSION['user_id'],
-        'name'    => $_SESSION['user_name'],
-        'email'   => $_SESSION['user_email'],
-        'role'    => $_SESSION['role'],
-    ]
-]);
+$stmt = $pdo->prepare("SELECT name, email, picture, role FROM users WHERE email = ?");
+$stmt->execute([$_SESSION['user_email']]);
+$user = $stmt->fetch();
+
+if (!$user) {
+    // Session is stale
+    session_destroy();
+    echo json_encode(['success' => false, 'user' => null]);
+    exit;
+}
+
+echo json_encode(['success' => true, 'user' => $user]);

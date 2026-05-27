@@ -1,88 +1,80 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Not logged in.']);
+if (empty($_SESSION['user_email']) || !in_array($_SESSION['role'], ['seller','admin'])) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Seller access required.']);
     exit;
 }
 
-$id       = (int)($_POST['id'] ?? 0);
-$userId   = $_SESSION['user_id'];
-$role     = $_SESSION['role'] ?? 'buyer';
-
+$id = (int)($_POST['id'] ?? 0);
 if (!$id) {
-    echo json_encode(['success' => false, 'message' => 'Missing product ID.']);
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Product ID required.']);
     exit;
 }
 
-// Verify ownership — admin can edit any product
-$ownerCheck = $role === 'admin'
-    ? $pdo->prepare("SELECT id, image_url FROM products WHERE id = ?")
-    : $pdo->prepare("SELECT id, image_url FROM products WHERE id = ? AND seller_id = ?");
-
-$params = $role === 'admin' ? [$id] : [$id, $userId];
-$ownerCheck->execute($params);
-$existing = $ownerCheck->fetch();
+// Ownership check
+$ownerStmt = $pdo->prepare("SELECT seller_email, image_url FROM products WHERE id = ?");
+$ownerStmt->execute([$id]);
+$existing = $ownerStmt->fetch();
 
 if (!$existing) {
-    echo json_encode(['success' => false, 'message' => 'Product not found or access denied.']);
+    http_response_code(404);
+    echo json_encode(['success' => false, 'message' => 'Product not found.']);
     exit;
 }
 
-$name        = trim($_POST['name']        ?? '');
-$brand       = trim($_POST['brand']       ?? '');
-$category    = trim($_POST['category']    ?? '');
-$price       = (float)($_POST['price']    ?? 0);
-$stock       = (int)($_POST['stock']      ?? 0);
-$description = trim($_POST['description'] ?? '');
-$old_price   = $_POST['old_price'] ? (float)$_POST['old_price'] : null;
-$on_sale     = (int)($_POST['on_sale']    ?? 0);
-$imageUrl    = $existing['image_url']; // Keep existing by default
+if ($_SESSION['role'] !== 'admin' && $existing['seller_email'] !== $_SESSION['user_email']) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'You do not own this product.']);
+    exit;
+}
 
-// Handle new image upload
-if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-    $file     = $_FILES['image_file'];
-    $finfo    = new finfo(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo->file($file['tmp_name']);
-    $allowed  = ['image/jpeg', 'image/png', 'image/webp'];
+$name     = trim($_POST['name']        ?? '');
+$brand    = trim($_POST['brand']       ?? '');
+$desc     = trim($_POST['description'] ?? '');
+$price    = (float)($_POST['price']    ?? 0);
+$category = trim($_POST['category']    ?? 'general');
+$stock    = (int)($_POST['stock']      ?? 0);
 
-    if (in_array($mimeType, $allowed) && $file['size'] <= 2 * 1024 * 1024) {
+if (!$name || !$brand || !$desc || $price <= 0) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'All fields required.']);
+    exit;
+}
+
+$imageUrl = trim($_POST['image_url'] ?? $existing['image_url']);
+
+// Handle new file upload
+if (!empty($_FILES['pImageFile']) && $_FILES['pImageFile']['error'] === UPLOAD_ERR_OK) {
+    $tmp  = $_FILES['pImageFile']['tmp_name'];
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $allowed = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'];
+
+    if (isset($allowed[$mime])) {
+        $dir = __DIR__ . '/../../uploads/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
         // Delete old uploaded file
-        if ($existing['image_url'] && str_starts_with($existing['image_url'], 'uploads/')) {
-            $oldPath = __DIR__ . '/../../' . $existing['image_url'];
-            if (file_exists($oldPath)) unlink($oldPath);
+        $oldPath = __DIR__ . '/../../' . $existing['image_url'];
+        if (file_exists($oldPath) && strpos($existing['image_url'], 'uploads/') === 0) {
+            @unlink($oldPath);
         }
 
-        $uploadDir = __DIR__ . '/../../uploads/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
-        $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'prod_' . uniqid() . '.' . strtolower($ext);
-
-        if (move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
-            $imageUrl = 'uploads/' . $filename;
-        }
+        $filename = 'prod_' . uniqid('', true) . '.' . $allowed[$mime];
+        move_uploaded_file($tmp, $dir . $filename);
+        $imageUrl = 'uploads/' . $filename;
     }
-} elseif (!empty($_POST['image_url'])) {
-    $imageUrl = trim($_POST['image_url']);
 }
 
-try {
-    $pdo->prepare("
-        UPDATE products SET
-            name = ?, brand = ?, description = ?, price = ?, old_price = ?,
-            image_url = ?, category = ?, stock = ?, on_sale = ?, updated_at = NOW()
-        WHERE id = ?
-    ")->execute([
-        $name, $brand, $description, $price, $old_price,
-        $imageUrl, $category, $stock, $on_sale, $id,
-    ]);
+$pdo->prepare("
+    UPDATE products
+    SET name = ?, brand = ?, description = ?, price = ?,
+        image_url = ?, category = ?, stock = ?
+    WHERE id = ?
+")->execute([$name, $brand, $desc, $price, $imageUrl, $category, $stock, $id]);
 
-    echo json_encode(['success' => true]);
-
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Update failed.']);
-}
+echo json_encode(['success' => true]);

@@ -1,13 +1,18 @@
 <?php
-// htdocs/LuxeMart/db.php
+/**
+ * LuxeMart — Database Connection
+ * Adjust host/user/pass/dbname for your XAMPP setup.
+ */
+
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'luxemart_db');
 define('DB_USER', 'root');
-define('DB_PASS', '');  // XAMPP default — change on live server
+define('DB_PASS', '');          // XAMPP default: empty
+define('DB_CHARSET', 'utf8mb4');
 
 try {
     $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
         DB_USER,
         DB_PASS,
         [
@@ -18,5 +23,11 @@ try {
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    die(json_encode(['success' => false, 'message' => 'Database connection failed.']));
+    header('Content-Type: application/json');
+    die(json_encode([
+        'success' => false,
+        'message' => 'Database connection failed.',
+        // Remove the line below in production:
+        'debug'   => $e->getMessage(),
+    ]));
 }

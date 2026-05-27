@@ -1,264 +1,301 @@
-// ============================================================
-//  LuxeMart — cart.js (FULL REWRITE)
-//  All cart data lives in the database via api/cart/
-//  No localStorage for cart data
-// ============================================================
+/**
+ * LuxeMart — cart.js
+ * All cart operations go through api/cart/index.php.
+ * Falls back to localStorage for guests.
+ */
+
+'use strict';
 
 (function () {
-    'use strict';
 
-    // ── STATE ──────────────────────────────────────────────
-    // Single source of truth — populated from server
-    let cartItems = [];
+    // ── STATE ─────────────────────────────────────────────────
+    let _cartItems = [];   // [{ product_id, name, brand, price, img, qty, stock }]
 
-    // ── HELPERS ────────────────────────────────────────────
+    // ── HELPERS ───────────────────────────────────────────────
     const fmt = n => `KSh ${Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
 
-    // ── FETCH CART FROM SERVER ─────────────────────────────
-    const fetchCart = async () => {
-        const result = await window.api('api/cart/get.php');
-        if (result.success) {
-            cartItems = result.cart;
-            renderCartSidebar(cartItems);
-            syncCartCount(cartItems);
-        }
-        return cartItems;
-    };
+    function isLoggedIn () {
+        return typeof window.getUser === 'function' && window.getUser() !== null;
+    }
 
-    // ── ADD TO CART ────────────────────────────────────────
-    const addToCart = async (product, qty = 1) => {
-        // Must be logged in
-        const user = window.getUser ? window.getUser() : null;
-        if (!user) {
-            window.showToast('Please log in to add items to your cart.', 'info');
-            document.getElementById('loginModal')?.classList.add('show');
-            return;
-        }
+    // ── GUEST STORAGE (localStorage fallback) ─────────────────
+    function guestGet () {
+        try { return JSON.parse(localStorage.getItem('luxemart_guest_cart') || '[]'); }
+        catch { return []; }
+    }
 
-        // Optimistic UI — add immediately then confirm with server
-        const existing = cartItems.find(i => i.product_id === product.id);
-        if (existing) {
-            existing.qty += qty;
+    function guestSave (cart) {
+        localStorage.setItem('luxemart_guest_cart', JSON.stringify(cart));
+    }
+
+    // ── FETCH CART FROM SERVER ────────────────────────────────
+    window.fetchCart = async function () {
+        if (isLoggedIn()) {
+            const result = await window.api('api/cart/index.php');
+            _cartItems   = result?.cart || [];
         } else {
-            cartItems.push({
-                product_id: product.id,
-                name:       product.name,
-                price:      product.price,
-                img:        product.img,
-                brand:      product.brand || '',
-                stock:      product.stock ?? 99,
-                qty,
+            // Map guest cart IDs to full product data from products.js
+            const guest = guestGet();
+            _cartItems  = guest.map(g => {
+                const p = (window.products || []).find(x => x.id === g.product_id);
+                if (!p) return null;
+                return {
+                    product_id: p.id,
+                    name:  p.name,
+                    brand: p.brand,
+                    price: p.price,
+                    img:   p.img,
+                    stock: p.stock ?? 99,
+                    qty:   g.qty,
+                };
+            }).filter(Boolean);
+        }
+
+        renderCartSidebar();
+        updateBadges();
+        return _cartItems;
+    };
+
+    // ── ADD TO CART ───────────────────────────────────────────
+    window.addToCart = async function (product, qty = 1) {
+        const pid = product.id ?? product.product_id;
+
+        if (isLoggedIn()) {
+            const result = await window.api('api/cart/index.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add', product_id: pid, qty }),
             });
+
+            if (!result?.success) {
+                window.showToast?.(result?.message || 'Could not add to cart.', 'error');
+                return false;
+            }
+        } else {
+            // Guest cart
+            const guest = guestGet();
+            const idx   = guest.findIndex(i => i.product_id === pid);
+
+            if (idx > -1) {
+                guest[idx].qty = Math.min(guest[idx].qty + qty, product.stock ?? 99);
+            } else {
+                guest.push({ product_id: pid, qty });
+            }
+            guestSave(guest);
         }
-        renderCartSidebar(cartItems);
-        syncCartCount(cartItems);
 
-        const result = await window.api('api/cart/update.php', {
-            method: 'POST',
-            body: JSON.stringify({
-                action:     'add',
-                product_id: product.id,
-                qty,
-            }),
-        });
-
-        if (!result.success) {
-            window.showToast('Could not add item — please try again.', 'error');
-            await fetchCart(); // Revert to server state
-            return;
-        }
-
-        window.showToast(`${product.name} added to cart!`, 'success');
-
-        // Open sidebar
-        document.getElementById('cartSidebar')?.classList.add('open');
+        await window.fetchCart();
+        return true;
     };
 
-    // ── REMOVE FROM CART ───────────────────────────────────
-    const removeFromCart = async (productId) => {
-        // Optimistic removal
-        cartItems = cartItems.filter(i => i.product_id !== productId);
-        renderCartSidebar(cartItems);
-        syncCartCount(cartItems);
+    // ── UPDATE QTY (+1 / -1) ─────────────────────────────────
+    window.updateCartQty = async function (productId, delta) {
+        const pid     = parseInt(productId, 10);
+        const current = _cartItems.find(i => i.product_id === pid);
+        if (!current) return;
 
-        const result = await window.api('api/cart/update.php', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'remove', product_id: productId }),
-        });
+        const newQty = Math.max(0, current.qty + delta);
 
-        if (!result.success) {
-            window.showToast('Could not remove item.', 'error');
-            await fetchCart();
+        if (isLoggedIn()) {
+            if (newQty === 0) {
+                await window.api('api/cart/index.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'remove', product_id: pid }),
+                });
+            } else {
+                await window.api('api/cart/index.php', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'set', product_id: pid, qty: newQty }),
+                });
+            }
+        } else {
+            const guest = guestGet();
+            const idx   = guest.findIndex(i => i.product_id === pid);
+            if (idx > -1) {
+                if (newQty === 0) guest.splice(idx, 1);
+                else guest[idx].qty = newQty;
+                guestSave(guest);
+            }
         }
+
+        await window.fetchCart();
     };
 
-    // ── UPDATE QTY ─────────────────────────────────────────
-    const updateQty = async (productId, delta) => {
-        const item = cartItems.find(i => i.product_id === productId);
-        if (!item) return;
+    // ── REMOVE ITEM ───────────────────────────────────────────
+    window.removeFromCart = async function (productId) {
+        const pid = parseInt(productId, 10);
 
-        const newQty = item.qty + delta;
-
-        if (newQty <= 0) {
-            return removeFromCart(productId);
+        if (isLoggedIn()) {
+            await window.api('api/cart/index.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'remove', product_id: pid }),
+            });
+        } else {
+            const guest = guestGet().filter(i => i.product_id !== pid);
+            guestSave(guest);
         }
 
-        // Enforce stock limit
-        if (newQty > item.stock) {
-            window.showToast(`Only ${item.stock} in stock.`, 'info');
-            return;
-        }
-
-        // Optimistic update
-        item.qty = newQty;
-        renderCartSidebar(cartItems);
-        syncCartCount(cartItems);
-
-        const result = await window.api('api/cart/update.php', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'set', product_id: productId, qty: newQty }),
-        });
-
-        if (!result.success) {
-            window.showToast('Could not update quantity.', 'error');
-            await fetchCart();
-        }
+        await window.fetchCart();
     };
 
-    // ── CLEAR CART ─────────────────────────────────────────
-    const clearCart = async () => {
-        cartItems = [];
-        renderCartSidebar(cartItems);
-        syncCartCount(cartItems);
+    // ── CLEAR CART ────────────────────────────────────────────
+    window.clearCart = async function () {
+        if (isLoggedIn()) {
+            await window.api('api/cart/index.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'clear' }),
+            });
+        } else {
+            guestSave([]);
+        }
 
-        await window.api('api/cart/update.php', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'clear' }),
-        });
+        _cartItems = [];
+        renderCartSidebar();
+        updateBadges();
     };
 
-    // ── SYNC COUNT BADGES ──────────────────────────────────
-    const syncCartCount = (items) => {
-        const count = items.reduce((sum, i) => sum + i.qty, 0);
-        document.querySelectorAll('#cartCount, #mobileCartCount').forEach(el => {
+    // ── GETTER ────────────────────────────────────────────────
+    window.getCart = () => _cartItems;
+
+    // ── UPDATE COUNT BADGES ───────────────────────────────────
+    function updateBadges () {
+        const count = _cartItems.reduce((s, i) => s + i.qty, 0);
+        document.querySelectorAll('#cartCount, #mobileCartCount, .nav-badge[data-cart]').forEach(el => {
             el.textContent = count;
         });
-    };
+        // Also update any element with the cart count specifically
+        document.querySelectorAll('#cartCount').forEach(el => el.textContent = count);
+    }
 
-    // ── RENDER SIDEBAR ─────────────────────────────────────
-    const renderCartSidebar = (items) => {
-        const cartItemsEl = document.getElementById('cartItems');
-        const cartTotalEl = document.getElementById('cartTotal');
-        if (!cartItemsEl) return;
+    // ── RENDER SIDEBAR ────────────────────────────────────────
+    window.renderCartSidebar = function () {
+        const itemsEl = document.getElementById('cartItems');
+        const totalEl = document.getElementById('cartTotal');
+        if (!itemsEl) return;
 
-        const total = items.reduce((sum, i) => sum + (i.price * i.qty), 0);
-        if (cartTotalEl) cartTotalEl.textContent = fmt(total);
+        const total = _cartItems.reduce((s, i) => s + (i.price * i.qty), 0);
+        if (totalEl) totalEl.textContent = fmt(total);
 
-        if (!items.length) {
-            cartItemsEl.innerHTML = `
-                <div style="text-align:center;padding:3rem 1rem;color:var(--light-text);">
-                    <i class="fas fa-shopping-bag" style="font-size:3rem;margin-bottom:1rem;display:block;opacity:0.3;"></i>
-                    <p style="margin-bottom:1.5rem;">Your cart is empty</p>
-                    <a href="shop.html" class="btn-primary" style="display:inline-flex;">Start Shopping</a>
+        if (!_cartItems.length) {
+            itemsEl.innerHTML = `
+                <div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);">
+                    <i class="fas fa-shopping-bag" style="font-size:2.5rem;opacity:0.2;display:block;margin-bottom:1rem;"></i>
+                    <p style="font-weight:600;margin-bottom:0.5rem;">Your cart is empty</p>
+                    <a href="shop.html" style="color:var(--secondary);font-size:0.875rem;font-weight:600;">Browse Products →</a>
                 </div>`;
             return;
         }
 
-        cartItemsEl.innerHTML = items.map(item => `
-            <div class="cart-item" data-id="${item.product_id}">
-                <img src="${item.img}" alt="${item.name}" class="cart-item-img"
-                     onerror="this.src='https://via.placeholder.com/70x70?text=No+Image'">
-                <div class="cart-item-info">
-                    <div class="cart-item-title">${item.name}</div>
-                    <div style="font-size:0.8rem;color:var(--light-text);margin-bottom:0.4rem;">${item.brand}</div>
-                    <div class="cart-item-price">${fmt(item.price)}</div>
-                    <div class="cart-item-qty" style="margin-top:0.5rem;">
-                        <button class="qty-btn cart-decrease" data-id="${item.product_id}" aria-label="Decrease">-</button>
-                        <span class="qty-value">${item.qty}</span>
-                        <button class="qty-btn cart-increase" data-id="${item.product_id}" aria-label="Increase">+</button>
-                        <span style="font-size:0.8rem;color:var(--light-text);margin-left:0.5rem;">
-                            = ${fmt(item.price * item.qty)}
-                        </span>
+        itemsEl.innerHTML = _cartItems.map(item => `
+            <div class="cart-item" data-id="${item.product_id}" style="display:flex;gap:0.875rem;padding:0.875rem 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+                <a href="product.html?id=${item.product_id}">
+                    <img src="${item.img}" alt="${item.name}"
+                         style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);flex-shrink:0;"
+                         onerror="this.src='https://via.placeholder.com/60?text=?'">
+                </a>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
+                    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.5rem;">${item.brand || ''}</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <button class="cart-qty-btn cart-dec" data-id="${item.product_id}"
+                                style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--text);">−</button>
+                        <span style="font-weight:700;font-size:0.875rem;min-width:20px;text-align:center;">${item.qty}</span>
+                        <button class="cart-qty-btn cart-inc" data-id="${item.product_id}"
+                                style="width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--text);" ${item.qty >= item.stock ? 'disabled' : ''}>+</button>
+                        <span style="margin-left:auto;font-weight:700;font-size:0.875rem;">${fmt(item.price * item.qty)}</span>
                     </div>
                 </div>
-                <button class="cart-item-remove" data-id="${item.product_id}" aria-label="Remove item">
-                    <i class="fas fa-trash-alt"></i>
+                <button class="cart-remove-btn" data-id="${item.product_id}"
+                        style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;flex-shrink:0;"
+                        title="Remove item">
+                    <i class="fas fa-times" style="font-size:0.8rem;"></i>
                 </button>
             </div>
         `).join('');
 
-        // Attach sidebar button events
-        cartItemsEl.querySelectorAll('.cart-increase').forEach(btn => {
-            btn.addEventListener('click', () => updateQty(parseInt(btn.dataset.id), 1));
+        // Bind qty buttons
+        itemsEl.querySelectorAll('.cart-dec').forEach(btn => {
+            btn.addEventListener('click', () => window.updateCartQty(btn.dataset.id, -1));
         });
-        cartItemsEl.querySelectorAll('.cart-decrease').forEach(btn => {
-            btn.addEventListener('click', () => updateQty(parseInt(btn.dataset.id), -1));
+        itemsEl.querySelectorAll('.cart-inc').forEach(btn => {
+            btn.addEventListener('click', () => window.updateCartQty(btn.dataset.id, 1));
         });
-        cartItemsEl.querySelectorAll('.cart-item-remove').forEach(btn => {
-            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.id)));
+        itemsEl.querySelectorAll('.cart-remove-btn').forEach(btn => {
+            btn.addEventListener('click', () => window.removeFromCart(btn.dataset.id));
         });
     };
 
-    // ── GLOBAL ADD TO CART DELEGATION ─────────────────────
-    // Catches all .add-to-cart clicks anywhere on the page
+    // ── GLOBAL ADD-TO-CART DELEGATION ────────────────────────
     document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.add-to-cart, .btn-add-cart');
+        const btn = e.target.closest('.add-to-cart');
         if (!btn) return;
 
         e.preventDefault();
+        const pid = parseInt(btn.dataset.id, 10);
+        if (!pid) return;
 
-        const productId = parseInt(btn.dataset.id);
-        if (!productId) return;
+        // Find product from window.products or cart
+        let product = (window.products || []).find(p => p.id === pid);
 
-        // Get product from window.products (loaded by products.js)
-        // or from a data attribute if available
-        let product = null;
-        if (window.products) {
-            product = window.products.find(p => p.id === productId);
-        }
-
-        // Fallback: fetch from API if not in memory
         if (!product) {
-            const result = await window.api(`api/products/single.php?id=${productId}`);
-            if (result.success) product = result.product;
+            // Try fetching from API
+            const res = await window.api(`api/products/single.php?id=${pid}`);
+            if (res?.success) product = res.product;
         }
 
         if (!product) {
-            window.showToast('Could not add item. Please refresh.', 'error');
+            window.showToast?.('Product not found.', 'error');
             return;
         }
 
-        // Visual feedback on button
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> Added';
-        btn.disabled  = true;
-        setTimeout(() => {
-            btn.innerHTML  = originalText;
-            btn.disabled   = false;
-        }, 1500);
+        const ok = await window.addToCart(product, 1);
+        if (ok) {
+            window.showToast?.(`${product.name} added to cart!`, 'success');
 
-        await addToCart(product, 1);
+            // Animate button briefly
+            const original = btn.innerHTML;
+            btn.innerHTML  = '<i class="fas fa-check"></i> Added!';
+            btn.disabled   = true;
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.disabled  = false;
+            }, 1500);
+
+            // Open sidebar
+            document.getElementById('cartSidebar')?.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
     });
 
-    // ── GET CART (for checkout page) ───────────────────────
-    const getCart = () => cartItems;
+    // ── MERGE GUEST CART AFTER LOGIN ─────────────────────────
+    // Called after successful Google sign-in
+    window.mergeGuestCart = async function () {
+        const guest = guestGet();
+        if (!guest.length) return;
 
-    // ── EXPOSE GLOBALLY ────────────────────────────────────
-    window.addToCart         = addToCart;
-    window.removeFromCart    = removeFromCart;
-    window.updateCartQty     = updateQty;
-    window.clearCart         = clearCart;
-    window.getCart           = getCart;
-    window.fetchCart         = fetchCart;
-    window.renderCartSidebar = renderCartSidebar;
+        for (const item of guest) {
+            await window.api('api/cart/index.php', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'add', product_id: item.product_id, qty: item.qty }),
+            });
+        }
 
-    // ── INIT ───────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
-        // Only fetch if user is logged in
-        // verifySession in common.js calls updateCartCount which calls fetchCart
-        // But we fetch here too so the sidebar is ready immediately
-        const user = window.getUser ? window.getUser() : null;
-        if (user) fetchCart();
+        guestSave([]);
+        await window.fetchCart();
+    };
+
+    // ── INIT ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+        await window.fetchCart();
+
+        // Cart sidebar close button
+        document.getElementById('closeCart')?.addEventListener('click', () => {
+            document.getElementById('cartSidebar')?.classList.remove('open');
+            document.body.style.overflow = '';
+        });
+
+        // Checkout links in sidebar
+        const checkoutBtns = document.querySelectorAll('.cart-actions a[href*="checkout"]');
+        checkoutBtns.forEach(btn => { btn.href = 'checkout.html'; });
     });
 
 })();

@@ -1,79 +1,81 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once '../../db.php';
+require_once __DIR__ . '/../../db.php';
 
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Not logged in.']);
-    exit;
-}
-
-if (!in_array($_SESSION['role'] ?? '', ['seller', 'admin'])) {
+// ── AUTH ──────────────────────────────────────────────────────
+if (empty($_SESSION['user_email']) || !in_array($_SESSION['role'], ['seller','admin'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Seller access required.']);
     exit;
 }
 
-$name        = trim($_POST['name']        ?? '');
-$brand       = trim($_POST['brand']       ?? '');
-$category    = trim($_POST['category']    ?? '');
-$price       = (float)($_POST['price']    ?? 0);
-$stock       = (int)($_POST['stock']      ?? 0);
-$description = trim($_POST['description'] ?? '');
-$old_price   = $_POST['old_price'] ? (float)$_POST['old_price'] : null;
-$on_sale     = (int)($_POST['on_sale']    ?? 0);
+// ── REQUIRED FIELDS ───────────────────────────────────────────
+$name     = trim($_POST['name'] ?? '');
+$brand    = trim($_POST['brand'] ?? '');
+$desc     = trim($_POST['description'] ?? '');
+$price    = (float)($_POST['price'] ?? 0);
+$category = trim($_POST['category'] ?? 'general');
+$stock    = (int)($_POST['stock'] ?? 0);
 
-if (!$name || !$category || $price <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Name, category and price are required.']);
+if (!$name || !$brand || !$desc || $price <= 0) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Name, brand, description and price are required.']);
     exit;
 }
 
-// Handle image
+// ── IMAGE ─────────────────────────────────────────────────────
 $imageUrl = trim($_POST['image_url'] ?? '');
 
-if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-    $file     = $_FILES['image_file'];
-    $allowed  = ['image/jpeg', 'image/png', 'image/webp'];
-    $finfo    = new finfo(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo->file($file['tmp_name']);
+if (!empty($_FILES['pImageFile']) && $_FILES['pImageFile']['error'] === UPLOAD_ERR_OK) {
+    $tmp     = $_FILES['pImageFile']['tmp_name'];
+    $size    = $_FILES['pImageFile']['size'];
+    $maxSize = 2 * 1024 * 1024; // 2MB
 
-    if (!in_array($mimeType, $allowed)) {
-        echo json_encode(['success' => false, 'message' => 'Invalid image format.']);
-        exit;
-    }
-
-    if ($file['size'] > 2 * 1024 * 1024) {
+    if ($size > $maxSize) {
         echo json_encode(['success' => false, 'message' => 'Image must be under 2MB.']);
         exit;
     }
 
-    $uploadDir = __DIR__ . '/../../uploads/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
-    $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = 'prod_' . uniqid() . '.' . strtolower($ext);
-    $destPath = $uploadDir . $filename;
-
-    if (move_uploaded_file($file['tmp_name'], $destPath)) {
-        $imageUrl = 'uploads/' . $filename;
+    $mime    = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!in_array($mime, $allowed)) {
+        echo json_encode(['success' => false, 'message' => 'Only JPG, PNG and WEBP images allowed.']);
+        exit;
     }
+
+    $ext     = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$mime];
+    $dir     = __DIR__ . '/../../uploads/';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+    $filename = 'prod_' . uniqid('', true) . '.' . $ext;
+    move_uploaded_file($tmp, $dir . $filename);
+    $imageUrl = 'uploads/' . $filename;
 }
 
-try {
-    $stmt = $pdo->prepare("
-        INSERT INTO products
-            (name, brand, description, price, old_price, image_url, category, seller_id, stock, on_sale)
-        VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->execute([
-        $name, $brand, $description, $price, $old_price,
-        $imageUrl, $category, $_SESSION['user_id'], $stock, $on_sale,
-    ]);
-
-    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
-
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error.']);
+if (!$imageUrl) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'A product image is required.']);
+    exit;
 }
+
+// ── INSERT ────────────────────────────────────────────────────
+$stmt = $pdo->prepare("
+    INSERT INTO products
+        (name, brand, description, price, image_url, category, stock, seller_email)
+    VALUES
+        (:name, :brand, :desc, :price, :img, :cat, :stock, :email)
+");
+
+$stmt->execute([
+    ':name'  => $name,
+    ':brand' => $brand,
+    ':desc'  => $desc,
+    ':price' => $price,
+    ':img'   => $imageUrl,
+    ':cat'   => $category,
+    ':stock' => $stock,
+    ':email' => $_SESSION['user_email'],
+]);
+
+echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
